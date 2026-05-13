@@ -2,7 +2,7 @@
 Compliance & Material Intelligence Pipeline — Pydantic Validation Schemas
 """
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -225,6 +225,6 @@ class BOMCleanResult(BaseModel):
     total_rows: int
     valid_rows: int
     skipped_rows: int
-    materials: list[BOMRecordCreate]
-    warnings: list[str] = []
-    errors: list[str] = []
+    materials: List[BOMRecordCreate]
+    warnings: List[str] = []
+    errors: List[str] = []

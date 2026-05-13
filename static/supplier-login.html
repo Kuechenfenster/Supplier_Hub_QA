@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Portal - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { max-width: 450px; width: 100%; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header img { display: block; margin: 0 auto 15px; max-height: 80px; max-width: 200px; height: auto; background: white; padding: 8px 15px; border-radius: 8px; }
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        .content { padding: 40px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .alert.success { background: #d4edda; color: #155724; }
+        .alert.error { background: #f8d7da; color: #721c24; }
+        .links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .links a { color: #667eea; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+        .divider { display: flex; align-items: center; text-align: center; margin: 20px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e0e0e0; }
+        .divider span { padding: 0 10px; color: #999; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="assets/logo.png" alt="HTI Logo">
+            <h1>Supplier Portal</h1>
+            <p>Factory login</p>
+        </div>
+        <div class="content">
+            <div class="alert" id="loginAlert"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="email" placeholder="supplier@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn" id="submitBtn">Login</button>
+            </form>
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            <div class="links">
+                Don't have an account? <a href="/supplier">Register Factory</a>
+            </div>
+            <div class="links" style="margin-top: 15px;">
+                <a href="/management-login">Internal Users Login</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_URL = '';
+        let token = localStorage.getItem('supplier_token') || '';
+        let currentSupplierId = localStorage.getItem('supplier_id') || '';
+
+        // Redirect if already logged in
+        if (token) {
+            window.location.href = '/supplier-dashboard';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const alert = document.getElementById('loginAlert');
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(API_URL + '/api/suppliers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('supplier_token', data.token);
+                    localStorage.setItem('supplier_id', data.supplier.id);
+                    localStorage.setItem('supplier_name', data.supplier.name);
+                    localStorage.setItem('supplier_email', data.supplier.email);
+
+                    alert.className = 'alert success';
+                    alert.textContent = 'Login successful! Redirecting...';
+                    alert.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = '/supplier-dashboard';
+                    }, 1000);
+                } else {
+                    alert.className = 'alert error';
+                    alert.textContent = data.detail || 'Login failed!';
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.className = 'alert error';
+                alert.textContent = 'Connection error: ' + error.message;
+                alert.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        });
+
+        // Remove alert after 5 seconds
+        setTimeout(() => {
+            const alert = document.getElementById('loginAlert');
+            if (alert.style.display === 'block') {
+                alert.style.display = 'none';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

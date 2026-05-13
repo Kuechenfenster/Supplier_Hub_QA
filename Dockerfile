@@ -22,8 +22,9 @@ COPY index.html ./
 # Create data directories for BOM uploads and documents
 RUN mkdir -p data/incoming/boms data/documents data/processed data/reports
 
-# Set PYTHONPATH for imports
+# Set PYTHONPATH and BASE_DIR for imports
 ENV PYTHONPATH=/app
+ENV BASE_DIR=/app
 
 # Expose port
 EXPOSE 9000

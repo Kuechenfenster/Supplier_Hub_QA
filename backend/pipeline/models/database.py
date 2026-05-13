@@ -110,6 +110,8 @@ class MaterialLibrary(Base):
     compliance_checks = relationship("ComplianceCheck", back_populates="material", cascade="all, delete-orphan")
     bom_records = relationship("BOMRecord", back_populates="material")
     risk_alerts = relationship("RiskAlert", back_populates="material")
+    substance_tracking = relationship("SubstanceTracking", back_populates="material", cascade="all, delete-orphan")
+    share_permissions = relationship("SharePermission", back_populates="material", cascade="all, delete-orphan")
 
 
 # ======================================================================
@@ -164,6 +166,7 @@ class MaterialDocument(Base):
 
     # Relationships
     material = relationship("MaterialLibrary", back_populates="documents")
+    versions = relationship("DocumentVersion", back_populates="document", cascade="all, delete-orphan")
 
 
 # ======================================================================
@@ -239,6 +242,267 @@ class RiskAlert(Base):
 
 
 # ======================================================================
+# 9. Test_History — Lab Report Test Results
+# ======================================================================
+class TestHistory(Base):
+    __tablename__ = "test_history"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    material_id = Column(String(50), index=True)
+    report_number = Column(String(100))
+    report_date = Column(Date)
+    lab_name = Column(String(200))
+    test_standard = Column(String(100))
+    test_type = Column(String(50))
+    result = Column(String(20))
+    measured_value = Column(Float)
+    unit = Column(String(20))
+    limit_value = Column(Float)
+    sku = Column(String(50))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+
+
+# ======================================================================
+# 10. Document_Versions — Full History for Document Versioning
+# ======================================================================
+class DocumentVersion(Base):
+    __tablename__ = "document_versions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    material_document_id = Column(Integer, ForeignKey("material_documents.id"), index=True)
+    version = Column(String(20), nullable=False)  # v1.0, v1.1, etc.
+    file_path = Column(String(500), nullable=False)
+    file_size = Column(Integer)
+    uploaded_by = Column(String(100))
+    created_at = Column(DateTime, default=utcnow)
+    is_current = Column(Boolean, default=True)
+    notes = Column(Text)
+
+    # Relationships
+    document = relationship("MaterialDocument", back_populates="versions")
+
+
+# ======================================================================
+# 11. Share_Permissions — Material Access Control for Suppliers
+# ======================================================================
+class SharePermission(Base):
+    __tablename__ = "share_permissions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    material_id = Column(String(50), ForeignKey("material_library.material_id"), index=True)
+    supplier_id = Column(String(50), index=True)
+    granted_by = Column(String(100))
+    granted_at = Column(DateTime, default=utcnow)
+    expires_at = Column(DateTime)
+    access_level = Column(String(20), default="read")  # read, write, admin
+
+    # Relationships
+    material = relationship("MaterialLibrary", back_populates="share_permissions")
+
+
+# ======================================================================
+# 12. Product_Comparability — Compare Products by CAS Number
+# ======================================================================
+class ProductComparability(Base):
+    __tablename__ = "product_comparability"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    product_sku = Column(String(50), nullable=False, index=True)
+    material_id = Column(String(50), ForeignKey("material_library.material_id"), index=True)
+    cas_number = Column(String(50), nullable=False, index=True)
+    substance_name = Column(String(200), nullable=False)
+    concentration_min = Column(Float)
+    concentration_max = Column(Float)
+    concentration_typical = Column(Float)
+    comparison_group = Column(String(50), index=True)
+    source = Column(String(30))  # bom_upload / lab_report / manual
+    created_at = Column(DateTime, default=utcnow)
+
+
+# ======================================================================
+# 12. Substance_Tracking — CAS-Level Tracking Per Product SKU
+# ======================================================================
+class SubstanceTracking(Base):
+    __tablename__ = "substance_tracking"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    material_id = Column(String(50), ForeignKey("material_library.material_id"), index=True)
+    product_sku = Column(String(50), nullable=False, index=True)
+    bom_record_id = Column(Integer, ForeignKey("bom_records.id"))
+    cas_number = Column(String(50), nullable=False, index=True)
+    substance_name = Column(String(200), nullable=False)
+    concentration_min = Column(Float)
+    concentration_max = Column(Float)
+    concentration_typical = Column(Float)
+    unit = Column(String(20))
+    trace_id = Column(String(50), index=True)  # Track substance flow through BOMs
+    created_at = Column(DateTime, default=utcnow)
+
+    # Relationships
+    material = relationship("MaterialLibrary", back_populates="substance_tracking")
+    bom_record = relationship("BOMRecord", backref="substance_tracking")
+
+
+# ======================================================================
+# 13. Safety_Assessments — Product Safety Assessment Workflow
+# ======================================================================
+class SafetyAssessment(Base):
+    __tablename__ = "safety_assessments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    product_sku = Column(String(50), nullable=False, index=True)
+    assessment_name = Column(String(200), nullable=False)
+    version = Column(String(20), default="v1.0")
+    status = Column(String(20), default="draft")  # draft, under_review, approved, rejected, archived
+    created_by = Column(String(100))
+    reviewed_by = Column(String(100))
+    created_at = Column(DateTime, default=utcnow)
+    reviewed_at = Column(DateTime)
+    approval_date = Column(DateTime)
+    notes = Column(Text)
+
+    # Relationships
+    checklist = relationship("AssessmentChecklist", back_populates="assessment", cascade="all, delete-orphan")
+    results = relationship("AssessmentResult", back_populates="assessment", cascade="all, delete-orphan")
+
+
+# ======================================================================
+# 14. Assessment_Checklist — Safety Assessment Checklist Items
+# ======================================================================
+class AssessmentChecklist(Base):
+    __tablename__ = "assessment_checklist"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    assessment_id = Column(Integer, ForeignKey("safety_assessments.id"), index=True)
+    checklist_item = Column(String(200), nullable=False)  # e.g., "Has SDS been reviewed?"
+    category = Column(String(50))  # documentation, testing, regulatory
+    required = Column(Boolean, default=True)
+    is_complete = Column(Boolean, default=False)
+    evidence_document_id = Column(Integer, ForeignKey("material_documents.id"))
+    checked_by = Column(String(100))
+    checked_at = Column(DateTime)
+    notes = Column(Text)
+
+    # Relationships
+    assessment = relationship("SafetyAssessment", back_populates="checklist")
+
+
+# ======================================================================
+# 15. Assessment_Results — Test Results per Assessment
+# ======================================================================
+class AssessmentResult(Base):
+    __tablename__ = "assessment_results"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    assessment_id = Column(Integer, ForeignKey("safety_assessments.id"), index=True)
+    cas_number = Column(String(50), index=True)
+    substance_name = Column(String(200))
+    test_required = Column(String(50))  # EN 71-3, REACh, GHS, internal
+    check_type = Column(String(50))  # migration_test, svhc_screening, etc.
+    result = Column(String(20))  # pass, fail, required, exempt, n/a
+    measured_value = Column(Float)
+    limit_value = Column(Float)
+    unit = Column(String(20))
+    details = Column(Text)
+    reference = Column(String(200))  # e.g., REACh Article 57
+
+    # Relationships
+    assessment = relationship("SafetyAssessment", back_populates="results")
+
+
+# ======================================================================
+# 16. ECHA_Substances — ECHA / REACh Chemical Database
+# ======================================================================
+class ECHAChemical(Base):
+    __tablename__ = "echa_chemicals"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entry_no = Column(String(100), nullable=True, index=True)  # Unique identifier from source (ECHA registration no, CAS, etc.)
+    name = Column(String(200), nullable=False, index=True)
+    ec_number = Column(String(50), nullable=False, index=True)
+    cas_number = Column(String(50), nullable=False, index=True)
+    reach_status = Column(String(50))  # registered, pre-registered, exempt, restricted, svhc
+    reach_listing = Column(String(200))  # e.g., Article 57 SVHC, Annex XIV, Annex XVII
+    gh_code = Column(String(100))  # GHS classification code
+    info_link = Column(String(500))  # Link to ECHA info page
+    source_origin = Column(String(100))  # ECHA Website, Supplier SDS, Lab Report, etc.
+    source_reference = Column(String(500))  # Document ID, Supplier Name, etc.
+    verification_method = Column(String(50), default="AI Analysis")
+    verified_at = Column(DateTime)
+    category = Column(String(50), default="Substance")  # Substance, Mixture, Product
+    added_by = Column(String(100))
+    added_at = Column(DateTime, default=utcnow)
+    history = Column(Text)  # JSON string of history changes
+
+    # Relationships
+    compliance_checks = relationship("ECHAComplianceCheck", back_populates="chemical", cascade="all, delete-orphan")
+
+
+class ECHAComplianceCheck(Base):
+    __tablename__ = "echa_compliance_checks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chemical_id = Column(Integer, ForeignKey("echa_chemicals.id"), index=True)
+    regulation = Column(String(50), nullable=False)  # REACh, CLP, Toy Directive
+    check_type = Column(String(100), nullable=False)
+    result = Column(String(20), nullable=False)  # pass, fail, review
+    limit_value = Column(Float)
+    measured_value = Column(Float)
+    unit = Column(String(20))
+    details = Column(Text)
+    checked_at = Column(DateTime, default=utcnow)
+
+    # Relationships
+    chemical = relationship("ECHAChemical", back_populates="compliance_checks")
+
+
+# ======================================================================
+# 17. SVHC_Substance — SVHC Database
+# ======================================================================
+class SVHCSubstance(Base):
+    __tablename__ = "svhc_substances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    substance_name = Column(String(200), nullable=False, index=True)
+    description = Column(Text)
+    ec_no = Column(String(50), nullable=False, index=True)
+    cas_no = Column(String(50), nullable=False, index=True)
+    reason_inclusion = Column(Text)  # Reason for inclusion in SVHC list
+    date_inclusion = Column(Date)  # Date of inclusion in SVHC list
+    decision = Column(String(50))  # Decision type: included, reviewed, removed, updated
+    iuclid_dataset = Column(String(100))  # IUCLID dataset ID
+    support_document = Column(String(200))  # Supporting document reference
+    response_comments = Column(Text)  # Response to comments during review
+    remarks = Column(Text)  # Additional remarks
+    upload_type = Column(String(50))  # candidate_list, authorization_list, sunset_list, other
+    last_updated = Column(DateTime, default=utcnow)
+    uploaded_by = Column(String(100))
+    created_at = Column(DateTime, default=utcnow)
+
+    # Relationships
+    compliance_checks = relationship("SVHCComplianceCheck", back_populates="svhc", cascade="all, delete-orphan")
+
+
+class SVHCComplianceCheck(Base):
+    __tablename__ = "svhc_compliance_checks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    svhc_id = Column(Integer, ForeignKey("svhc_substances.id"), index=True)
+    regulation = Column(String(50), nullable=False)  # REACh, CLP
+    check_type = Column(String(100), nullable=False)
+    result = Column(String(20), nullable=False)  # pass, fail, review
+    limit_value = Column(Float)
+    measured_value = Column(Float)
+    unit = Column(String(20))
+    details = Column(Text)
+    checked_at = Column(DateTime, default=utcnow)
+
+    # Relationships
+    svhc = relationship("SVHCSubstance", back_populates="compliance_checks")
+
+
+# ======================================================================
 # Database Engine & Session Management
 # ======================================================================
 engine = None
@@ -267,7 +531,7 @@ def get_session():
 
 
 def init_db(db_url: str = None):
-    if engine is None:
+    if engine is None or SessionLocal is None:
         init_engine(db_url)
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")

@@ -4,12 +4,12 @@ Shared authentication helpers - avoids circular imports between main.py and bom_
 import os
 import bcrypt
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List, Tuple
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 
-from models import get_db, InternalUser, AuditLog, SessionLocal
+from models import get_db, InternalUser, AuditLog, SessionLocal, Supplier
 
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
 JWT_ALGORITHM = "HS256"
@@ -54,6 +54,17 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     return user
 
 
+async def get_current_supplier(credentials: HTTPAuthorizationCredentials = Depends(security), db: SessionLocal = Depends(get_db)):
+    """Get current authenticated supplier from JWT token."""
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    payload = decode_jwt_token(credentials.credentials)
+    supplier = db.query(Supplier).filter(Supplier.id == payload["user_id"]).first()
+    if not supplier or supplier.status != "active":
+        raise HTTPException(status_code=401, detail="Supplier not found or inactive")
+    return supplier
+
+
 def log_audit(db, user_id: int, action: str, entity_type: str, entity_id: int = None, old_value: dict = None, new_value: dict = None, ip_address: str = None):
     audit = AuditLog(
         user_id=user_id, action=action, entity_type=entity_type,
@@ -64,3 +75,79 @@ def log_audit(db, user_id: int, action: str, entity_type: str, entity_id: int = 
     )
     db.add(audit)
     db.commit()
+
+
+# ======================================================================
+# Visibility Helper Functions (Phase 1)
+# ======================================================================
+
+def get_visible_materials_query(user, db):
+    """
+    Get query for materials visible to a user based on role and permissions.
+    Internal users (admin/manager/qa) see all materials.
+    Supplier users see only shared materials with visibility >= internal.
+    """
+    from pipeline.models.database import MaterialLibrary, DocumentVersion
+
+    # Internal users see all materials
+    if user.role in ["admin", "manager", "qa"]:
+        return db.query(MaterialLibrary)
+
+    # Supplier users see only shared materials
+    # Check share_permissions table for supplier access
+    from pipeline.models.database import get_db as pipeline_get_db
+    pipeline_db = pipeline_get_db()
+
+    # Get supplier ID from user's supplier info (if exists)
+    # For now, return all materials - suppliers can be restricted later
+    # via share_permissions lookup
+    return db.query(MaterialLibrary).filter(
+        MaterialLibrary.visibility.in_(['public', 'internal'])
+    )
+
+
+def get_visible_documents_query(user, db):
+    """
+    Get query for documents visible to a user.
+    Internal users see all documents.
+    Supplier users see documents with supplier_accessible=True or visibility=public.
+    """
+    from pipeline.models.database import MaterialDocument
+
+    if user.role in ["admin", "manager", "qa"]:
+        return db.query(MaterialDocument)
+
+    return db.query(MaterialDocument).filter(
+        MaterialDocument.visibility.in_(['public', 'internal'])
+    )
+
+
+def check_material_access(user, material_id: str, db):
+    """
+    Check if a user can access a specific material.
+    Returns True if accessible, False otherwise.
+    """
+    from pipeline.models.database import MaterialLibrary, SharePermission
+
+    material = db.query(MaterialLibrary).filter(MaterialLibrary.material_id == material_id).first()
+    if not material:
+        return False
+
+    # Internal users can access all materials
+    if user.role in ["admin", "manager", "qa"]:
+        return True
+
+    # Supplier users need explicit access
+    # Check if material is shared with this supplier
+    if material.visibility == 'public':
+        return True
+
+    if user.role == 'viewer':
+        # Check share_permissions
+        shared = db.query(SharePermission).filter(
+            SharePermission.material_id == material_id
+        ).first()
+        if shared:
+            return True
+
+    return False

@@ -1,0 +1,3 @@
+substance_name,ec_no,cas_no,description,reason_inclusion,date_inclusion,decision,iuclid_dataset,support_document,response_comments,remarks
+Test Substance 1,200-001-0,123-45-6,Test substance for SVHC,SVHC candidate list,2024-01-15,included,IUCLID-001,ECHA-2024-001,Comments accepted,Test remarks
+Test Substance 2,200-002-0,234-56-7,Another test substance,Authorisation list,2024-02-20,reviewed,IUCLID-002,ECHA-2024-002,Under review,Additional notes

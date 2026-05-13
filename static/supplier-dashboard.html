@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Portal - Dashboard</title>
+    <style>
+        /* Language selector styles */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lang-selector select {
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .lang-selector select:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f7fa; min-height: 100vh; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 20px; }
+        .navbar .user-info { display: flex; align-items: center; gap: 15px; }
+        .navbar .user-info span { font-size: 14px; }
+        .navbar .btn-logout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .navbar .btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+        /* Layout with Sidebar */
+        .layout { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar { width: 250px; background: white; border-right: 1px solid #e0e0e0; padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidebar-header { padding: 10px 25px; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .sidebar .nav-group { margin-bottom: 25px; }
+        .sidebar .nav-group-title { padding: 10px 25px; color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .sidebar .nav-item { display: block; padding: 12px 25px; color: #666; text-decoration: none; font-size: 14px; border-left: 3px solid transparent; transition: all 0.2s; }
+        .sidebar .nav-item:hover { background: #f8f9fa; color: #667eea; }
+        .sidebar .nav-item.active { background: #f0f2ff; color: #667eea; border-left-color: #667eea; }
+        .sidebar .nav-item .count { margin-left: auto; background: #e0e0e0; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+        .main-content { flex: 1; margin-left: 250px; padding: 30px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { color: #333; font-size: 28px; margin-bottom: 10px; }
+        .page-header p { color: #666; font-size: 14px; }
+
+        /* Tab Navigation */
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+        .tab { padding: 12px 24px; border: none; background: none; color: #666; cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 3px solid transparent; }
+        .tab:hover { color: #667eea; }
+        .tab.active { color: #667eea; border-bottom-color: #667eea; }
+        .tab-count { background: #e0e0e0; padding: 2px 10px; border-radius: 10px; font-size: 11px; margin-left: 8px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .stat-card h3 { color: #666; font-size: 13px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: #667eea; }
+        .stat-card .label { color: #999; font-size: 12px; }
+
+        /* Product List Section */
+        .section { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .section-header h3 { color: #333; font-size: 18px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .btn-outline { background: white; color: #667eea; border: 1px solid #667eea; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .btn-outline:hover { background: #f8f9fa; }
+
+        /* Product Cards */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .product-card { background: #f8f9fa; border-radius: 12px; padding: 20px; border-left: 4px solid #667eea; }
+        .product-card.priority-high { border-left-color: #dc3545; }
+        .product-card.priority-medium { border-left-color: #ffc107; }
+        .product-card.priority-low { border-left-color: #28a745; }
+
+        /* Content Area */
+        .content-area { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+
+        .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .product-id { color: #667eea; font-weight: 700; font-size: 16px; }
+        .product-title { color: #333; font-size: 18px; margin: 8px 0 12px; }
+        .product-subtitle { color: #999; font-size: 13px; line-height: 1.6; }
+        .product-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-sm:hover { transform: none; box-shadow: none; }
+
+
+        /* Tabs Container */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .loading { text-align: center; padding: 50px; color: #999; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+        .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .priority-high { background: #f8d7da; color: #721c24; }
+        .priority-medium { background: #fff3cd; color: #856404; }
+        .priority-low { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Supplier Portal</h1>
+        <div class="user-info">
+            <div class="lang-selector">
+                <label for="languageSelect" style="color: white; font-size: 13px;"> Language:</label>
+                <select id="languageSelect" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="zh">中文 (Chinese)</option>
+                </select>
+            </div>
+            <span id="supplierName">Supplier</span>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">Navigation</div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Overview</div>
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Materials & Suppliers</div>
+                <a href="#" class="nav-item" data-page="raw-suppliers">
+                    <span>Raw Suppliers</span>
+                    <span class="count" id="countRawSuppliers">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="materials">
+                    <span>Material</span>
+                    <span class="count" id="countMaterialsSide">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="substances">
+                    <span>Substances & Mixtures</span>
+                    <span class="count" id="countSubstancesSide">0</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Products & Components</div>
+                <a href="#" class="nav-item" data-page="bought-components">
+                    <span>Bought Components</span>
+                    <span class="count" id="countBoughtComponents">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="products">
+                    <span>Products</span>
+                    <span class="count" id="countProducts">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="seal-samples">
+                    <span>Seal Samples</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Process</div>
+                <a href="#" class="nav-item" data-page="process-flow">
+                    <span>Process Flow</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Vendor Compliance</div>
+                <a href="#" class="nav-item" data-page="upcoming-audits">
+                    <span>Upcoming Audits</span>
+                </a>
+                <a href="#" class="nav-item" data-page="corrective-action">
+                    <span>Corrective Action Plan</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="page-header">
+                    <h2 id="page-title">Supplier Dashboard</h2>
+                    <p id="page-description">Overview of your materials, products, and compliance status.</p>
+                </div>
+
+                <div id="page-content">
+                    <!-- Dashboard Content -->
+                    <div id="dashboard-content" class="content-area" style="display: block;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Active Products</h3>
+                                <div class="value" id="countActive">0</div>
+                                <div class="label">Live on market</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Registered Suppliers</h3>
+                                <div class="value" id="countSuppliers">0</div>
+                                <div class="label">Factory partners</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Registered Materials</h3>
+                                <div class="value" id="countMaterials">0</div>
+                                <div class="label">Total products</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Registered Substances</h3>
+                                <div class="value" id="countSubstances">0</div>
+                                <div class="label">CAS substances</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Missing Seal Sample</h3>
+                                <div class="value" id="countMissingSealSample">0</div>
+                                <div class="label">Products without sample</div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Navigation -->
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('active', this)">All Products <span class="tab-count" id="tabCountActive">0</span></button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div id="tab-content-active" class="tab-content active">
+                            <div class="section">
+                                <div class="section-header">
+                                    <h3>Product Portfolio</h3>
+                                    <button class="btn-primary" onclick="refreshData()">Refresh</button>
+                                </div>
+                                <div id="activeProducts" class="product-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Raw Suppliers Content -->
+                    <div id="raw-suppliers-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Raw Suppliers</h3>
+                            <button class="btn-primary" onclick="refreshRawSuppliers()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Raw Suppliers page coming soon...</p>
+                    </div>
+
+                    <!-- Materials Content -->
+                    <div id="materials-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Material</h3>
+                            <button class="btn-primary" onclick="refreshMaterials()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Material page coming soon...</p>
+                    </div>
+
+                    <!-- Substances Content -->
+                    <div id="substances-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Substances & Mixtures</h3>
+                            <button class="btn-primary" onclick="refreshSubstances()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Substances & Mixtures page coming soon...</p>
+                    </div>
+
+                    <!-- Bought Components Content -->
+                    <div id="bought-components-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Bought Components</h3>
+                            <button class="btn-primary" onclick="refreshBoughtComponents()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Bought Components page coming soon...</p>
+                    </div>
+
+                    <!-- Products Content -->
+                    <div id="products-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Products</h3>
+                            <button class="btn-primary" onclick="refreshProducts()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Products page coming soon...</p>
+                    </div>
+
+                    <!-- Seal Samples Content -->
+                    <div id="seal-samples-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Seal Samples</h3>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Seal Samples page coming soon...</p>
+                    </div>
+
+                    <!-- Process Flow Content -->
+                    <div id="process-flow-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Process Flow</h3>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Process Flow page coming soon...</p>
+                    </div>
+
+                    <!-- Upcoming Audits Content -->
+                    <div id="upcoming-audits-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Upcoming Audits</h3>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Upcoming Audits page coming soon...</p>
+                    </div>
+
+                    <!-- Corrective Action Plan Content -->
+                    <div id="corrective-action-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Corrective Action Plan</h3>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Corrective Action Plan page coming soon...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('supplier_token') || '';
+        let supplierName = localStorage.getItem('supplier_name') || '';
+        let currentTab = 'active';
+        let allProducts = [];
+        let currentSection = 'dashboard';
+
+        if (!token) {
+            window.location.href = '/supplier-login';
+        }
+
+        document.getElementById('supplierName').textContent = supplierName;
+
+        // Sidebar navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                switchPage(page, this);
+            });
+        });
+
+        function switchPage(page, navItem) {
+            // Update sidebar active state
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+
+            // Update page content visibility
+            document.querySelectorAll('.content-area').forEach(content => content.style.display = 'none');
+            document.getElementById(page + '-content').style.display = 'block';
+
+            // Update page title and description using translations
+            const t = translations[currentLang];
+            const titles = {
+                'dashboard': t.dashboard.title,
+                'raw-suppliers': t.pages.rawSuppliersTitle,
+                'materials': t.pages.materialTitle,
+                'substances': t.pages.substancesTitle,
+                'bought-components': t.pages.boughtComponentsTitle,
+                'products': t.pages.productsTitle,
+                'process-flow': t.pages.processFlowTitle,
+                'upcoming-audits': t.pages.upcomingAuditsTitle,
+                'corrective-action': t.pages.correctiveActionTitle,
+                'seal-samples': t.pages.sealSamplesTitle
+            };
+            const descriptions = {
+                'dashboard': t.dashboard.description,
+                'raw-suppliers': t.pages.rawSuppliersDesc,
+                'materials': t.pages.materialDesc,
+                'substances': t.pages.substancesDesc,
+                'bought-components': t.pages.boughtComponentsDesc,
+                'products': t.pages.productsDesc,
+                'process-flow': t.pages.processFlowDesc,
+                'upcoming-audits': t.pages.upcomingAuditsDesc,
+                'corrective-action': t.pages.correctiveActionDesc,
+                'seal-samples': t.pages.sealSamplesDesc
+            };
+
+            document.getElementById('page-title').textContent = titles[page];
+            document.getElementById('page-description').textContent = descriptions[page];
+
+            currentSection = page;
+
+            // Load data for the page if available
+            if (page === 'raw-suppliers') loadRawSuppliers();
+            if (page === 'materials') loadMaterials();
+            if (page === 'substances') loadSubstances();
+            if (page === 'bought-components') loadBoughtComponents();
+            if (page === 'products') loadProducts();
+            if (page === 'process-flow') loadProcessFlow();
+            if (page === 'upcoming-audits') loadUpcomingAudits();
+            if (page === 'corrective-action') loadCorrectiveAction();
+            if (page === 'seal-samples') loadSealSamples();
+        }
+
+        function logout() {
+            localStorage.removeItem('supplier_token');
+            localStorage.removeItem('supplier_id');
+            localStorage.removeItem('supplier_name');
+            window.location.href = '/supplier-login';
+        }
+
+        function switchTab(tabName, btn) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-content-' + tabName).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function getStatusClass(status) {
+            const lower = status.toLowerCase();
+            if (lower.includes('active') || lower.includes('approved') || lower === 'compliant') return 'status-active';
+            if (lower.includes('review') || lower.includes('pending')) return 'status-review';
+            if (lower.includes('block') || lower.includes('suspended') || lower.includes('restricted')) return 'status-blocked';
+            if (lower.includes('legal') || lower.includes('regulation')) return 'status-legal';
+            if (lower.includes('verify') || lower.includes('flagged') || lower.includes('non-compliant')) return 'status-verify';
+            return 'status-active';
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/bom/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('countActive').textContent = data.active_products || 0;
+                document.getElementById('countSuppliers').textContent = data.registered_suppliers || 0;
+                document.getElementById('countMaterials').textContent = data.registered_materials || 0;
+                document.getElementById('countSubstances').textContent = data.registered_substances || 0;
+
+                // Calculate missing seal samples (products without documents)
+                // This is a placeholder - in reality you'd check for document presence
+                let missingSealSample = 0;
+                document.getElementById('countMissingSealSample').textContent = missingSealSample;
+                // Make it red if more than 0
+                if (missingSealSample > 0) {
+                    document.getElementById('countMissingSealSample').style.color = '#dc3545';
+                } else {
+                    document.getElementById('countMissingSealSample').style.color = '#667eea';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/bom/materials', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await response.json();
+                allProducts = data.materials || [];
+
+                // Update tab counts based on current tab
+                document.getElementById('tabCountActive').textContent = allProducts.length;
+
+                // Render products in active tab
+                renderProducts(allProducts, 'activeProducts');
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('activeProducts').innerHTML =
+                    '<div class="empty-state"><h3>Connection Error</h3><p>' + error.message + '</p><button class="btn-primary" onclick="refreshData()">Retry</button></div>';
+            }
+        }
+
+        function renderProducts(products, containerId) {
+            const container = document.getElementById(containerId);
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No products in this category</p></div>';
+                return;
+            }
+
+            container.innerHTML = products.map(p => `
+                <div class="product-card priority-${p.ai_verification_status === 'flagged' ? 'high' : 'low'}">
+                    <div class="product-header">
+                        <div>
+                            <div class="product-id">${p.material_id || 'N/A'}</div>
+                            <div class="product-title">${p.material_name || 'Unknown'}</div>
+                        </div>
+                        <span class="status-badge ${getStatusClass(p.internal_status)}">${p.internal_status || 'Active'}</span>
+                    </div>
+                    <div class="product-subtitle">
+                        <div><strong>Category:</strong> ${p.category || 'General'}</div>
+                        <div><strong>Material Type:</strong> ${p.material_type || 'Mixture'}</div>
+                        <div><strong>Component:</strong> ${p.part_spec_name || 'N/A'}</div>
+                        <div><strong>REACh:</strong> ${p.reach_regulation || 'Not specified'}</div>
+                        <div><strong>Toy Directive:</strong> ${p.toy_directive_compliant !== null ? (p.toy_directive_compliant ? 'Compliant' : 'Not Compliant') : 'N/A'}</div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-sm btn-outline" onclick="viewDetails('${p.material_id}')">View Details</button>
+                        <button class="btn-sm btn-outline" onclick="viewDocuments('${p.material_id}')">Documents</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function refreshData() {
+            document.getElementById('activeProducts').innerHTML = '<div class="loading">Loading products...</div>';
+            await loadProducts();
+        }
+
+        function viewDetails(materialId) {
+            console.log('View details for:', materialId);
+            // Open a modal or navigate to details page
+            alert('View details for material: ' + materialId);
+        }
+
+        function viewDocuments(materialId) {
+            console.log('View documents for:', materialId);
+            alert('View documents for material: ' + materialId);
+        }
+
+        // Initialize
+        loadStats();
+        loadProducts();
+
+        // Page-specific functions (placeholders for now)
+        async function loadRawSuppliers() {
+            console.log('Loading Raw Suppliers...');
+            const response = await fetch('/api/suppliers', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('countRawSuppliers').textContent = data.length || 0;
+                console.log('Raw Suppliers:', data);
+            }
+        }
+
+        async function loadMaterials() {
+            console.log('Loading Materials...');
+            const response = await fetch('/api/bom/materials', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('countMaterialsSide').textContent = data.count || 0;
+                console.log('Materials:', data);
+            }
+        }
+
+        async function loadSubstances() {
+            console.log('Loading Substances...');
+            const response = await fetch('/api/bom/materials', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('countSubstancesSide').textContent = data.count || 0;
+                console.log('Substances:', data);
+            }
+        }
+
+        async function loadBoughtComponents() {
+            console.log('Loading Bought Components...');
+        }
+
+        async function loadProducts() {
+            console.log('Loading Products...');
+        }
+
+        async function loadProcessFlow() {
+            console.log('Loading Process Flow...');
+        }
+
+        async function loadUpcomingAudits() {
+            console.log('Loading Upcoming Audits...');
+        }
+
+        async function loadCorrectiveAction() {
+            console.log('Loading Corrective Action Plan...');
+        }
+
+        // Refresh functions
+        function refreshRawSuppliers() { loadRawSuppliers(); }
+        function refreshMaterials() { loadMaterials(); }
+        function refreshSubstances() { loadSubstances(); }
+        function refreshBoughtComponents() { loadBoughtComponents(); }
+        function refreshProducts() { loadProducts(); }
+        function refreshData() {
+            document.getElementById('activeProducts').innerHTML = '<div class="loading">Loading products...</div>';
+            loadProducts();
+        }
+
+        async function loadSealSamples() {
+            console.log('Loading Seal Samples...');
+        }
+
+        // =================================================================
+        // Bilingual Support - English & Mandarin
+        // =================================================================
+        const translations = {
+            en: {
+                language: 'English',
+                sidebar: {
+                    navigation: 'Navigation',
+                    overview: 'Overview',
+                    materialsSuppliers: 'Materials & Suppliers',
+                    rawSuppliers: 'Raw Suppliers',
+                    material: 'Material',
+                    substances: 'Substances & Mixtures',
+                    productsComponents: 'Products & Components',
+                    boughtComponents: 'Bought Components',
+                    products: 'Products',
+                    sealSamples: 'Seal Samples',
+                    process: 'Process',
+                    processFlow: 'Process Flow',
+                    vendorCompliance: 'Vendor Compliance',
+                    upcomingAudits: 'Upcoming Audits',
+                    correctiveAction: 'Corrective Action Plan'
+                },
+                dashboard: {
+                    title: 'Supplier Dashboard',
+                    description: 'Overview of your materials, products, and compliance status.',
+                    activeProducts: 'Active Products',
+                    activeProductsLabel: 'Live on market',
+                    registeredSuppliers: 'Registered Suppliers',
+                    registeredSuppliersLabel: 'Factory partners',
+                    registeredMaterials: 'Registered Materials',
+                    registeredMaterialsLabel: 'Total products',
+                    registeredSubstances: 'Registered Substances',
+                    registeredSubstancesLabel: 'CAS substances',
+                    missingSealSample: 'Missing Seal Sample',
+                    missingSealSampleLabel: 'Products without sample',
+                    allProducts: 'All Products',
+                    productPortfolio: 'Product Portfolio',
+                    refresh: 'Refresh',
+                    emptyProducts: 'No products in this category'
+                },
+                pages: {
+                    comingSoon: 'page coming soon...',
+                    rawSuppliersTitle: 'Raw Suppliers',
+                    rawSuppliersDesc: 'Manage your raw material suppliers.',
+                    materialTitle: 'Material',
+                    materialDesc: 'Material library and specifications.',
+                    substancesTitle: 'Substances & Mixtures',
+                    substancesDesc: 'Substances and mixtures database.',
+                    boughtComponentsTitle: 'Bought Components',
+                    boughtComponentsDesc: 'Components sourced from suppliers.',
+                    productsTitle: 'Products',
+                    productsDesc: 'Finished products portfolio.',
+                    sealSamplesTitle: 'Seal Samples',
+                    sealSamplesDesc: 'Seal sample images and documentation.',
+                    processFlowTitle: 'Process Flow',
+                    processFlowDesc: 'Manufacturing and quality process flow.',
+                    upcomingAuditsTitle: 'Upcoming Audits',
+                    upcomingAuditsDesc: 'Scheduled vendor audits and assessments.',
+                    correctiveActionTitle: 'Corrective Action Plan',
+                    correctiveActionDesc: 'CAPA (Corrective Action and Preventive Action) tracking.'
+                },
+                buttons: {
+                    uploadNew: 'Upload New',
+                    viewSample: 'View Sample',
+                    download: 'Download',
+                    refresh: 'Refresh',
+                    viewDetails: 'View Details',
+                    documents: 'Documents'
+                },
+                labels: {
+                    currentSealSample: 'Current Seal Sample:',
+                    lastUpload: 'Last Upload:',
+                    notUploaded: 'Not uploaded',
+                    category: 'Category:',
+                    materialType: 'Material Type:',
+                    component: 'Component:',
+                    reach: 'REACh:',
+                    notSpecified: 'Not specified',
+                    toyDirective: 'Toy Directive:',
+                    compliant: 'Compliant',
+                    notCompliant: 'Not Compliant'
+                }
+            },
+            zh: {
+                language: '中文',
+                sidebar: {
+                    navigation: '导航',
+                    overview: '概览',
+                    materialsSuppliers: '物料与供应商',
+                    rawSuppliers: '原始供应商',
+                    material: '物料',
+                    substances: '物质与混合物',
+                    productsComponents: '产品与组件',
+                    boughtComponents: '采购组件',
+                    products: '产品',
+                    sealSamples: '封样',
+                    process: '流程',
+                    processFlow: '流程',
+                    vendorCompliance: '供应商合规',
+                    upcomingAudits: '即将审核',
+                    correctiveAction: '纠正措施'
+                },
+                dashboard: {
+                    title: '供应商仪表板',
+                    description: '您的物料、产品和合规状况概览。',
+                    activeProducts: '活跃产品',
+                    activeProductsLabel: '在售中',
+                    registeredSuppliers: '注册供应商',
+                    registeredSuppliersLabel: '工厂合作伙伴',
+                    registeredMaterials: '注册物料',
+                    registeredMaterialsLabel: '产品总数',
+                    registeredSubstances: '注册物质',
+                    registeredSubstancesLabel: 'CAS物质',
+                    missingSealSample: '缺少封样',
+                    missingSealSampleLabel: '无样品的产品',
+                    allProducts: '全部产品',
+                    productPortfolio: '产品组合',
+                    refresh: '刷新',
+                    emptyProducts: '此类别中无产品'
+                },
+                pages: {
+                    comingSoon: '功能开发中...',
+                    rawSuppliersTitle: '原始供应商',
+                    rawSuppliersDesc: '管理您的原材料供应商。',
+                    materialTitle: '物料',
+                    materialDesc: '物料库和规格。',
+                    substancesTitle: '物质与混合物',
+                    substancesDesc: '物质和混合物数据库。',
+                    boughtComponentsTitle: '采购组件',
+                    boughtComponentsDesc: '从供应商处采购的组件。',
+                    productsTitle: '产品',
+                    productsDesc: '已完成的产品组合。',
+                    sealSamplesTitle: '封样',
+                    sealSamplesDesc: '封样图片和文档。',
+                    processFlowTitle: '流程',
+                    processFlowDesc: '制造和质量流程。',
+                    upcomingAuditsTitle: '即将审核',
+                    upcomingAuditsDesc: '计划的供应商审核和评估。',
+                    correctiveActionTitle: '纠正措施',
+                    correctiveActionDesc: 'CAPA（纠正和预防措施）跟踪。'
+                },
+                buttons: {
+                    uploadNew: '上传新文件',
+                    viewSample: '查看样本',
+                    download: '下载',
+                    refresh: '刷新',
+                    viewDetails: '查看详情',
+                    documents: '文档'
+                },
+                labels: {
+                    currentSealSample: '当前封样:',
+                    lastUpload: '最后上传:',
+                    notUploaded: '未上传',
+                    category: '类别:',
+                    materialType: '物料类型:',
+                    component: '组件:',
+                    reach: 'REACh:',
+                    notSpecified: '未指定',
+                    toyDirective: '玩具指令:',
+                    compliant: '合规',
+                    notCompliant: '不合规'
+                }
+            }
+        };
+
+        let currentLang = localStorage.getItem('supplier_language') || 'en';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('supplier_language', lang);
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLang];
+
+            // Update HTML lang attribute
+            document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh';
+
+            // Update language selector
+            document.getElementById('languageSelect').value = currentLang;
+
+            // Update navigation sidebar
+            document.querySelector('.sidebar-header').textContent = t.sidebar.navigation;
+            document.querySelectorAll('.sidebar .nav-group-title').forEach((el, i) => {
+                const titles = [
+                    t.sidebar.overview,
+                    t.sidebar.materialsSuppliers,
+                    t.sidebar.productsComponents,
+                    t.sidebar.process,
+                    t.sidebar.vendorCompliance
+                ];
+                if (i < titles.length) el.textContent = titles[i];
+            });
+            document.querySelectorAll('.sidebar .nav-item span:first-child').forEach((el, i) => {
+                const navItems = [
+                    t.sidebar.overview,
+                    t.sidebar.rawSuppliers,
+                    t.sidebar.material,
+                    t.sidebar.substances,
+                    t.sidebar.boughtComponents,
+                    t.sidebar.products,
+                    t.sidebar.sealSamples,
+                    t.sidebar.processFlow,
+                    t.sidebar.upcomingAudits,
+                    t.sidebar.correctiveAction
+                ];
+                if (i < navItems.length) el.textContent = navItems[i];
+            });
+
+            // Update dashboard stats
+            const cards = document.querySelectorAll('.stat-card h3');
+            const cardLabels = [
+                t.dashboard.activeProducts,
+                t.dashboard.registeredSuppliers,
+                t.dashboard.registeredMaterials,
+                t.dashboard.registeredSubstances,
+                t.dashboard.missingSealSample
+            ];
+            cards.forEach((el, i) => {
+                if (i < cardLabels.length) el.textContent = cardLabels[i];
+            });
+
+            const cardLabels2 = document.querySelectorAll('.stat-card .label');
+            const cardLabels2Text = [
+                t.dashboard.activeProductsLabel,
+                t.dashboard.registeredSuppliersLabel,
+                t.dashboard.registeredMaterialsLabel,
+                t.dashboard.registeredSubstancesLabel,
+                t.dashboard.missingSealSampleLabel
+            ];
+            cardLabels2.forEach((el, i) => {
+                if (i < cardLabels2Text.length) el.textContent = cardLabels2Text[i];
+            });
+
+            // Update page title and description
+            document.getElementById('page-title').textContent = t.dashboard.title;
+            document.getElementById('page-description').textContent = t.dashboard.description;
+
+            // Update buttons
+            const refreshBtns = document.querySelectorAll('button[onclick^="refresh"]');
+            refreshBtns.forEach(btn => {
+                if (btn.textContent.includes('Refresh')) btn.textContent = t.buttons.refresh;
+            });
+
+            // Update all products tab
+            const allProductsTab = document.querySelector('.tab');
+            if (allProductsTab) {
+                const tabText = allProductsTab.textContent.split('<')[0].trim();
+                if (tabText === 'All Products' || tabText === '全部产品') {
+                    allProductsTab.innerHTML = `${t.dashboard.allProducts} <span class="tab-count" id="tabCountActive">0</span>`;
+                }
+            }
+
+            // Update section headers
+            const sectionHeaders = document.querySelectorAll('.section-header h3');
+            const sectionHeadersText = [
+                t.dashboard.productPortfolio,
+                t.pages.rawSuppliersTitle,
+                t.pages.materialTitle,
+                t.pages.substancesTitle,
+                t.pages.boughtComponentsTitle,
+                t.pages.productsTitle,
+                t.pages.sealSamplesTitle,
+                t.pages.processFlowTitle,
+                t.pages.upcomingAuditsTitle,
+                t.pages.correctiveActionTitle
+            ];
+            sectionHeaders.forEach((el, i) => {
+                if (i < sectionHeadersText.length) el.textContent = sectionHeadersText[i];
+            });
+
+            // Update empty state messages
+            const emptyStates = document.querySelectorAll('.empty-state');
+            const emptyStateTexts = [
+                t.pages.rawSuppliersTitle,
+                t.pages.materialTitle,
+                t.pages.substancesTitle,
+                t.pages.boughtComponentsTitle,
+                t.pages.productsTitle,
+                t.pages.sealSamplesTitle,
+                t.pages.processFlowTitle,
+                t.pages.upcomingAuditsTitle,
+                t.pages.correctiveActionTitle
+            ];
+            emptyStates.forEach((el, i) => {
+                if (i < emptyStateTexts.length) {
+                    el.innerHTML = `<p>${emptyStateTexts[i]} ${t.pages.comingSoon}</p>`;
+                }
+            });
+        }
+
+        // Initialize language on page load
+        updateLanguage();
+    </script>
+</body>
+</html>

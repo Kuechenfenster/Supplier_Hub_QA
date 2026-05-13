@@ -4,7 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://supplier:supplier123@localhost:5432/supplier_hub")
+# Database URL - defaults to SQLite (use DATABASE_URL env var to override)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/db/supplier_hub.db")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -13,7 +14,7 @@ Base = declarative_base()
 # Internal Users (Company Admin/Staff)
 class InternalUser(Base):
     __tablename__ = "internal_users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
@@ -24,15 +25,28 @@ class InternalUser(Base):
     invitation_expires = Column(DateTime, nullable=False)
     role = Column(String(20), nullable=False, default="viewer")
     department_id = Column(Integer, ForeignKey("departments.id"))
+    supervisor_id = Column(Integer, ForeignKey("internal_users.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = Column(DateTime, nullable=True)
-    created_by = Column(Integer, ForeignKey("internal_users.id"))
-    
+
     # Explicit foreign_keys to avoid ambiguity
     department = relationship("Department", back_populates="users", foreign_keys=[department_id])
-    created_by_user = relationship("InternalUser", remote_side=[id], foreign_keys=[created_by])
+    # supervisor is many-to-one (each user has one supervisor)
+    # remote_side=[id] tells SQLAlchemy that 'id' is on the parent side
+    supervisor = relationship("InternalUser",
+                              remote_side=[id],
+                              foreign_keys=[supervisor_id],
+                              uselist=False,
+                              back_populates="subordinates")
+    # subordinates is one-to-many (each user can have many subordinates)
+    # overlaps="supervisor" tells SQLAlchemy this relationship overlaps with supervisor
+    # to avoid the warning about copying the same column
+    subordinates = relationship("InternalUser",
+                                foreign_keys=[supervisor_id],
+                                back_populates="supervisor",
+                                overlaps="supervisor")
 
 # Departments
 class Department(Base):

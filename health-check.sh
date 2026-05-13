@@ -13,7 +13,7 @@ docker compose exec -T db pg_isready -U supplier
 echo ""
 
 echo "Web App Check:"
-curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:8080/
+curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:9000/
 echo ""
 
 echo "Admin User Status:"

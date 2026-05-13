@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(chmod +x *)",
+      "Bash(pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(curl -s http://localhost:9000/api/health)",
+      "Bash(python3.12)",
+      "Bash(curl -s http://localhost:9000/)",
+      "Bash(curl -s http://localhost:9000/management)",
+      "Bash(curl -s http://localhost:9000/assets/logo.png -I)",
+      "Bash(curl *)",
+      "Bash(ls -la /reference/)",
+      "Read(//Users/**)",
+      "Bash(pkill -f \"python3 backend/main.py\")",
+      "Bash(python *)",
+      "Bash(docker compose exec *)",
+      "Bash(docker compose *)",
+      "Bash(echo \"Started server with PID: $!\")",
+      "Bash(sqlite3 *)",
+      "Bash(pkill -f \"run.py\")",
+      "Bash(xxd)",
+      "Bash(pkill -f \"python3 run.py\")",
+      "Bash(kill -9 29610)",
+      "Bash(uvicorn backend.main:app --host 0.0.0.0 --port 9000)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs kill *)",
+      "Bash(kill 24343 *)",
+      "Bash(lsof -ti:9000)",
+      "WebFetch(domain:echa.europa.eu)",
+      "WebSearch"
+    ]
+  }
+}

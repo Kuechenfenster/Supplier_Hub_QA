@@ -21,6 +21,16 @@
         .sidebar button:hover { background: #f5f6fa; }
         .sidebar button.active { background: #1a1a2e; color: white; }
         .sidebar button .icon { width: 20px; text-align: center; }
+        /* Sidebar group styles */
+        .sidebar-group { margin-bottom: 10px; }
+        .sidebar-group-header { padding: 10px 20px; cursor: pointer; color: #1a1a2e; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sidebar-group-header:hover { background: #f5f6fa; }
+        .sidebar-group-content { display: block; }
+        .sidebar-group-content.collapsed { display: none; }
+        .sidebar-group button { padding: 8px 30px; font-size: 13px; background: none; border: none; text-align: left; cursor: pointer; color: #666; display: flex; align-items: center; gap: 10px; width: 100%; }
+        .sidebar-group button:hover { background: #f5f6fa; color: #1a1a2e; }
+        .sidebar-group button.active { background: #667eea; color: white; }
+        .sidebar-group button .icon { width: 20px; text-align: center; }
         .content { flex: 1; padding: 30px; overflow-y: auto; max-height: calc(100vh - 60px); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -97,13 +107,51 @@
     
     <div class="main">
         <div class="sidebar">
-            <button class="active" onclick="showTab('dashboard')"><span class="icon">📊</span> Dashboard</button>
-            <button onclick="showTab('bom')"><span class="icon">📋</span> BOM Upload</button>
-            <button onclick="showTab('materials')"><span class="icon">🧪</span> Materials</button>
-            <button onclick="showTab('users')"><span class="icon">👥</span> Users</button>
-            <button onclick="showTab('departments')"><span class="icon">🏛️</span> Departments</button>
-            <button onclick="showTab('suppliers')"><span class="icon">🏭</span> Suppliers</button>
-            <button onclick="showTab('activity')"><span class="icon">📝</span> Activity Log</button>
+            <div class="sidebar-group">
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('overviewGroup')"><span class="icon">📊</span> Overview</div>
+                <div class="sidebar-group-content" id="overviewGroup">
+                    <button class="active" onclick="showTab('dashboard'); toggleSidebarGroup('overviewGroup')"><span class="icon">🏠</span> Dashboard</button>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('productGroup')"><span class="icon">📦</span> Product</div>
+                <div class="sidebar-group-content" id="productGroup">
+                    <button onclick="showTab('materials'); toggleSidebarGroup('productGroup')"><span class="icon">🧪</span> Materials</button>
+                    <button onclick="showTab('formulations'); toggleSidebarGroup('productGroup')"><span class="icon">🧪</span> Formulations</button>
+                    <button onclick="showTab('bom'); toggleSidebarGroup('productGroup')"><span class="icon">📋</span> Bill of Materials</button>
+                    <button onclick="showTab('sealSample'); toggleSidebarGroup('productGroup')"><span class="icon">🏷️</span> Seal Sample</button>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('correctiveActionGroup')"><span class="icon">✅</span> Corrective Action</div>
+                <div class="sidebar-group-content" id="correctiveActionGroup">
+                    <button onclick="showTab('customerClaims'); toggleSidebarGroup('correctiveActionGroup')"><span class="icon">📣</span> Customer Claims</button>
+                    <button onclick="showTab('qcIssues'); toggleSidebarGroup('correctiveActionGroup')"><span class="icon">❌</span> QC Issues</button>
+                    <button onclick="showTab('centerExcellence'); toggleSidebarGroup('correctiveActionGroup')"><span class="icon">🏆</span> Centre of Excellence</button>
+                    <button onclick="showTab('auditCAPs'); toggleSidebarGroup('correctiveActionGroup')"><span class="icon">📝</span> Audit CAPs</button>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('databaseGroup')"><span class="icon">💾</span> Database</div>
+                <div class="sidebar-group-content" id="databaseGroup">
+                    <button onclick="showTab('sdsM SDS'); toggleSidebarGroup('databaseGroup')"><span class="icon">📄</span> SDS/MSDS/IFRA</button>
+                    <button onclick="showTab('legalRequirements'); toggleSidebarGroup('databaseGroup')"><span class="icon">⚖️</span> Legal Requirements</button>
+                    <button onclick="showTab('customerRequirements'); toggleSidebarGroup('databaseGroup')"><span class="icon">📋</span> Customer Requirements</button>
+                    <button onclick="showTab('echa'); toggleSidebarGroup('databaseGroup')"><span class="icon">🧪</span> ECHA</button>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('usersGroup')"><span class="icon">👥</span> Users</div>
+                <div class="sidebar-group-content" id="usersGroup">
+                    <button onclick="showTab('departments'); toggleSidebarGroup('usersGroup')"><span class="icon">🏛️</span> Departments</button>
+                    <button onclick="showTab('users'); toggleSidebarGroup('usersGroup')"><span class="icon">👤</span> User Management</button>
+                    <button onclick="showTab('suppliers'); toggleSidebarGroup('usersGroup')"><span class="icon">🏭</span> Supplier Management</button>
+                </div>
+            </div>
         </div>
         
         <div class="content">
@@ -209,7 +257,7 @@
                 <div class="card">
                     <table>
                         <thead>
-                            <tr><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
+                            <tr><th>Username</th><th>Email</th><th>Role</th><th>Department</th><th>Supervisor</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="usersTable"></tbody>
                     </table>
@@ -231,7 +279,46 @@
                     </table>
                 </div>
             </div>
-            
+
+            <!-- Substance Database Tab -->
+            <div id="substanceDatabase" class="tab-content">
+                <h2 style="color:#1a1a2e;margin-bottom:20px;">Substance Database</h2>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
+                        <h3 style="font-size:16px;color:#333;">CAS-Number Registry</h3>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <input type="text" id="substanceSearch" placeholder="Search by CAS, name, vendor, or manufacturer..." style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;width:280px;font-size:13px;" onkeyup="if(event.key === 'Enter') loadSubstances()">
+                            <button class="btn btn-primary btn-sm" onclick="loadSubstances()">Search</button>
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('substanceSearch').value=''; loadSubstances()">Reset</button>
+                            <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Substance import feature coming soon')">+ Import</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>CAS Number</th><th>Substance Name</th><th>Vendor</th><th>Manufacturer</th><th>Limit (mg/kg)</th><th>Status</th><th>Last Updated</th></tr>
+                        </thead>
+                        <tbody id="substancesTable"><tr><td colspan="7" class="empty">No substances loaded. Import from substance database.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Requirement Database Tab -->
+            <div id="requirementDatabase" class="tab-content">
+                <h2 style="color:#1a1a2e;margin-bottom:20px;">Requirement Database</h2>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h3 style="font-size:16px;color:#333;">Regulatory Requirements</h3>
+                        <button class="btn btn-primary btn-sm" onclick="alert('Requirement import feature coming soon')">+ Import Requirements</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Regulation</th><th>Section</th><th>Description</th><th>Limit/Requirement</th><th>Applies To</th><th>Effective Date</th></tr>
+                        </thead>
+                        <tbody id="requirementsTable"><tr><td colspan="6" class="empty">No requirements loaded. Import from requirement database.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Suppliers Tab -->
             <div id="suppliers" class="tab-content">
                 <h2 style="color:#1a1a2e;margin-bottom:20px;">All Suppliers</h2>
@@ -257,9 +344,422 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Formulations Tab -->
+            <div id="formulations" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">🧪 Formulations</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Formulation ID</th><th>Name</th><th>Category</th><th>Last Updated</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="formulationsTable"><tr><td colspan="5" class="empty">No formulations loaded. Import from BOM or formulation database.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Seal Sample Tab -->
+            <div id="sealSample" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">🏷️ Seal Sample Management</h2>
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h3 style="font-size:16px;color:#333;">Seal Sample Records</h3>
+                        <button class="btn btn-primary btn-sm" onclick="alert('Add Seal Sample feature coming soon')">+ Add Seal Sample</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Product Name</th><th>Batch Number</th><th>Seal Type</th><th>Date Applied</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="sealSampleTable"><tr><td colspan="5" class="empty">No seal sample records. Add seal samples for products.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Claims Tab -->
+            <div id="customerClaims" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">📣 Customer Claims</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Claim ID</th><th>Customer</th><th>Product</th><th>Issue</th><th>Status</th><th>Created</th></tr>
+                        </thead>
+                        <tbody id="customerClaimsTable"><tr><td colspan="6" class="empty">No customer claims logged.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- QC Issues Tab -->
+            <div id="qcIssues" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">❌ QC Issues</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Issue ID</th><th>Product</th><th>Issue Type</th><th>Severity</th><th>Status</th><th>Resolved</th></tr>
+                        </thead>
+                        <tbody id="qcIssuesTable"><tr><td colspan="6" class="empty">No QC issues recorded.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Centre of Excellence Tab -->
+            <div id="centerExcellence" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">🏆 Centre of Excellence</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Initiative</th><th>Category</th><th>Score</th><th>Last Review</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="centerExcellenceTable"><tr><td colspan="5" class="empty">No centre of excellence records.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Audit CAPs Tab -->
+            <div id="auditCAPs" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">📝 Audit CAPs (Corrective Action Plans)</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>CAP ID</th><th>Audit Reference</th><th>Issue</th><th>Status</th><th>Due Date</th></tr>
+                        </thead>
+                        <tbody id="auditCAPsTable"><tr><td colspan="5" class="empty">No CAPs recorded.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SDS/MSDS/IFRA Tab -->
+            <div id="sdsM SDS" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">📄 SDS/MSDS/IFRA Database</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Document</th><th>Material</th><th>Type</th><th>Version</th><th>Uploaded</th></tr>
+                        </thead>
+                        <tbody id="sdsTable"><tr><td colspan="5" class="empty">No SDS/MSDS/IFRA documents loaded.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Legal Requirements Tab -->
+            <div id="legalRequirements" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">⚖️ Legal Requirements</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Requirement</th><th>Regulation</th><th>Applicability</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="legalRequirementsTable"><tr><td colspan="4" class="empty">No legal requirements loaded.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Requirements Tab -->
+            <div id="customerRequirements" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">📋 Customer Requirements</h2>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Requirement</th><th>Customer</th><th>Category</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="customerRequirementsTable"><tr><td colspan="4" class="empty">No customer requirements loaded.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ECHA Tab -->
+            <div id="echa" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#1a1a2e;">🧪 ECHA Database</h2>
+
+                <!-- Database Selection Grid -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" id="databaseSubstanceBtn" onclick="showECHASubdatabase('substance')" style="flex:1 minwidth:150px;">Substance Database</button>
+                        <button class="btn btn-secondary" id="databaseReachBtn" onclick="showECHASubdatabase('reach')" style="flex:1 minwidth:150px;">REACh</button>
+                        <button class="btn btn-secondary" id="databaseClpBtn" onclick="showECHASubdatabase('clp')" style="flex:1 minwidth:150px;">CLP</button>
+                        <button class="btn btn-secondary" id="databaseSvhcBtn" onclick="showECHASubdatabase('svhc')" style="flex:1 minwidth:150px;">SVHC</button>
+                    </div>
+                </div>
+
+                <!-- Substance Database (Default) -->
+                <div id="echaSubstanceDatabase" class="echa-database-section">
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                        <h3 style="font-size:16px;color:#333;">Chemical Registry</h3>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openAddECHAModal()">➕ Add Substance</button>
+                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('echaFile').click()">📥 Upload File</button>
+                            <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export feature coming soon')">📤 Export</button>
+                            <input type="file" id="echaFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleECHAFileSelect(event)">
+                        </div>
+                    </div>
+                    <div id="echaAlert" class="alert" style="display:none;"></div>
+
+                    <!-- Upload Options -->
+                    <div id="echaUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                        <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload Settings</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                            <div class="form-group">
+                                <label>File Origin</label>
+                                <select id="echaFileOrigin" required>
+                                    <option value="">Select origin...</option>
+                                    <option value="ECHA Website">ECHA Website</option>
+                                    <option value="Supplier SDS">Supplier SDS</option>
+                                    <option value="Lab Report">Lab Report</option>
+                                    <option value="Internal Research">Internal Research</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Source Reference</label>
+                                <input type="text" id="echaSourceRef" placeholder="e.g., ECHA ID, Supplier Name, Document Number">
+                            </div>
+                            <div class="form-group">
+                                <label>Verification Method</label>
+                                <select id="echaVerification">
+                                    <option value="AI Analysis">AI Analysis (recommended)</option>
+                                    <option value="Manual Review">Manual Review</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="echaCategory">
+                                    <option value="Substance">Substance</option>
+                                    <option value="Mixture">Mixture</option>
+                                    <option value="Product">Product</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;">
+                            <strong>Note:</strong> AI will process the file, extract substance data, and verify against current database before adding. All changes are logged in history.
+                        </div>
+                    <div style="margin-top:10px;display:flex;gap:10px;">
+                            <button class="btn btn-primary btn-sm" onclick="processECHAFile()">Upload & Process</button>
+                            <button class="btn btn-secondary btn-sm" onclick="closeECHAUpload()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <button class="btn btn-danger btn-sm" id="deleteSelectedECHABtn" onclick="deleteSelectedECHAChemicals()" disabled style="display:none;">Delete Selected</button>
+                            <span style="font-size:12px;color:#666;margin-left:10px;" id="echaSelectionInfo">Select substances to delete</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm" id="editECHABtn" onclick="editSelectedECHAChemical()" disabled>Edit Selected</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th style="width:40px;"><input type="checkbox" id="selectAllEcha" onclick="toggleSelectAllEcha(this)"></th><th>Name</th><th>EC Number</th><th>CAS Number</th><th>REACH Status</th><th>REACH Listing</th><th>CLP HS Code</th><th>Link to Info</th><th style="width:80px;">Actions</th></tr>
+                        </thead>
+                        <tbody id="echaTable"><tr><td colspan="9" class="empty">No ECHA data loaded.</td></tr></tbody>
+                    </table>
+                </div>
+                </div>
+
+                <!-- REACh Database Section -->
+                <div id="echaReachDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <h3>REACh Compliance Database</h3>
+                        <p style="color:#666;margin-bottom:15px;">View and manage REACh registration data, SVHC candidates, and Annex XVII restrictions.</p>
+                        <div style="background:#e7f3ff;padding:15px;border-radius:6px;font-size:13px;color:#004080;">
+                            <strong>REACh Database</strong><br>
+                            Full REACh compliance tracking with registration status, SVHC screening, and restriction alerts.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLP Database Section -->
+                <div id="echaClpDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <h3>CLP Classification Database</h3>
+                        <p style="color:#666;margin-bottom:15px;">View and manage CLP (Classification, Labeling and Packaging) hazard classifications.</p>
+                        <div style="background:#e7f3ff;padding:15px;border-radius:6px;font-size:13px;color:#004080;">
+                            <strong>CLP Database</strong><br>
+                            Full CLP classification data with GHS hazard codes, safety statements, and labeling requirements.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SVHC Database Section -->
+                <div id="echaSvhcDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <div>
+                                <h3>SVHC (Substances of Very High Concern) Database</h3>
+                                <p style="color:#666;margin-bottom:15px;">View and manage SVHC candidates and authorization list substances.</p>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('svhcFile').click()">📥 Upload CSV/XLS/XML</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export feature coming soon')">📤 Export</button>
+                                <input type="file" id="svhcFile" accept=".xlsx,.xls,.csv,.xml" style="display:none" onchange="handleSVHCFileSelect(event)">
+                            </div>
+                        </div>
+                        <div id="svhcAlert" class="alert" style="display:none;"></div>
+
+                        <!-- Upload Options -->
+                        <div id="svhcUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload Settings</h4>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                                <div class="form-group">
+                                    <label>Upload Type</label>
+                                    <select id="svhcUploadType">
+                                        <option value="candidate_list">Candidate List Update</option>
+                                        <option value="authorization_list">Authorization List (Annex XIV)</option>
+                                        <option value="sunset_list">Sunset List</option>
+                                        <option value="other">Other Update</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Decision Type</label>
+                                    <select id="svhcDecisionType">
+                                        <option value="included">Included</option>
+                                        <option value="reviewed">Reviewed</option>
+                                        <option value="removed">Removed</option>
+                                        <option value="updated">Updated</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label> IUCLID Dataset</label>
+                                    <input type="text" id="svhcIucidId" placeholder="e.g., IUCLID-123456">
+                                </div>
+                                <div class="form-group">
+                                    <label>Support Document</label>
+                                    <input type="text" id="svhcSupportDoc" placeholder="e.g., ECHA-2024-XXXX">
+                                </div>
+                            </div>
+                            <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;margin-bottom:10px;">
+                                <strong>Notes:</strong>
+                                <ul style="margin:5px 0 0 20px;">
+                                    <li>CSV/XLS: Columns should include: Substance Name, EC No., CAS No., Reason, Date of Inclusion, Decision, IUCLID Dataset, Support Document, Response to Comments, Remarks</li>
+                                    <li>XML: ECHA IUCLID XML format supported</li>
+                                </ul>
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="processSVHCFile()">Upload & Process</button>
+                                <button class="btn btn-secondary btn-sm" onclick="closeSVHCUpload()">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Upload History -->
+                        <div style="background:#f0f4ff;padding:15px;border-radius:8px;margin-bottom:15px;">
+                            <h4 style="font-size:13px;color:#1a1a2e;margin-bottom:10px;">Last Updated History</h4>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+                                <div style="background:#fff;padding:10px;border-radius:6px;border:1px solid #e0e0e0;">
+                                    <label style="font-size:11px;color:#666;display:block;">Last File Upload</label>
+                                    <div style="font-size:13px;color:#1a1a2e;" id="svhcLastUpload">Never</div>
+                                </div>
+                                <div style="background:#fff;padding:10px;border-radius:6px;border:1px solid #e0e0e0;">
+                                    <label style="font-size:11px;color:#666;display:block;">Last Manual Update</label>
+                                    <div style="font-size:13px;color:#1a1a2e;" id="svhcLastManualUpdate">Never</div>
+                                </div>
+                                <div style="background:#fff;padding:10px;border-radius:6px;border:1px solid #e0e0e0;">
+                                    <label style="font-size:11px;color:#666;display:block;">Last Update By</label>
+                                    <div style="font-size:13px;color:#1a1a2e;" id="svhcLastUpdateBy">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <button class="btn btn-danger btn-sm" id="deleteSelectedSvhcBtn" onclick="deleteSelectedSVHCs()" disabled style="display:none;">Delete Selected</button>
+                                <span style="font-size:12px;color:#666;margin-left:10px;" id="svhcSelectionInfo">Select substances to delete</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-sm" id="editSvhcBtn" onclick="editSelectedSVHC()" disabled>Edit Selected</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="selectAllSvhc" onclick="toggleSelectAllSvhc(this)"></th>
+                                    <th>Substance Name</th>
+                                    <th>Description</th>
+                                    <th>EC No.</th>
+                                    <th>CAS No.</th>
+                                    <th>Reason for Inclusion</th>
+                                    <th>Date of Inclusion</th>
+                                    <th>Decision</th>
+                                    <th>IUCLID Dataset</th>
+                                    <th>Support Document</th>
+                                    <th>Response to Comments</th>
+                                    <th>Remarks</th>
+                                    <th style="width:80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="svhcTable"><tr><td colspan="13" class="empty">No SVHC data loaded. Upload a file to populate the database.</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Edit ECHA Substance Modal -->
+                <div id="editECHAModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Edit Substance</h2>
+                            <button class="close-btn" onclick="closeModal('editECHAModal')">&times;</button>
+                        </div>
+                        <div id="editECHAAlert" class="alert" style="display:none;"></div>
+                        <div id="editECHAForm">
+                            <input type="hidden" id="editECHAMaterialId">
+                            <div class="form-group"><label>Entry No (Optional)</label><input type="text" id="editEntryNo" placeholder="e.g., ECHA-000001"></div>
+                            <div class="form-group"><label>Substance Name</label><input type="text" id="editName" required></div>
+                            <div class="form-group"><label>EC Number</label><input type="text" id="editEcNumber" required></div>
+                            <div class="form-group"><label>CAS Number</label><input type="text" id="editCasNumber" required></div>
+                            <div class="form-group"><label>REACH Status</label><select id="editReachStatus">
+                                <option value="">Select...</option>
+                                <option value="registered">Registered</option>
+                                <option value="pre-registered">Pre-registered</option>
+                                <option value="exempt">Exempt</option>
+                                <option value="restricted">Restricted</option>
+                                <option value="svhc">SVHC</option>
+                            </select></div>
+                            <div class="form-group"><label>REACH Listing</label><input type="text" id="editReachListing" placeholder="e.g., Article 57, Annex XIV"></div>
+                            <div class="form-group"><label>CLP HS Code</label><input type="text" id="editGhsCode" placeholder="e.g., H300, H310"></div>
+                            <div class="form-group"><label>Info Link</label><input type="text" id="editInfoLink" placeholder="https://echa.europa.eu/..."></div>
+                        </div>
+                        <div style="margin-top:15px;display:flex;gap:10px;">
+                            <button class="btn btn-primary btn-sm" onclick="updateECHAChemical()">Save Changes</button>
+                            <button class="btn btn-secondary btn-sm" onclick="closeModal('editECHAModal')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add ECHA Substance Modal -->
+                <div id="addECHAModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Add New Substance</h2>
+                            <button class="close-btn" onclick="closeModal('addECHAModal')">&times;</button>
+                        </div>
+                        <div id="addECHAAlert" class="alert" style="display:none;"></div>
+                        <div id="addECHAForm">
+                            <div class="form-group"><label>Entry No (Optional)</label><input type="text" id="addEntryNo" placeholder="e.g., ECHA-000001"></div>
+                            <div class="form-group"><label>Substance Name</label><input type="text" id="addName" required></div>
+                            <div class="form-group"><label>EC Number</label><input type="text" id="addEcNumber" required></div>
+                            <div class="form-group"><label>CAS Number</label><input type="text" id="addCasNumber" required></div>
+                            <div class="form-group"><label>REACH Status</label><select id="addReachStatus">
+                                <option value="">Select...</option>
+                                <option value="registered">Registered</option>
+                                <option value="pre-registered">Pre-registered</option>
+                                <option value="exempt">Exempt</option>
+                                <option value="restricted">Restricted</option>
+                                <option value="svhc">SVHC</option>
+                            </select></div>
+                            <div class="form-group"><label>REACH Listing</label><input type="text" id="addReachListing" placeholder="e.g., Article 57, Annex XIV"></div>
+                            <div class="form-group"><label>CLP HS Code</label><input type="text" id="addGhsCode" placeholder="e.g., H300, H310"></div>
+                            <div class="form-group"><label>Info Link</label><input type="text" id="addInfoLink" placeholder="https://echa.europa.eu/..."></div>
+                        </div>
+                        <div style="margin-top:15px;display:flex;gap:10px;">
+                            <button class="btn btn-primary btn-sm" onclick="submitAddECHAChemical()">Add Substance</button>
+                            <button class="btn btn-secondary btn-sm" onclick="closeModal('addECHAModal')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-    
+
     <!-- Add User Modal -->
     <div id="userModal" class="modal">
         <div class="modal-content">
@@ -269,10 +769,10 @@
             </div>
             <div id="userModalAlert" class="alert"></div>
             <form id="addUserForm">
-                <div class="form-group"><label>Username</label><input type="text" id="newUsername" required></div>
                 <div class="form-group"><label>Email</label><input type="email" id="newUserEmail" required></div>
                 <div class="form-group"><label>Full Name</label><input type="text" id="newUserFullname" required></div>
-                <div class="form-group"><label>Role</label><select id="newUserRole"><option value="viewer">Viewer</option><option value="qa">QA Manager</option><option value="manager">Department Manager</option><option value="admin">Admin</option></select></div>
+                <div class="form-group"><label>Department</label><select id="newUserDepartment"><option value="">No Department</option></select></div>
+                <div class="form-group"><label>Supervisor</label><select id="newUserSupervisor"><option value="">No Supervisor</option></select></div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Create User</button>
             </form>
             <div id="invitationResult" style="display:none;">
@@ -285,7 +785,40 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit User</h2>
+                <button class="close-btn" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div id="editUserModalAlert" class="alert"></div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group"><label>Email</label><input type="email" id="editUserEmail" required></div>
+                <div class="form-group"><label>Full Name</label><input type="text" id="editUserFullname" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="editUserRole">
+                        <option value="viewer">Viewer</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Department</label><select id="editUserDepartment"><option value="">No Department</option></select></div>
+                <div class="form-group"><label>Supervisor</label><select id="editUserSupervisor"><option value="">No Supervisor</option></select></div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;">
+                        <input type="checkbox" id="editUserIsActive" style="width:auto;margin-right:10px;">
+                        Active User
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Update User</button>
+                <button type="button" class="btn btn-danger" id="deleteUserBtn" style="width:100%;margin-top:10px;">Delete User</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Add Department Modal -->
     <div id="deptModal" class="modal">
         <div class="modal-content">
@@ -332,13 +865,37 @@
             const token = localStorage.getItem('token');
             if (!token) { window.location.href = '/management/login'; return; }
             currentUser = JSON.parse(localStorage.getItem('user'));
-            document.getElementById('currentUserName').textContent = currentUser.full_name;
+            if (!currentUser || !currentUser.name) {
+                // Invalid user data, re-login
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            document.getElementById('currentUserName').textContent = currentUser.name;
             document.getElementById('currentUserRole').textContent = currentUser.role;
             loadDashboard();
         }
         
         function getHeaders() {
-            return { 'Authorization': 'Bearer ' + localStorage.getItem('token') };
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/management/login';
+                return {};
+            }
+            return { 'Authorization': 'Bearer ' + token };
+        }
+
+        async function checkTokenAndRetry() {
+            // Check if token is valid by attempting a simple request
+            const response = await fetch(API + '/api/auth/me', { headers: getHeaders() });
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return false;
+            }
+            return true;
         }
         
         function logout() {
@@ -347,20 +904,75 @@
             window.location.href = '/management/login';
         }
         
+        function toggleSidebarGroup(groupId) {
+            const content = document.getElementById(groupId);
+            if (content) {
+                content.classList.toggle('collapsed');
+            }
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.target.closest('button').classList.add('active');
+
+            // Mark the active button in sidebar
+            const buttons = document.querySelectorAll(`.sidebar button[onclick*="${tabId}"]`);
+            buttons.forEach(b => b.classList.add('active'));
+
+            // Expand parent group if needed
+            const groupContent = document.getElementById(tabId + 'Group');
+            if (groupContent) {
+                groupContent.classList.remove('collapsed');
+            }
+
+            // Expand specific groups based on tab
+            const groupMap = {
+                'dashboard': 'overviewGroup',
+                'materials': 'productGroup',
+                'formulations': 'productGroup',
+                'bom': 'productGroup',
+                'sealSample': 'productGroup',
+                'customerClaims': 'correctiveActionGroup',
+                'qcIssues': 'correctiveActionGroup',
+                'centerExcellence': 'correctiveActionGroup',
+                'auditCAPs': 'correctiveActionGroup',
+                'sdsM SDS': 'databaseGroup',
+                'legalRequirements': 'databaseGroup',
+                'customerRequirements': 'databaseGroup',
+                'echa': 'databaseGroup',
+                'departments': 'usersGroup',
+                'users': 'usersGroup',
+                'suppliers': 'usersGroup'
+            };
+            const groupId = groupMap[tabId];
+            if (groupId) {
+                document.getElementById(groupId).classList.remove('collapsed');
+            }
+
             if (tabId === 'users') loadUsers();
             if (tabId === 'departments') loadDepartments();
+            if (tabId === 'substanceDatabase') loadSubstances();
+            if (tabId === 'requirementDatabase') loadRequirements();
             if (tabId === 'suppliers') loadSuppliers();
             if (tabId === 'activity') loadActivity();
             if (tabId === 'bom') loadBOMRecords();
+            if (tabId === 'echa') loadECHAReach();
             if (tabId === 'materials') loadMaterials();
+            if (tabId === 'formulations') loadFormulations();
+            if (tabId === 'sealSample') loadSealSample();
+            if (tabId === 'customerClaims') loadCustomerClaims();
+            if (tabId === 'qcIssues') loadQCIssues();
+            if (tabId === 'centerExcellence') loadCenterExcellence();
+            if (tabId === 'auditCAPs') loadAuditCAPs();
         }
         
-        function showModal(id) { document.getElementById(id).classList.add('active'); }
+        function showModal(id) {
+            document.getElementById(id).classList.add('active');
+            if (id === 'userModal') {
+                populateDepartments();
+            }
+        }
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
             document.getElementById(id).querySelector('form')?.reset();
@@ -370,23 +982,61 @@
                 document.getElementById('addUserForm').style.display = 'block';
                 document.getElementById('invitationResult').style.display = 'none';
             }
+            if (id === 'editUserModal') {
+                document.getElementById('deleteUserBtn').style.display = 'block';
+            }
+        }
+
+        async function populateDepartments() {
+            var deptSelect = document.getElementById('newUserDepartment');
+            var supSelect = document.getElementById('newUserSupervisor');
+            var depts = await fetch(API + '/api/admin/departments', { headers: getHeaders() }).then(function(r) { return r.json(); });
+            deptSelect.innerHTML = '<option value="">No Department</option>' + depts.map(function(d) {
+                return '<option value="' + d.id + '">' + d.name + '</option>';
+            }).join('');
+
+            // Populate supervisors with existing users
+            var users = await fetch(API + '/api/admin/users', { headers: getHeaders() }).then(function(r) { return r.json(); });
+            supSelect.innerHTML = '<option value="">No Supervisor</option>' + users.filter(function(u) { return u.id !== currentUser.id; }).map(function(u) {
+                return '<option value="' + u.id + '">' + u.name + ' (' + u.email + ')</option>';
+            }).join('');
         }
         
         async function loadDashboard() {
             try {
-                const stats = await fetch(API + '/api/admin/dashboard/stats', { headers: getHeaders() }).then(r => r.json());
+                console.log('Loading dashboard...');
+                const statsResponse = await fetch(API + '/api/admin/dashboard/stats', { headers: getHeaders() });
+                if (statsResponse.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                const stats = await statsResponse.json();
+                console.log('Stats:', stats);
                 document.getElementById('statsGrid').innerHTML = `
-                    <div class="stat-card"><div class="number">${stats.total_suppliers}</div><div class="label">Total Suppliers</div></div>
-                    <div class="stat-card"><div class="number">${stats.active_suppliers}</div><div class="label">Active Suppliers</div></div>
-                    <div class="stat-card"><div class="number">${stats.pending_suppliers}</div><div class="label">Pending Approval</div></div>
-                    <div class="stat-card"><div class="number">${stats.active_users}</div><div class="label">Active Users</div></div>
-                    <div class="stat-card"><div class="number">${stats.total_departments}</div><div class="label">Departments</div></div>
+                    <div class="stat-card"><div class="number" id="stat-total-suppliers">${stats.total_suppliers || 0}</div><div class="label">Total Suppliers</div></div>
+                    <div class="stat-card"><div class="number" id="stat-active-suppliers">${stats.active_suppliers || 0}</div><div class="label">Active Suppliers</div></div>
+                    <div class="stat-card"><div class="number" id="stat-seal-sample" style="color: ${stats.seal_sample_missing >= 1 ? '#dc3545' : '#ffffff'};">${stats.seal_sample_missing || 0}</div><div class="label">Seal Sample</div></div>
+                    <div class="stat-card"><div class="number" id="stat-vcm-cap" style="color: ${stats.vcm_cap_missing >= 1 ? '#dc3545' : '#ffffff'};">${stats.vcm_cap_missing || 0}</div><div class="label">VCM CAP</div></div>
+                    <div class="stat-card"><div class="number" id="stat-qc-cap" style="color: ${stats.qc_cap_missing >= 1 ? '#dc3545' : '#ffffff'};">${stats.qc_cap_missing || 0}</div><div class="label">QC CAP</div></div>
                 `;
-                const activity = await fetch(API + '/api/admin/dashboard/activity', { headers: getHeaders() }).then(r => r.json());
-                document.getElementById('recentActivity').innerHTML = activity.length ? activity.map(a => 
+                const activityResponse = await fetch(API + '/api/admin/dashboard/activity', { headers: getHeaders() });
+                if (activityResponse.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                const activity = await activityResponse.json();
+                console.log('Activity:', activity);
+                document.getElementById('recentActivity').innerHTML = activity.length ? activity.map(a =>
                     '<div style="padding:10px;border-bottom:1px solid #eee;font-size:13px;"><strong>' + a.action + '</strong> on ' + a.entity_type + ' by User #' + a.user_id + '<br><small style="color:#999;">' + new Date(a.created_at).toLocaleString() + '</small></div>'
                 ).join('') : '<p class="empty">No recent activity</p>';
-            } catch(e) { console.error('Dashboard error', e); }
+            } catch(e) {
+                console.error('Dashboard error:', e);
+                document.getElementById('statsGrid').innerHTML = '<p class="empty">Error loading dashboard: ' + e.message + '</p>';
+            }
         }
         
         // ─── BOM Upload ────────────────────────────────
@@ -416,15 +1066,15 @@
             var btn = document.getElementById('uploadBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Processing...';
-            
+
             var formData = new FormData();
             formData.append('file', selectedFile);
-            
+
             var bomId = document.getElementById('bomId').value;
             var defaultSku = document.getElementById('defaultSku').value;
             var productName = document.getElementById('productName').value;
             var version = document.getElementById('bomVersion').value;
-            
+
             try {
                 var url = API + '/api/bom/upload';
                 var params = new URLSearchParams();
@@ -433,16 +1083,25 @@
                 if (productName) params.append('product_name', productName);
                 if (version) params.append('version', version);
                 if (params.toString()) url += '?' + params.toString();
-                
+
                 var response = await fetch(url, {
                     method: 'POST',
                     headers: getHeaders(),
                     body: formData
                 });
-                
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Process BOM';
+                    return;
+                }
+
                 var data = await response.json();
-                
-                if (response.ok && data.status === 'success') {
+
+                if (response.ok) {
                     showAlert('BOM processed successfully!', 'success');
                     document.getElementById('uploadResult').classList.add('show');
                     var html = '<div class="result-row"><span class="result-label">BOM ID</span><span class="result-value">' + data.bom_id + '</span></div>';
@@ -479,7 +1138,14 @@
 
         async function loadBOMRecords() {
             try {
-                var records = await fetch(API + '/api/bom/records', { headers: getHeaders() }).then(function(r) { return r.json(); });
+                var records = await fetch(API + '/api/bom/records', { headers: getHeaders() });
+                if (records.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                records = await records.json();
                 document.getElementById('bomRecordsTable').innerHTML = records.length ? records.map(function(r) {
                     return '<tr><td>' + r.bom_id + '</td><td>' + r.sku + '</td><td><strong>' + r.material_id + '</strong></td><td>' + (r.quantity || '-') + '</td><td>' + (r.unit || '-') + '</td><td><span class="badge badge-' + (r.component_role || 'other') + '">' + (r.component_role || '-') + '</span></td><td>' + (r.source_file || '-') + '</td></tr>';
                 }).join('') : '<tr><td colspan="7" class="empty">No BOM records found</td></tr>';
@@ -490,7 +1156,14 @@
 
         async function loadMaterials() {
             try {
-                var materials = await fetch(API + '/api/bom/materials', { headers: getHeaders() }).then(function(r) { return r.json(); });
+                var materials = await fetch(API + '/api/bom/materials', { headers: getHeaders() });
+                if (materials.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                materials = await materials.json();
                 document.getElementById('materialsTable').innerHTML = materials.length ? materials.map(function(m) {
                     return '<tr><td><strong>' + m.material_id + '</strong></td><td>' + m.material_name + '</td><td>' + m.component_name + '</td><td>' + m.supplier_id + '</td><td><span class="badge badge-' + (m.category || 'other') + '">' + (m.category || '-') + '</span></td><td>' + (m.cas_number || '-') + '</td><td>' + (m.ghs_classification || '-') + '</td><td>' + (m.en71_3_category || '-') + '</td></tr>';
                 }).join('') : '<tr><td colspan="8" class="empty">No materials in library</td></tr>';
@@ -498,41 +1171,107 @@
                 document.getElementById('materialsTable').innerHTML = '<tr><td colspan="8" class="empty">Error loading materials</td></tr>';
             }
         }
-        
+
         async function loadUsers() {
-            var users = await fetch(API + '/api/admin/users', { headers: getHeaders() }).then(function(r) { return r.json(); });
+            var users = await fetch(API + '/api/admin/users', { headers: getHeaders() });
+            if (users.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            users = await users.json();
             document.getElementById('usersTable').innerHTML = users.length ? users.map(function(u) {
-                return '<tr><td>' + u.username + '</td><td>' + u.full_name + '</td><td>' + u.email + '</td><td><span class="badge badge-' + u.role + '">' + u.role + '</span></td><td><span class="badge ' + (u.is_active ? 'badge-active' : 'badge-inactive') + '">' + (u.is_active ? 'Active' : 'Inactive') + '</span></td><td>' + (u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never') + '</td><td><button class="btn btn-sm btn-danger" onclick="toggleUser(' + u.id + ', ' + !u.is_active + ')">' + (u.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
-            }).join('') : '<tr><td colspan="7" class="empty">No users found</td></tr>';
+                var deptCell = '';
+                if (u.department) {
+                    deptCell = '<td><a href="#" onclick="filterByDepartment(' + u.department.id + ', ' + JSON.stringify(u.department.name) + ')" style="color:#1a1a2e;text-decoration:none;"><span class="badge badge-active" style="font-size:11px;">' + u.department.name + '</span></a></td>';
+                } else {
+                    deptCell = '<td><span class="badge badge-inactive" style="font-size:11px;">No Dept</span></td>';
+                }
+                var supCell = '';
+                if (u.supervisor) {
+                    supCell = '<td>' + u.supervisor.name + '</td>';
+                } else {
+                    supCell = '<td>-</td>';
+                }
+                var lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString() : '-';
+                var code = u.email ? u.email.replace(/'/g, "\\'") : '';
+                var name = u.name ? u.name.replace(/'/g, "\\'") : '';
+                var editBtn = '<button class="btn btn-sm btn-warning" onclick="openEditUser(' + u.id + ', \'' + code + '\', \'' + name + '\', ' + (u.department_id || 'null') + ', ' + (u.supervisor_id || 'null') + ', \'' + u.role + '\', ' + (u.is_active ? 'true' : 'false') + ')">Edit</button>';
+                var deleteBtn = '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + u.id + ', \'' + code + '\')">Delete</button>';
+                if (u.id === currentUser.id) {
+                    editBtn = '<button class="btn btn-sm" style="background:#e0e0e0;color:#666;">Edit</button>';
+                    deleteBtn = '<button class="btn btn-sm" style="background:#e0e0e0;color:#666;">Delete</button>';
+                }
+                return '<tr><td>' + u.name + '</td><td>' + (u.email || '-') + '</td><td><span class="badge badge-' + u.role + '">' + u.role + '</span></td>' + deptCell + supCell + '<td><span class="badge ' + (u.is_active ? 'badge-active' : 'badge-inactive') + '">' + (u.is_active ? 'Active' : 'Inactive') + '</span></td><td>' + lastLogin + '</td><td>' + editBtn + ' ' + deleteBtn + '</td></tr>';
+            }).join('') : '<tr><td colspan="8" class="empty">No users found</td></tr>';
+        }
+
+        function filterByDepartment(deptId, deptName) {
+            alert('Filter by department: ' + deptName + ' (ID: ' + deptId + ')');
+            // TODO: Implement filtering logic if needed
         }
         
         async function loadDepartments() {
-            var depts = await fetch(API + '/api/admin/departments', { headers: getHeaders() }).then(function(r) { return r.json(); });
+            var depts = await fetch(API + '/api/admin/departments', { headers: getHeaders() });
+            if (depts.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            depts = await depts.json();
             document.getElementById('deptsTable').innerHTML = depts.length ? depts.map(function(d) {
-                return '<tr><td><strong>' + d.code + '</strong></td><td>' + d.name + '</td><td>' + (d.location || '-') + '</td><td>' + (d.description || '-') + '</td><td><span class="badge badge-active">' + (d.headcount || 0) + '</span></td><td><button class="btn btn-sm btn-warning" onclick="openEditDept(' + d.id + ', '' + d.code + '', '' + d.name + '', '' + (d.location || '') + '', '' + (d.description || '') + '')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteDepartment(' + d.id + ', '' + d.name + '')">Delete</button></td></tr>';
+                var code = d.code ? d.code.replace(/'/g, "\\'") : '';
+                var name = d.name ? d.name.replace(/'/g, "\\'") : '';
+                var location = (d.location || '').replace(/'/g, "\\'");
+                var description = (d.description || '').replace(/'/g, "\\'");
+                var editBtn = '<button class="btn btn-sm btn-warning" onclick="openEditDept(' + d.id + ', \'' + code + '\', \'' + name + '\', \'' + location + '\', \'' + description + '\')">Edit</button>';
+                var deleteBtn = '<button class="btn btn-sm btn-danger" onclick="deleteDepartment(' + d.id + ', \'' + name + '\')">Delete</button>';
+                return '<tr><td><strong>' + d.code + '</strong></td><td>' + d.name + '</td><td>' + (d.location || '-') + '</td><td>' + (d.description || '-') + '</td><td><span class="badge badge-active">' + (d.headcount || 0) + '</span></td><td>' + editBtn + ' ' + deleteBtn + '</td></tr>';
             }).join('') : '<tr><td colspan="6" class="empty">No departments</td></tr>';
         }
         
         async function loadSuppliers() {
-            var suppliers = await fetch(API + '/api/suppliers').then(function(r) { return r.json(); });
+            var suppliers = await fetch(API + '/api/suppliers', { headers: getHeaders() });
+            if (suppliers.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            suppliers = await suppliers.json();
             document.getElementById('suppliersTable').innerHTML = suppliers.length ? suppliers.map(function(s) {
                 return '<tr><td>' + s.code + '</td><td>' + s.name + '</td><td>' + s.email + '</td><td><span class="badge badge-pending">' + (s.status || 'pending') + '</span></td></tr>';
             }).join('') : '<tr><td colspan="4" class="empty">No suppliers registered</td></tr>';
         }
         
         async function loadActivity() {
-            var logs = await fetch(API + '/api/admin/dashboard/activity?limit=50', { headers: getHeaders() }).then(function(r) { return r.json(); });
+            var logs = await fetch(API + '/api/admin/dashboard/activity?limit=50', { headers: getHeaders() });
+            if (logs.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            logs = await logs.json();
             document.getElementById('auditTable').innerHTML = logs.length ? logs.map(function(l) {
                 return '<tr><td>' + new Date(l.created_at).toLocaleString() + '</td><td>User #' + l.user_id + '</td><td>' + l.action + '</td><td>' + l.entity_type + '</td></tr>';
             }).join('') : '<tr><td colspan="4" class="empty">No activity logged</td></tr>';
         }
         
         async function toggleUser(userId, isActive) {
-            await fetch(API + '/api/admin/users/' + userId, {
+            var res = await fetch(API + '/api/admin/users/' + userId, {
                 method: 'PUT',
                 headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ is_active: isActive })
             });
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
             loadUsers();
         }
         
@@ -542,16 +1281,27 @@
             var btn = this.querySelector('button[type="submit"]');
             btn.disabled = true;
             try {
+                var deptId = document.getElementById('newUserDepartment').value;
+                var supId = document.getElementById('newUserSupervisor').value;
                 var res = await fetch(API + '/api/admin/users', {
                     method: 'POST',
                     headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
                     body: JSON.stringify({
-                        username: document.getElementById('newUsername').value,
                         email: document.getElementById('newUserEmail').value,
-                        full_name: document.getElementById('newUserFullname').value,
-                        role: document.getElementById('newUserRole').value
+                        name: document.getElementById('newUserFullname').value,
+                        password: generateTempPassword(),
+                        department_id: deptId ? parseInt(deptId) : null,
+                        supervisor_id: supId ? parseInt(supId) : null,
+                        role: 'viewer'
                     })
                 });
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    btn.disabled = false;
+                    return;
+                }
                 var data = await res.json();
                 if (res.ok) {
                     document.getElementById('addUserForm').style.display = 'none';
@@ -570,21 +1320,52 @@
             }
             btn.disabled = false;
         });
+
+        function generateTempPassword() {
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            var password = '';
+            for (var i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
         
         document.getElementById('addDeptForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            await fetch(API + '/api/admin/departments', {
-                method: 'POST',
-                headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
-                body: JSON.stringify({
-                    code: document.getElementById('newDeptCode').value,
-                    name: document.getElementById('newDeptName').value,
-                    location: document.getElementById('newDeptLocation').value,
-                    description: document.getElementById('newDeptDesc').value
-                })
-            });
-            closeModal('deptModal');
-            loadDepartments();
+            var alert = document.getElementById('deptModalAlert');
+            var btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            try {
+                var res = await fetch(API + '/api/admin/departments', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        code: document.getElementById('newDeptCode').value,
+                        name: document.getElementById('newDeptName').value,
+                        location: document.getElementById('newDeptLocation').value,
+                        description: document.getElementById('newDeptDesc').value
+                    })
+                });
+                var data = await res.json();
+                if (res.ok) {
+                    alert.textContent = 'Department created successfully!';
+                    alert.className = 'alert alert-success';
+                    alert.style.display = 'block';
+                    setTimeout(function() {
+                        closeModal('deptModal');
+                        loadDepartments();
+                    }, 1000);
+                } else {
+                    alert.textContent = data.detail || 'Failed to create department';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'block';
+                }
+            } catch (err) {
+                alert.textContent = 'Error: ' + err.message;
+                alert.className = 'alert alert-error';
+                alert.style.display = 'block';
+            }
+            btn.disabled = false;
         });
         
         function openEditDept(id, code, name, location, description) {
@@ -602,6 +1383,12 @@
                 method: 'DELETE',
                 headers: getHeaders()
             });
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
             var data = await res.json();
             if (res.ok) {
                 alert('Department deleted');
@@ -610,6 +1397,96 @@
                 alert(data.detail || 'Failed to delete department');
             }
         }
+
+        function openEditUser(id, email, name, deptId, supId, role, isActive) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserEmail').value = email;
+            document.getElementById('editUserFullname').value = name;
+            document.getElementById('editUserRole').value = role;
+            document.getElementById('editUserDepartment').value = deptId || '';
+            document.getElementById('editUserSupervisor').value = supId || '';
+            document.getElementById('editUserIsActive').checked = isActive === true;
+
+            // Populate department dropdown
+            var deptSelect = document.getElementById('editUserDepartment');
+            fetch(API + '/api/admin/departments', { headers: getHeaders() }).then(function(r) { return r.json(); }).then(function(depts) {
+                deptSelect.innerHTML = '<option value="">No Department</option>' + depts.map(function(d) {
+                    return '<option value="' + d.id + '"' + (deptId === d.id ? ' selected' : '') + '>' + d.name + '</option>';
+                }).join('');
+            });
+
+            // Populate supervisor dropdown
+            var supSelect = document.getElementById('editUserSupervisor');
+            fetch(API + '/api/admin/users', { headers: getHeaders() }).then(function(r) { return r.json(); }).then(function(users) {
+                supSelect.innerHTML = '<option value="">No Supervisor</option>' + users.filter(function(u) { return u.id !== id; }).map(function(u) {
+                    return '<option value="' + u.id + '"' + (supId === u.id ? ' selected' : '') + '>' + u.name + ' (' + u.email + ')</option>';
+                }).join('');
+            });
+
+            showModal('editUserModal');
+        }
+
+        async function deleteUser(id, email) {
+            if (!confirm('Are you sure you want to delete user "' + email + '"?')) return;
+            var res = await fetch(API + '/api/admin/users/' + id, {
+                method: 'DELETE',
+                headers: getHeaders()
+            });
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            var data = await res.json();
+            if (res.ok) {
+                alert('User deleted');
+                loadUsers();
+            } else {
+                alert(data.detail || 'Failed to delete user');
+            }
+        }
+
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var id = document.getElementById('editUserId').value;
+            var res = await fetch(API + '/api/admin/users/' + id, {
+                method: 'PUT',
+                headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                body: JSON.stringify({
+                    name: document.getElementById('editUserFullname').value,
+                    email: document.getElementById('editUserEmail').value,
+                    role: document.getElementById('editUserRole').value,
+                    department_id: document.getElementById('editUserDepartment').value ? parseInt(document.getElementById('editUserDepartment').value) : null,
+                    supervisor_id: document.getElementById('editUserSupervisor').value ? parseInt(document.getElementById('editUserSupervisor').value) : null,
+                    is_active: document.getElementById('editUserIsActive').checked
+                })
+            });
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
+            var data = await res.json();
+            if (res.ok) {
+                closeModal('editUserModal');
+                loadUsers();
+            } else {
+                var alert = document.getElementById('editUserModalAlert');
+                alert.textContent = data.detail || 'Failed to update user';
+                alert.className = 'alert alert-error';
+                alert.style.display = 'block';
+            }
+        });
+
+        document.getElementById('deleteUserBtn').addEventListener('click', async function() {
+            var id = document.getElementById('editUserId').value;
+            var email = document.getElementById('editUserEmail').value;
+            if (id && email) {
+                await deleteUser(id, email);
+            }
+        });
 
         document.getElementById('editDeptForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -624,6 +1501,12 @@
                     description: document.getElementById('editDeptDesc').value
                 })
             });
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/management/login';
+                return;
+            }
             var data = await res.json();
             if (res.ok) {
                 closeModal('editDeptModal');
@@ -635,6 +1518,816 @@
                 alert.style.display = 'block';
             }
         });
+
+        async function loadSubstances() {
+            const searchQuery = document.getElementById('substanceSearch')?.value || '';
+            try {
+                const response = await fetch(API + '/api/bom/substances/search' + (searchQuery ? `?query=${encodeURIComponent(searchQuery)}` : ''), { headers: getHeaders() });
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                const data = await response.json();
+                const tbody = document.getElementById('substancesTable');
+                if (data.count === 0 || !data.substances || data.substances.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">No substances found. Import substances from external sources (e.g., ECHA, supplier SDS).</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.substances.map(s => `
+                    <tr>
+                        <td>${s.cas_number || '-'}</td>
+                        <td>${s.substance_name || '-'}</td>
+                        <td>${s.vendor_name || '-'}</td>
+                        <td>${s.manufacturer_name || '-'}</td>
+                        <td>${s.migration_limit_mg_kg !== null ? s.migration_limit_mg_kg : (s.internal_limit_mg_kg !== null ? s.internal_limit_mg_kg : '-')}</td>
+                        <td>${s.svhc ? 'SVHC' : (s.reach_status || 'Standard')}</td>
+                        <td><small style="color:#999;">${s.created_at ? new Date(s.created_at).toLocaleDateString() : '-'}</small></td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                console.error('Load substances error:', e);
+                document.getElementById('substancesTable').innerHTML = '<tr><td colspan="7" class="empty">Error loading substances: ' + e.message + '</td></tr></tr>';
+            }
+        }
+
+        async function loadRequirements() {
+            // Placeholder for requirement database loading
+            document.getElementById('requirementsTable').innerHTML = '<tr><td colspan="6" class="empty">Requirement Database - Import regulatory requirements (e.g., REACh, EN 71-3, TSCA)</td></tr>';
+        }
+
+        // New tab placeholder functions
+        async function loadFormulations() {
+            document.getElementById('formulationsTable').innerHTML = '<tr><td colspan="5" class="empty">Formulation Database - Import formulations from BOM or manage manually.</td></tr>';
+        }
+
+        async function loadSealSample() {
+            document.getElementById('sealSampleTable').innerHTML = '<tr><td colspan="5" class="empty">Seal Sample Records - Add seal samples for product batches.</td></tr>';
+        }
+
+        async function loadCustomerClaims() {
+            document.getElementById('customerClaimsTable').innerHTML = '<tr><td colspan="6" class="empty">Customer Claims - Log and track customer complaints.</td></tr>';
+        }
+
+        async function loadQCIssues() {
+            document.getElementById('qcIssuesTable').innerHTML = '<tr><td colspan="6" class="empty">QC Issues - Record and resolve quality control issues.</td></tr>';
+        }
+
+        async function loadCenterExcellence() {
+            document.getElementById('centerExcellenceTable').innerHTML = '<tr><td colspan="5" class="empty">Centre of Excellence - Track initiatives and performance metrics.</td></tr>';
+        }
+
+        async function loadAuditCAPs() {
+            document.getElementById('auditCAPsTable').innerHTML = '<tr><td colspan="5" class="empty">Audit CAPs - Track corrective action plans from audits.</td></tr>';
+        }
+
+        async function loadSDS() {
+            document.getElementById('sdsTable').innerHTML = '<tr><td colspan="5" class="empty">SDS/MSDS/IFRA Documents - Upload and manage safety documentation.</td></tr>';
+        }
+
+        async function loadLegalRequirements() {
+            document.getElementById('legalRequirementsTable').innerHTML = '<tr><td colspan="4" class="empty">Legal Requirements - Manage regulatory compliance requirements.</td></tr>';
+        }
+
+        async function loadCustomerRequirements() {
+            document.getElementById('customerRequirementsTable').innerHTML = '<tr><td colspan="4" class="empty">Customer Requirements - Track customer-specific requirements.</td></tr>';
+        }
+
+        let selectedECHAChemicals = [];
+
+        async function loadECHAReach() {
+            // Show substance database section, hide others
+            document.getElementById('echaSubstanceDatabase').style.display = 'block';
+            document.getElementById('echaReachDatabase').style.display = 'none';
+            document.getElementById('echaClpDatabase').style.display = 'none';
+            // Update button state
+            document.getElementById('databaseSubstanceBtn').className = 'btn btn-primary';
+            document.getElementById('databaseReachBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseClpBtn').className = 'btn btn-secondary';
+
+            try {
+                const response = await fetch(API + '/api/bom/echa/list', { headers: getHeaders() });
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                const data = await response.json();
+                const tbody = document.getElementById('echaTable');
+                if (!data.chemicals || data.chemicals.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="empty">No ECHA data loaded.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.chemicals.map(c => `
+                    <tr data-id="${c.id}">
+                        <td><input type="checkbox" class="echa-checkbox" data-id="${c.id}"></td>
+                        <td>${c.name || '-'}</td>
+                        <td>${c.ec_number || '-'}</td>
+                        <td>${c.cas_number || '-'}</td>
+                        <td>${c.reach_status || '-'}</td>
+                        <td>${c.reach_listing || '-'}</td>
+                        <td>${c.gh_code || '-'}</td>
+                        <td>${c.info_link ? '<a href="' + c.info_link + '" target="_blank">🔗 Info</a>' : '-'}</td>
+                        <td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="editECHAChemical(${c.id})">Edit</button></td>
+                    </tr>
+                `).join('');
+
+                // Add checkbox click handler
+                document.querySelectorAll('.echa-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            selectedECHAChemicals.push(parseInt(this.dataset.id));
+                        } else {
+                            selectedECHAChemicals = selectedECHAChemicals.filter(id => id !== parseInt(this.dataset.id));
+                        }
+                        updateDeleteButtonState();
+                        updateEditButtonState();
+                    });
+                });
+            } catch(e) {
+                console.error('Load ECHA error:', e);
+                document.getElementById('echaTable').innerHTML = '<tr><td colspan="9" class="empty">Error loading ECHA data: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function updateDeleteButtonState() {
+            const btn = document.getElementById('deleteSelectedECHABtn');
+            const info = document.getElementById('echaSelectionInfo');
+            if (btn) {
+                if (selectedECHAChemicals.length === 0) {
+                    btn.style.display = 'none';
+                    info.style.display = 'block';
+                    info.textContent = 'Select substances to delete';
+                } else {
+                    btn.style.display = 'inline-block';
+                    info.style.display = 'none';
+                    btn.textContent = `Delete Selected (${selectedECHAChemicals.length})`;
+                }
+                btn.disabled = selectedECHAChemicals.length === 0;
+            }
+        }
+
+        function updateEditButtonState() {
+            const btn = document.getElementById('editECHABtn');
+            if (btn) {
+                if (selectedECHAChemicals.length === 1) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            }
+        }
+
+        // ECHA / REACh File Upload Functions
+        function handleECHAFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('echaAlert').style.display = 'none';
+                document.getElementById('echaUploadOptions').style.display = 'block';
+                document.getElementById('echaUploadOptions').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function closeECHAUpload() {
+            document.getElementById('echaUploadOptions').style.display = 'none';
+            document.getElementById('echaFile').value = '';
+            document.getElementById('echaFileOrigin').value = '';
+            document.getElementById('echaSourceRef').value = '';
+            document.getElementById('echaVerification').value = 'AI Analysis';
+            document.getElementById('echaCategory').value = 'Substance';
+            document.getElementById('echaAlert').style.display = 'none';
+        }
+
+        async function processECHAFile() {
+            const fileInput = document.getElementById('echaFile');
+            const file = fileInput.files[0];
+            const origin = document.getElementById('echaFileOrigin').value;
+            const sourceRef = document.getElementById('echaSourceRef').value;
+            const verification = document.getElementById('echaVerification').value;
+            const category = document.getElementById('echaCategory').value;
+
+            if (!file) {
+                showECHAAlert('Please select a file first', 'error');
+                return;
+            }
+            if (!origin) {
+                showECHAAlert('Please select the file origin', 'error');
+                return;
+            }
+            if (!sourceRef) {
+                showECHAAlert('Please provide a source reference', 'error');
+                return;
+            }
+
+            // Show confirmation dialog
+            const confirmMsg = `Upload ${file.name}?\n\nOrigin: ${origin}\nSource: ${sourceRef}\nVerification: ${verification}\nCategory: ${category}\n\nAI will process and verify data before adding to database.`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('origin', origin);
+                formData.append('sourceRef', sourceRef);
+                formData.append('verification', verification);
+                formData.append('category', category);
+
+                const response = await fetch(API + '/api/bom/echa/import', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showECHAAlert(`Success! ${data.imported || 0} substances added, ${data.updated || 0} updated, ${data.skipped || 0} skipped. View audit log for details.`, 'success');
+                    setTimeout(() => {
+                        loadECHAReach();
+                        closeECHAUpload();
+                    }, 2000);
+                } else {
+                    showECHAAlert(data.detail || 'Failed to process file: ' + JSON.stringify(data), 'error');
+                }
+            } catch(e) {
+                console.error('ECHA upload error:', e);
+                showECHAAlert('Error uploading file: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upload & Process';
+            }
+        }
+
+        function showECHAAlert(message, type) {
+            const alert = document.getElementById('echaAlert');
+            alert.textContent = message;
+            alert.className = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+            alert.style.display = 'block';
+        }
+
+        function closeManualEntryAlert() {
+            const alert = document.getElementById('manualEntryAlert');
+            alert.style.display = 'none';
+        }
+
+        function toggleSelectAllEcha(checkbox) {
+            const checkboxes = document.querySelectorAll('.echa-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                if (checkbox.checked) {
+                    selectedECHAChemicals.push(parseInt(cb.dataset.id));
+                } else {
+                    selectedECHAChemicals = selectedECHAChemicals.filter(id => id !== parseInt(cb.dataset.id));
+                }
+            });
+            updateDeleteButtonState();
+            updateEditButtonState();
+        }
+
+        let currentECHAEditData = null;
+
+        function editSelectedECHAChemical() {
+            if (selectedECHAChemicals.length === 1) {
+                editECHAChemical(selectedECHAChemicals[0]);
+            } else {
+                showECHAAlert('Please select exactly one substance to edit', 'error');
+            }
+        }
+
+        async function editECHAChemical(id) {
+            try {
+                const response = await fetch(API + '/api/bom/echa/list', { headers: getHeaders() });
+                const data = await response.json();
+                const chemical = data.chemicals.find(c => c.id === id);
+                if (!chemical) {
+                    showECHAAlert('Substance not found', 'error');
+                    return;
+                }
+
+                currentECHAEditData = chemical;
+                document.getElementById('editECHAMaterialId').value = id;
+                document.getElementById('editEntryNo').value = chemical.entry_no || '';
+                document.getElementById('editName').value = chemical.name || '';
+                document.getElementById('editEcNumber').value = chemical.ec_number || '';
+                document.getElementById('editCasNumber').value = chemical.cas_number || '';
+                document.getElementById('editReachStatus').value = chemical.reach_status || '';
+                document.getElementById('editReachListing').value = chemical.reach_listing || '';
+                document.getElementById('editGhsCode').value = chemical.gh_code || '';
+                document.getElementById('editInfoLink').value = chemical.info_link || '';
+
+                document.getElementById('editECHAModal').classList.add('active');
+            } catch(e) {
+                console.error('Edit ECHA error:', e);
+                showECHAAlert('Error loading substance: ' + e.message, 'error');
+            }
+        }
+
+        async function updateECHAChemical() {
+            if (!currentECHAEditData) {
+                showECHAAlert('No substance selected', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(API + '/api/bom/echa/update', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        id: currentECHAEditData.id,
+                        entry_no: document.getElementById('editEntryNo').value.trim(),
+                        name: document.getElementById('editName').value.trim(),
+                        ec_number: document.getElementById('editEcNumber').value.trim(),
+                        cas_number: document.getElementById('editCasNumber').value.trim(),
+                        reach_status: document.getElementById('editReachStatus').value,
+                        reach_listing: document.getElementById('editReachListing').value.trim(),
+                        gh_code: document.getElementById('editGhsCode').value.trim(),
+                        info_link: document.getElementById('editInfoLink').value.trim()
+                    })
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showECHAAlert('Substance updated successfully', 'success');
+                    closeModal('editECHAModal');
+                    loadECHAReach();
+                    currentECHAEditData = null;
+                } else {
+                    showECHAAlert(data.detail || 'Failed to update substance', 'error');
+                }
+            } catch(e) {
+                console.error('Update ECHA error:', e);
+                showECHAAlert('Error updating substance: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        }
+
+        async function deleteSelectedECHAChemicals() {
+            if (selectedECHAChemicals.length === 0) {
+                showECHAAlert('Please select substances to delete', 'error');
+                return;
+            }
+
+            // Ask for admin password
+            const password = prompt('Enter admin password to confirm deletion:', '');
+            if (!password) {
+                return;
+            }
+
+            const btn = document.getElementById('deleteSelectedECHABtn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch(API + '/api/bom/echa/delete', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        ids: selectedECHAChemicals,
+                        password: password
+                    })
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showECHAAlert(`Successfully deleted ${data.deleted} substance(s)`, 'success');
+                    selectedECHAChemicals = [];
+                    updateDeleteButtonState();
+                    setTimeout(() => {
+                        loadECHAReach();
+                    }, 1500);
+                } else {
+                    showECHAAlert(data.detail || 'Failed to delete substances', 'error');
+                }
+            } catch(e) {
+                console.error('Delete ECHA error:', e);
+                showECHAAlert('Error deleting substances: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = `Delete Selected (${selectedECHAChemicals.length})`;
+            }
+        }
+
+        // ECHA Database Sub-sections
+        function showECHASubdatabase(section) {
+            // Update active button styling
+            document.getElementById('databaseSubstanceBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseReachBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseClpBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseSvhcBtn').className = 'btn btn-secondary';
+
+            // Hide all sections
+            document.getElementById('echaSubstanceDatabase').style.display = 'none';
+            document.getElementById('echaReachDatabase').style.display = 'none';
+            document.getElementById('echaClpDatabase').style.display = 'none';
+            document.getElementById('echaSvhcDatabase').style.display = 'none';
+
+            // Show selected section
+            if (section === 'substance') {
+                document.getElementById('databaseSubstanceBtn').className = 'btn btn-primary';
+                document.getElementById('echaSubstanceDatabase').style.display = 'block';
+                loadECHAReach(); // Load substances for default view
+            } else if (section === 'reach') {
+                document.getElementById('databaseReachBtn').className = 'btn btn-primary';
+                document.getElementById('echaReachDatabase').style.display = 'block';
+            } else if (section === 'clp') {
+                document.getElementById('databaseClpBtn').className = 'btn btn-primary';
+                document.getElementById('echaClpDatabase').style.display = 'block';
+            } else if (section === 'svhc') {
+                document.getElementById('databaseSvhcBtn').className = 'btn btn-primary';
+                document.getElementById('echaSvhcDatabase').style.display = 'block';
+                loadSVHCData(); // Load SVHC data
+            }
+        }
+
+        // Add ECHA Chemical Functions
+        function openAddECHAModal() {
+            document.getElementById('addECHAMaterialId').value = '';
+            document.getElementById('addEntryNo').value = '';
+            document.getElementById('addName').value = '';
+            document.getElementById('addEcNumber').value = '';
+            document.getElementById('addCasNumber').value = '';
+            document.getElementById('addReachStatus').value = '';
+            document.getElementById('addReachListing').value = '';
+            document.getElementById('addGhsCode').value = '';
+            document.getElementById('addInfoLink').value = '';
+            document.getElementById('addECHAAlert').style.display = 'none';
+            document.getElementById('addECHAModal').classList.add('active');
+        }
+
+        async function submitAddECHAChemical() {
+            const entryNo = document.getElementById('addEntryNo').value.trim();
+            const name = document.getElementById('addName').value.trim();
+            const ecNumber = document.getElementById('addEcNumber').value.trim();
+            const casNumber = document.getElementById('addCasNumber').value.trim();
+            const reachStatus = document.getElementById('addReachStatus').value;
+            const reachListing = document.getElementById('addReachListing').value.trim();
+            const ghCode = document.getElementById('addGhsCode').value.trim();
+            const infoLink = document.getElementById('addInfoLink').value.trim();
+
+            if (!name || !ecNumber || !casNumber) {
+                showAddECHAAlert('Name, EC Number, and CAS Number are required', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch(API + '/api/bom/echa/add', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        entry_no: entryNo || null,
+                        name: name,
+                        ec_number: ecNumber,
+                        cas_number: casNumber,
+                        reach_status: reachStatus || null,
+                        reach_listing: reachListing || null,
+                        gh_code: ghCode || null,
+                        info_link: infoLink || null
+                    })
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAddECHAAlert(`Success! Substance "${name}" added with Entry No: ${data.entry_no || '-'}`, 'success');
+                    setTimeout(() => {
+                        closeModal('addECHAModal');
+                        loadECHAReach();
+                    }, 1500);
+                } else {
+                    showAddECHAAlert(data.detail || 'Failed to add substance', 'error');
+                }
+            } catch(e) {
+                console.error('Add ECHA chemical error:', e);
+                showAddECHAAlert('Error adding substance: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Add Substance';
+            }
+        }
+
+        function showAddECHAAlert(message, type) {
+            const alert = document.getElementById('addECHAAlert');
+            alert.textContent = message;
+            alert.className = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+            alert.style.display = 'block';
+        }
+
+        // SVHC Database Functions
+        let selectedSVHCs = [];
+
+        function handleSVHCFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('svhcAlert').style.display = 'none';
+                document.getElementById('svhcUploadOptions').style.display = 'block';
+                document.getElementById('svhcUploadOptions').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function closeSVHCUpload() {
+            document.getElementById('svhcUploadOptions').style.display = 'none';
+            document.getElementById('svhcFile').value = '';
+            document.getElementById('svhcUploadType').value = 'candidate_list';
+            document.getElementById('svhcDecisionType').value = 'included';
+            document.getElementById('svhcIucidId').value = '';
+            document.getElementById('svhcSupportDoc').value = '';
+            document.getElementById('svhcAlert').style.display = 'none';
+        }
+
+        async function processSVHCFile() {
+            const fileInput = document.getElementById('svhcFile');
+            const file = fileInput.files[0];
+            const uploadType = document.getElementById('svhcUploadType').value;
+            const decisionType = document.getElementById('svhcDecisionType').value;
+            const iuclidId = document.getElementById('svhcIucidId').value.trim();
+            const supportDoc = document.getElementById('svhcSupportDoc').value.trim();
+
+            if (!file) {
+                showSVHCAlert('Please select a file to upload', 'error');
+                return;
+            }
+
+            const btn = document.querySelector('#svhcUploadOptions button[onclick*="processSVHCFile"]');
+            if (!btn) return;
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_type', uploadType);
+                formData.append('decision_type', decisionType);
+                formData.append('iuclid_dataset', iuclidId);
+                formData.append('support_document', supportDoc);
+
+                const response = await fetch(API + '/api/bom/svhc/upload', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSVHCAlert(`Success! ${data.imported || 0} substances added, ${data.updated || 0} updated, ${data.skipped || 0} skipped.`, 'success');
+                    document.getElementById('svhcLastUpload').textContent = new Date().toLocaleString();
+                    document.getElementById('svhcLastUpdateBy').textContent = localStorage.getItem('user') || 'Admin';
+                    setTimeout(() => {
+                        closeSVHCUpload();
+                        loadSVHCData();
+                    }, 2000);
+                } else {
+                    showSVHCAlert(data.detail || 'Failed to process file', 'error');
+                }
+            } catch(e) {
+                console.error('SVHC upload error:', e);
+                showSVHCAlert('Error uploading file: ' + e.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Upload & Process';
+                }
+            }
+        }
+
+        function showSVHCAlert(message, type) {
+            const alert = document.getElementById('svhcAlert');
+            alert.textContent = message;
+            alert.className = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+            alert.style.display = 'block';
+        }
+
+        async function loadSVHCData() {
+            try {
+                const response = await fetch(API + '/api/bom/svhc/list', { headers: getHeaders() });
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+                const data = await response.json();
+                const tbody = document.getElementById('svhcTable');
+                if (!data.svhcs || data.svhcs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="13" class="empty">No SVHC data loaded. Upload a file to populate the database.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.svhcs.map(s => `
+                    <tr data-id="${s.id}">
+                        <td><input type="checkbox" class="svhc-checkbox" data-id="${s.id}"></td>
+                        <td>${s.substance_name || '-'}</td>
+                        <td>${s.description || '-'}</td>
+                        <td>${s.ec_no || '-'}</td>
+                        <td>${s.cas_no || '-'}</td>
+                        <td>${s.reason_inclusion || '-'}</td>
+                        <td>${s.date_inclusion || '-'}</td>
+                        <td>${s.decision || '-'}</td>
+                        <td>${s.iuclid_dataset || '-'}</td>
+                        <td>${s.support_document || '-'}</td>
+                        <td>${s.response_comments || '-'}</td>
+                        <td>${s.remarks || '-'}</td>
+                        <td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="editSVHC(${s.id})">Edit</button></td>
+                    </tr>
+                `).join('');
+
+                document.querySelectorAll('.svhc-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            selectedSVHCs.push(parseInt(this.dataset.id));
+                        } else {
+                            selectedSVHCs = selectedSVHCs.filter(id => id !== parseInt(this.dataset.id));
+                        }
+                        updateSVHCDeleteButtonState();
+                        updateSVHCEditButtonState();
+                    });
+                });
+            } catch(e) {
+                console.error('Load SVHC error:', e);
+                document.getElementById('svhcTable').innerHTML = '<tr><td colspan="13" class="empty">Error loading SVHC data: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function updateSVHCDeleteButtonState() {
+            const btn = document.getElementById('deleteSelectedSvhcBtn');
+            const info = document.getElementById('svhcSelectionInfo');
+            if (btn) {
+                if (selectedSVHCs.length === 0) {
+                    btn.style.display = 'none';
+                    info.style.display = 'block';
+                    info.textContent = 'Select substances to delete';
+                } else {
+                    btn.style.display = 'inline-block';
+                    info.style.display = 'none';
+                    btn.textContent = `Delete Selected (${selectedSVHCs.length})`;
+                }
+                btn.disabled = selectedSVHCs.length === 0;
+            }
+        }
+
+        function updateSVHCEditButtonState() {
+            const btn = document.getElementById('editSvhcBtn');
+            if (btn) {
+                if (selectedSVHCs.length === 1) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            }
+        }
+
+        function toggleSelectAllSvhc(checkbox) {
+            const checkboxes = document.querySelectorAll('.svhc-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                if (checkbox.checked) {
+                    selectedSVHCs.push(parseInt(cb.dataset.id));
+                } else {
+                    selectedSVHCs = selectedSVHCs.filter(id => id !== parseInt(cb.dataset.id));
+                }
+            });
+            updateSVHCDeleteButtonState();
+            updateSVHCEditButtonState();
+        }
+
+        function editSelectedSVHC() {
+            if (selectedSVHCs.length === 1) {
+                editSVHC(selectedSVHCs[0]);
+            } else {
+                showSVHCAlert('Please select exactly one substance to edit', 'error');
+            }
+        }
+
+        let currentSVHCEditData = null;
+
+        async function editSVHC(id) {
+            try {
+                const response = await fetch(API + '/api/bom/svhc/list', { headers: getHeaders() });
+                const data = await response.json();
+                const svhc = data.svhcs.find(s => s.id === id);
+                if (!svhc) {
+                    showSVHCAlert('Substance not found', 'error');
+                    return;
+                }
+                currentSVHCEditData = svhc;
+                // Modal would be opened with pre-filled data
+                showSVHCAlert('Edit functionality coming soon - Substance ID: ' + id, 'success');
+            } catch(e) {
+                console.error('Edit SVHC error:', e);
+                showSVHCAlert('Error loading substance: ' + e.message, 'error');
+            }
+        }
+
+        async function deleteSelectedSVHCs() {
+            if (selectedSVHCs.length === 0) {
+                showSVHCAlert('Please select substances to delete', 'error');
+                return;
+            }
+
+            const password = prompt('Enter admin password to confirm deletion:', '');
+            if (!password) {
+                return;
+            }
+
+            const btn = document.getElementById('deleteSelectedSvhcBtn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch(API + '/api/bom/svhc/delete', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        ids: selectedSVHCs,
+                        password: password
+                    })
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/management/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSVHCAlert(`Successfully deleted ${data.deleted} substance(s)`, 'success');
+                    selectedSVHCs = [];
+                    updateSVHCDeleteButtonState();
+                    setTimeout(() => {
+                        loadSVHCData();
+                    }, 1500);
+                } else {
+                    showSVHCAlert(data.detail || 'Failed to delete substances', 'error');
+                }
+            } catch(e) {
+                console.error('Delete SVHC error:', e);
+                showSVHCAlert('Error deleting substances: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = `Delete Selected (${selectedSVHCs.length})`;
+            }
+        }
+
+        function showSVHCModal(id) {
+            // Placeholder - implement actual modal for SVHC
+            showSVHCAlert('SVHC edit modal would open here', 'info');
+        }
 
         checkAuth();
     </script>

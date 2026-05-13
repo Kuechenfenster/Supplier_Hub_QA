@@ -15,14 +15,18 @@ import uvicorn
 from models import init_db, get_db, InternalUser, Department, Supplier, SessionLocal
 from auth_helpers import (
     hash_password, verify_password, create_jwt_token, decode_jwt_token,
-    get_current_user, log_audit, security, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRY
+    get_current_user, get_current_supplier, log_audit, security, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRY
 )
 
 from bom_routes import router as bom_router
 
 # Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://supplier:supplier123@localhost:5432/supplier_hub")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/db/supplier_hub.db")
 INVITATION_EXPIRY_DAYS = 7
+
+# Base directory for static files - parent of backend directory
+# Use env var if set (Docker), otherwise calculate from __file__
+BASE_DIR = os.getenv("BASE_DIR", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # FastAPI app
 app = FastAPI(title="Supplier Hub API", version="2.0")
@@ -36,8 +40,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+# Mount static files - use absolute path for Docker compatibility
+app.mount("/assets", StaticFiles(directory=os.path.join(BASE_DIR, "static", "assets")), name="assets")
 
 # Register BOM router
 app.include_router(bom_router)
@@ -60,11 +64,21 @@ async def serve_management_login():
 
 @app.get("/management-dashboard", response_class=FileResponse)
 async def serve_dashboard():
-    return "static/management-dashboard.html"
+    return "static/management.html"
 
 @app.get("/supplier", response_class=FileResponse)
 async def serve_supplier():
     return "index.html"
+
+
+@app.get("/supplier-login", response_class=FileResponse)
+async def serve_supplier_login():
+    return "static/supplier-login.html"
+
+
+@app.get("/supplier-dashboard", response_class=FileResponse)
+async def serve_supplier_dashboard():
+    return "static/supplier-dashboard.html"
 
 
 # Pydantic Models
@@ -73,7 +87,13 @@ class UserCreate(BaseModel):
     password: str
     name: str
     department_id: Optional[int] = None
+    supervisor_id: Optional[int] = None
     role: str = "viewer"
+
+    @property
+    def username(self):
+        # Generate username from email (before @)
+        return self.email.split('@')[0]
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -133,13 +153,44 @@ async def login(data: UserLogin, db: SessionLocal = Depends(get_db)):
 async def me(current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     return {"id": current_user.id, "email": current_user.email, "name": current_user.name, "role": current_user.role}
 
+
+@app.get("/api/suppliers/me")
+async def supplier_me(current_supplier: Supplier = Depends(get_current_supplier), db: SessionLocal = Depends(get_db)):
+    """Get current supplier info."""
+    return {"id": current_supplier.id, "email": current_supplier.email, "name": current_supplier.name, "code": current_supplier.code, "status": current_supplier.status}
+
+
 # User Management
 @app.get("/api/admin/users")
 async def list_users(current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     if current_user.role not in ["admin", "manager"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     users = db.query(InternalUser).all()
-    return [{"id": u.id, "email": u.email, "name": u.name, "role": u.role, "is_active": u.is_active} for u in users]
+    result = []
+    for u in users:
+        dept = None
+        if u.department_id:
+            dept_obj = db.query(Department).filter(Department.id == u.department_id).first()
+            if dept_obj:
+                dept = {"id": dept_obj.id, "name": dept_obj.name, "code": dept_obj.code}
+        supervisor = None
+        if u.supervisor_id:
+            sup_user = db.query(InternalUser).filter(InternalUser.id == u.supervisor_id).first()
+            if sup_user:
+                supervisor = {"id": sup_user.id, "name": sup_user.full_name, "email": sup_user.email}
+        result.append({
+            "id": u.id,
+            "email": u.email,
+            "name": u.full_name,
+            "role": u.role,
+            "is_active": u.is_active,
+            "department_id": u.department_id,
+            "department": dept,
+            "supervisor_id": u.supervisor_id,
+            "supervisor": supervisor,
+            "last_login": u.last_login.isoformat() if u.last_login else None
+        })
+    return result
 
 @app.post("/api/admin/users")
 async def create_user(data: UserCreate, current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
@@ -148,17 +199,32 @@ async def create_user(data: UserCreate, current_user: InternalUser = Depends(get
     if db.query(InternalUser).filter(InternalUser.email == data.email).first():
         raise HTTPException(status_code=400, detail="Email already exists")
     user = InternalUser(
+        username=data.username,
         email=data.email,
         password_hash=hash_password(data.password),
-        name=data.name,
+        full_name=data.name,
         department_id=data.department_id,
-        role=data.role
+        supervisor_id=data.supervisor_id,
+        role=data.role,
+        invitation_code=secrets.token_urlsafe(16),
+        invitation_expires=datetime.now() + timedelta(days=7)
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    log_audit(db, current_user.id, "create", "user", user.id)
-    return {"id": user.id, "email": user.email, "name": user.name, "role": user.role}
+    # Get department info - need to query explicitly since relationship may not be loaded
+    dept = None
+    if user.department_id:
+        dept_obj = db.query(Department).filter(Department.id == user.department_id).first()
+        if dept_obj:
+            dept = {"id": dept_obj.id, "name": dept_obj.name, "code": dept_obj.code}
+    # Get supervisor info
+    supervisor = None
+    if user.supervisor_id:
+        sup_user = db.query(InternalUser).filter(InternalUser.id == user.supervisor_id).first()
+        if sup_user:
+            supervisor = {"id": sup_user.id, "name": sup_user.full_name, "email": sup_user.email}
+    return {"id": user.id, "email": user.email, "name": user.full_name, "role": user.role, "department_id": user.department_id, "department": dept, "supervisor_id": user.supervisor_id, "supervisor": supervisor}
 
 @app.put("/api/admin/users/{user_id}")
 async def update_user(user_id: int, data: dict, current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
@@ -168,7 +234,7 @@ async def update_user(user_id: int, data: dict, current_user: InternalUser = Dep
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if "name" in data:
-        user.name = data["name"]
+        user.full_name = data["name"]
     if "role" in data:
         user.role = data["role"]
     if "is_active" in data:
@@ -176,7 +242,8 @@ async def update_user(user_id: int, data: dict, current_user: InternalUser = Dep
     db.commit()
     db.refresh(user)
     log_audit(db, current_user.id, "update", "user", user_id)
-    return {"id": user.id, "email": user.email, "name": user.name, "role": user.role, "is_active": user.is_active}
+    dept = {"id": user.department.id, "name": user.department.name, "code": user.department.code} if user.department else None
+    return {"id": user.id, "email": user.email, "name": user.full_name, "role": user.role, "is_active": user.is_active, "department_id": user.department_id, "department": dept}
 
 @app.delete("/api/admin/users/{user_id}")
 async def delete_user(user_id: int, current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
@@ -267,6 +334,27 @@ async def list_suppliers(db: SessionLocal = Depends(get_db)):
     suppliers = db.query(Supplier).all()
     return [{"id": s.id, "name": s.name, "email": s.email, "code": s.code, "status": s.status} for s in suppliers]
 
+
+class SupplierLogin(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/api/suppliers/login")
+async def supplier_login(data: SupplierLogin, db: SessionLocal = Depends(get_db)):
+    """Supplier login endpoint - returns JWT token for supplier portal access."""
+    supplier = db.query(Supplier).filter(
+        (Supplier.email == data.email)
+    ).first()
+    if not supplier or not verify_password(data.password, supplier.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if supplier.status != "active":
+        raise HTTPException(status_code=403, detail="Supplier account is not active")
+    # Create a special token for suppliers with role "supplier"
+    token = create_jwt_token(supplier.id, supplier.code, "supplier")
+    return {"token": token, "supplier": {"id": supplier.id, "name": supplier.name, "email": supplier.email, "code": supplier.code, "status": supplier.status}}
+
+
 @app.post("/api/suppliers")
 async def create_supplier(data: SupplierCreate, db: SessionLocal = Depends(get_db)):
     if db.query(Supplier).filter(Supplier.email == data.email).first():
@@ -288,13 +376,27 @@ async def dashboard_stats(current_user: InternalUser = Depends(get_current_user)
     total_users = db.query(InternalUser).count()
     active_users = db.query(InternalUser).filter(InternalUser.is_active == True).count()
     total_departments = db.query(Department).filter(Department.is_active == True).count()
+
+    # Missing Seal Sample count (placeholder - will be populated from pipeline DB)
+    # For now, returning 0 as a placeholder
+    seal_sample_missing = 0
+
+    # Missing VCM CAP count (placeholder)
+    vcm_cap_missing = 0
+
+    # Missing QC CAP count (placeholder)
+    qc_cap_missing = 0
+
     return {
         "total_suppliers": total_suppliers,
         "active_suppliers": active_suppliers,
         "pending_suppliers": pending_suppliers,
         "total_users": total_users,
         "active_users": active_users,
-        "total_departments": total_departments
+        "total_departments": total_departments,
+        "seal_sample_missing": seal_sample_missing,
+        "vcm_cap_missing": vcm_cap_missing,
+        "qc_cap_missing": qc_cap_missing
     }
 
 @app.get("/api/admin/dashboard/activity")

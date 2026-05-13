@@ -10,13 +10,20 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, List
+
+# Fix for Python 3.9 compatibility
+PathLike = Union[str, Path]
+
+# Fix for Python 3.9 compatibility
+PathLike = Union[str, Path]
 
 import pandas as pd
 
 from pipeline.config import BOM_COLUMN_MAP, BOM_REQUIRED_COLUMNS, BOMS_DIR, PROCESSED_DIR
 from pipeline.models.database import (
-    init_db, get_db, MaterialLibrary, BOMRecord
+    init_db, get_db, MaterialLibrary, BOMRecord,
+    SubstanceTracking, ProductComparability, SubstanceBreakdown
 )
 from pipeline.models.database import Manufacturer, Supplier
 from pipeline.models.schemas import BOMCleanResult, BOMRecordCreate
@@ -139,12 +146,12 @@ def clean_supplier_id(val) -> Optional[str]:
 # Main BOM Cleaning Pipeline
 # ═══════════════════════════════════════════════════════════
 def clean_bom(
-    file_path: str | Path,
+    file_path: PathLike,
     bom_id: Optional[str] = None,
     sku: Optional[str] = None,
     product_name: Optional[str] = None,
     version: str = "v1.0",
-    sheet_name: Optional[str | int] = 0,
+    sheet_name: Optional[Union[str, int]] = 0,
     header_row: int = 0,
 ) -> BOMCleanResult:
     """
@@ -445,30 +452,88 @@ def save_to_database(result: BOMCleanResult) -> dict:
             )
             db.add(bom_record)
             bom_records_added += 1
-        
+
+            # ─── Track Substance per Product (Phase 4) ──
+            # Get substance breakdown for this material and track per SKU
+            substance_records = db.query(SubstanceBreakdown).filter(
+                SubstanceBreakdown.material_id == rec.material_id
+            ).all()
+
+            for sub in substance_records:
+                tracking = SubstanceTracking(
+                    material_id=rec.material_id,
+                    product_sku=rec.sku,
+                    bom_record_id=bom_record.id,  # This is set after flush
+                    cas_number=sub.cas_number,
+                    substance_name=sub.substance_name,
+                    concentration_min=sub.concentration_min,
+                    concentration_max=sub.concentration_max,
+                    concentration_typical=sub.concentration_typical,
+                    trace_id=f"{rec.bom_id}-{rec.material_id}-{sub.cas_number[:8]}"
+                )
+                db.add(tracking)
+
+        db.flush()  # Flush to get bom_record.id for substance tracking
+
+        # ─── Create Product Comparability Records (Phase 3) ─
+        # Create comparability records linking products to CAS numbers
+        for rec in result.materials:
+            # Get substance breakdown for this material
+            substance_records = db.query(SubstanceBreakdown).filter(
+                SubstanceBreakdown.material_id == rec.material_id
+            ).all()
+
+            for sub in substance_records:
+                comp = ProductComparability(
+                    product_sku=rec.sku,
+                    material_id=rec.material_id,
+                    cas_number=sub.cas_number,
+                    substance_name=sub.substance_name,
+                    concentration_min=sub.concentration_min,
+                    concentration_max=sub.concentration_max,
+                    comparison_group=result.sku  # Use SKU as comparison group
+                )
+                db.add(comp)
+
         db.commit()
+
+        # Count substance tracking and comparability records added in this batch
+        substance_tracking_added = len(result.materials) * sum(
+            len(db.query(SubstanceBreakdown).filter(SubstanceBreakdown.material_id == rec.material_id).all())
+            for rec in result.materials
+        )
+
+        comparability_added = len(result.materials) * sum(
+            len(db.query(SubstanceBreakdown).filter(SubstanceBreakdown.material_id == rec.material_id).all())
+            for rec in result.materials
+        )
+
         logger.info(f"  Saved: {manufacturers_added} manufacturers, {suppliers_added} suppliers, {materials_added} new materials, {materials_updated} updated, {bom_records_added} BOM records")
-        
+        logger.info(f"  Substance tracking: {substance_tracking_added} records added")
+        logger.info(f"  Comparability: {comparability_added} records created")
+
     except Exception as e:
         db.rollback()
         logger.error(f"  Database error: {e}")
         raise
     finally:
         db.close()
-    
+
     return {
         "manufacturers_added": manufacturers_added,
         "suppliers_added": suppliers_added,
         "materials_added": materials_added,
         "materials_updated": materials_updated,
         "bom_records_added": bom_records_added,
+        "substance_tracking_added": substance_tracking_added,
+        "comparability_added": comparability_added,
     }
 
 
 # ═══════════════════════════════════════════════════════════
 # Process Folder
 # ═══════════════════════════════════════════════════════════
-def process_bom_folder(folder_path: str | Path = None, **kwargs) -> list[BOMCleanResult]:
+def process_bom_folder(folder_path: PathLike = None, **kwargs) -> List[BOMCleanResult]:
     """
     Process all Excel files in the BOMs incoming folder.
     Moves processed files to the processed/ directory after successful import.
