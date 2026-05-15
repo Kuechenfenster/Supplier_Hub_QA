@@ -1,3 +1,7 @@
+# docker-compose.yml — Local development with PostgreSQL
+# For Coolify: use Dockerfile-based deployment instead
+# Coolify provides PostgreSQL as a separate service; set DATABASE_URL in dashboard
+
 version: '3.8'
 
 services:
@@ -23,10 +27,10 @@ services:
     build: .
     container_name: supplier-web
     ports:
-      - "9000:9000"   # HTI Portal
+      - "9000:9000"
     environment:
       DATABASE_URL: postgresql://supplier:supplier123@db:5432/supplier_hub
-      PIPELINE_DATABASE_URL: postgresql://supplier:supplier123@db:5432/hti_pipeline
+      PIPELINE_DATABASE_URL: postgresql://supplier:supplier123@db:5432/supplier_hub
       JWT_SECRET: change-this-secret-in-production
       JWT_EXPIRY: "3600"
       OLLAMA_HOST: http://host.docker.internal:11434

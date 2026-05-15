@@ -17,7 +17,7 @@ LOGS_DIR = BASE_DIR / "logs"
 
 # Database
 DB_PATH = DB_DIR / "material_library.db"
-DATABASE_URL = os.getenv("PIPELINE_DATABASE_URL", "sqlite:///backend/db/hti_pipeline.db")
+DATABASE_URL = os.getenv("PIPELINE_DATABASE_URL", os.getenv("DATABASE_URL", "sqlite:///backend/db/hti_pipeline.db"))
 
 # ─── API Keys ────────────────────────────────────────────
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")

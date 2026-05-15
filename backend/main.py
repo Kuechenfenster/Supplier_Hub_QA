@@ -20,6 +20,13 @@ from auth_helpers import (
 
 from bom_routes import router as bom_router
 
+try:
+    from pipeline.models.database import init_db as pipeline_init_db
+    pipeline_init_db()
+    print("✅ Pipeline database initialized")
+except Exception as e:
+    print(f"⚠️ Pipeline database init skipped: {e}")
+
 # Configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/db/supplier_hub.db")
 INVITATION_EXPIRY_DAYS = 7

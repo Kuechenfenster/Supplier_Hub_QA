@@ -1,29 +1,33 @@
 #!/bin/bash
 set -e
 
-echo "⏳ Waiting for database to be ready..."
+DB_URL="${DATABASE_URL:-sqlite:///backend/db/supplier_hub.db}"
 
-# Wait for PostgreSQL to be ready
-while ! python -c "import psycopg2; psycopg2.connect('postgresql://supplier:supplier123@db:5432/supplier_hub')" 2>/dev/null; do
-    echo "  Database not ready, waiting..."
-    sleep 2
-done
+echo "==> Supplier Hub — Coolify Entrypoint"
+echo "==> DATABASE_URL: ${DB_URL//:*@/:***@}"
 
-echo "✅ Database is ready!"
-echo "📝 Running database migrations..."
-python backend/migrate.py
+if [[ "$DB_URL" == postgresql://* ]] || [[ "$DB_URL" == postgres://* ]]; then
+    echo "==> Waiting for PostgreSQL..."
+    for i in $(seq 1 30); do
+        if python -c "
+import psycopg2, os, sys
+try:
+    conn = psycopg2.connect(os.getenv('DATABASE_URL', '$DB_URL'))
+    conn.close()
+    sys.exit(0)
+except Exception as e:
+    sys.exit(1)
+" 2>/dev/null; then
+            echo "==> PostgreSQL ready"
+            break
+        fi
+        echo "    attempt $i/30 — waiting..."
+        sleep 2
+    done
+fi
 
-echo "🔧 Initializing admin user..."
+echo "==> Running admin seed..."
 python backend/init_db.py || true
 
-echo ""
-echo "=========================================="
-echo "  SUPPLIER HUB IS READY!"
-echo "=========================================="
-echo "  Web API: http://localhost:9000"
-echo "  Login: admin / master1312"
-echo "  ⚠️  CHANGE PASSWORD AFTER FIRST LOGIN!"
-echo "=========================================="
-echo ""
-
+echo "==> Starting application..."
 exec "$@"
