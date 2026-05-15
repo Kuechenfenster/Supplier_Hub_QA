@@ -337,7 +337,9 @@ async def delete_department(dept_id: int, current_user: InternalUser = Depends(g
 
 # Suppliers
 @app.get("/api/suppliers")
-async def list_suppliers(db: SessionLocal = Depends(get_db)):
+async def list_suppliers(current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
     suppliers = db.query(Supplier).all()
     return [{"id": s.id, "name": s.name, "email": s.email, "code": s.code, "status": s.status} for s in suppliers]
 
@@ -372,6 +374,32 @@ async def create_supplier(data: SupplierCreate, db: SessionLocal = Depends(get_d
     db.add(supplier)
     db.commit()
     db.refresh(supplier)
+    return {"id": supplier.id, "name": supplier.name, "code": supplier.code, "status": supplier.status}
+
+@app.put("/api/suppliers/{supplier_id}/approve")
+async def approve_supplier(supplier_id: int, current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    supplier.status = "active"
+    db.commit()
+    db.refresh(supplier)
+    log_audit(db, current_user.id, "approve", "supplier", supplier_id)
+    return {"id": supplier.id, "name": supplier.name, "code": supplier.code, "status": supplier.status}
+
+@app.put("/api/suppliers/{supplier_id}/reject")
+async def reject_supplier(supplier_id: int, current_user: InternalUser = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    supplier.status = "suspended"
+    db.commit()
+    db.refresh(supplier)
+    log_audit(db, current_user.id, "reject", "supplier", supplier_id)
     return {"id": supplier.id, "name": supplier.name, "code": supplier.code, "status": supplier.status}
 
 # Dashboard
