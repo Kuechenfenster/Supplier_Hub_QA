@@ -1,0 +1,129 @@
+- generic [active] [ref=e187]:
+  - generic [ref=e188]:
+    - navigation [ref=e191]:
+      - generic [ref=e192]:
+        - generic [ref=e193]:
+          - link "Coolify" [ref=e194] [cursor=pointer]:
+            - /url: /
+          - link "v4.0.0" [ref=e195] [cursor=pointer]:
+            - /url: https://github.com/coollabsio/coolify/releases/tag/v4.0.0
+        - button / [ref=e197]:
+          - img [ref=e198]
+          - generic [ref=e200]: /
+        - button "Preferences 9+" [ref=e203] [cursor=pointer]:
+          - img "Preferences" [ref=e204]
+          - generic [ref=e206]: 9+
+      - combobox [ref=e209]:
+        - option "Switch team" [disabled]
+        - option "Root Team" [selected]
+      - list [ref=e210]:
+        - listitem [ref=e211]:
+          - list [ref=e212]:
+            - listitem [ref=e213]:
+              - link "Dashboard" [ref=e214] [cursor=pointer]:
+                - /url: /
+                - img [ref=e215]
+                - generic [ref=e217]: Dashboard
+            - listitem [ref=e218]:
+              - link "Projects" [ref=e219] [cursor=pointer]:
+                - /url: /projects
+                - img [ref=e220]
+                - generic [ref=e225]: Projects
+            - listitem [ref=e226]:
+              - link "Servers" [ref=e227] [cursor=pointer]:
+                - /url: /servers
+                - img [ref=e228]
+                - generic [ref=e233]: Servers
+            - listitem [ref=e234]:
+              - link "Sources" [ref=e235] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/sources
+                - img [ref=e236]
+                - generic [ref=e238]: Sources
+            - listitem [ref=e239]:
+              - link "Destinations" [ref=e240] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/destinations
+                - img [ref=e241]
+                - generic [ref=e243]: Destinations
+            - listitem [ref=e244]:
+              - link "S3 Storages" [ref=e245] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/storages
+                - img [ref=e246]
+                - generic [ref=e251]: S3 Storages
+            - listitem [ref=e252]:
+              - link "Shared Variables" [ref=e253] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/shared-variables
+                - img [ref=e254]
+                - generic [ref=e258]: Shared Variables
+            - listitem [ref=e259]:
+              - link "Notifications" [ref=e260] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/notifications/email
+                - img [ref=e261]
+                - generic [ref=e263]: Notifications
+            - listitem [ref=e264]:
+              - link "Keys & Tokens" [ref=e265] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/security/private-key
+                - img [ref=e266]
+                - generic [ref=e268]: Keys & Tokens
+            - listitem [ref=e269]:
+              - link "Tags" [ref=e270] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/tags
+                - img [ref=e271]
+                - generic [ref=e275]: Tags
+            - listitem [ref=e276]:
+              - link "Terminal" [ref=e277] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/terminal
+                - img [ref=e278]
+                - generic [ref=e281]: Terminal
+            - listitem [ref=e282]:
+              - link "Profile" [ref=e283] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/profile
+                - img [ref=e284]
+                - generic [ref=e289]: Profile
+            - listitem [ref=e290]:
+              - link "Teams" [ref=e291] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/team
+                - img [ref=e292]
+                - generic [ref=e300]: Teams
+            - listitem [ref=e301]:
+              - link "Settings" [ref=e302] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e303]
+                - generic [ref=e307]: Settings
+            - generic:
+              - listitem:
+                - generic "No upgrade available"
+            - listitem [ref=e309]:
+              - link "Sponsor us" [ref=e310] [cursor=pointer]:
+                - /url: https://coolify.io/sponsorships
+                - img [ref=e311]
+                - generic [ref=e315]: Sponsor us
+            - listitem [ref=e316]:
+              - generic "Send us feedback or get help!" [ref=e319] [cursor=pointer]:
+                - img [ref=e320]
+                - generic [ref=e322]: Feedback
+            - listitem [ref=e323]:
+              - button "Logout" [ref=e325]:
+                - img [ref=e326]
+                - generic [ref=e328]: Logout
+    - main [ref=e329]:
+      - generic [ref=e331]:
+        - generic [ref=e332]:
+          - generic [ref=e333]:
+            - heading "Resources" [level=1] [ref=e334]
+            - link "Clone" [ref=e335] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/clone
+            - button "Delete Environment" [ref=e337] [cursor=pointer]
+          - navigation [ref=e338]:
+            - list [ref=e339]:
+              - listitem [ref=e340]:
+                - generic [ref=e341]:
+                  - link "My first project" [ref=e342] [cursor=pointer]:
+                    - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92
+                  - button [ref=e343]:
+                    - img [ref=e344]
+              - listitem [ref=e345]:
+                - link "production" [ref=e347] [cursor=pointer]:
+                  - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269
+        - link "+ Add Resource" [ref=e348] [cursor=pointer]:
+          - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/new
+  - list

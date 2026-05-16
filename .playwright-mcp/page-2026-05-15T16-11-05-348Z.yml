@@ -1,0 +1,223 @@
+- generic [active] [ref=e527]:
+  - generic [ref=e528]:
+    - navigation [ref=e531]:
+      - generic [ref=e532]:
+        - generic [ref=e533]:
+          - link "Coolify" [ref=e534] [cursor=pointer]:
+            - /url: /
+          - link "v4.0.0" [ref=e535] [cursor=pointer]:
+            - /url: https://github.com/coollabsio/coolify/releases/tag/v4.0.0
+        - button / [ref=e537]:
+          - img [ref=e538]
+          - generic [ref=e540]: /
+        - button "Preferences 9+" [ref=e543] [cursor=pointer]:
+          - img "Preferences" [ref=e544]
+          - generic [ref=e546]: 9+
+      - combobox [ref=e549]:
+        - option "Switch team" [disabled]
+        - option "Root Team" [selected]
+      - list [ref=e550]:
+        - listitem [ref=e551]:
+          - list [ref=e552]:
+            - listitem [ref=e553]:
+              - link "Dashboard" [ref=e554] [cursor=pointer]:
+                - /url: /
+                - img [ref=e555]
+                - generic [ref=e557]: Dashboard
+            - listitem [ref=e558]:
+              - link "Projects" [ref=e559] [cursor=pointer]:
+                - /url: /projects
+                - img [ref=e560]
+                - generic [ref=e565]: Projects
+            - listitem [ref=e566]:
+              - link "Servers" [ref=e567] [cursor=pointer]:
+                - /url: /servers
+                - img [ref=e568]
+                - generic [ref=e573]: Servers
+            - listitem [ref=e574]:
+              - link "Sources" [ref=e575] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/sources
+                - img [ref=e576]
+                - generic [ref=e578]: Sources
+            - listitem [ref=e579]:
+              - link "Destinations" [ref=e580] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/destinations
+                - img [ref=e581]
+                - generic [ref=e583]: Destinations
+            - listitem [ref=e584]:
+              - link "S3 Storages" [ref=e585] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/storages
+                - img [ref=e586]
+                - generic [ref=e591]: S3 Storages
+            - listitem [ref=e592]:
+              - link "Shared Variables" [ref=e593] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/shared-variables
+                - img [ref=e594]
+                - generic [ref=e598]: Shared Variables
+            - listitem [ref=e599]:
+              - link "Notifications" [ref=e600] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/notifications/email
+                - img [ref=e601]
+                - generic [ref=e603]: Notifications
+            - listitem [ref=e604]:
+              - link "Keys & Tokens" [ref=e605] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/security/private-key
+                - img [ref=e606]
+                - generic [ref=e608]: Keys & Tokens
+            - listitem [ref=e609]:
+              - link "Tags" [ref=e610] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/tags
+                - img [ref=e611]
+                - generic [ref=e615]: Tags
+            - listitem [ref=e616]:
+              - link "Terminal" [ref=e617] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/terminal
+                - img [ref=e618]
+                - generic [ref=e621]: Terminal
+            - listitem [ref=e622]:
+              - link "Profile" [ref=e623] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/profile
+                - img [ref=e624]
+                - generic [ref=e629]: Profile
+            - listitem [ref=e630]:
+              - link "Teams" [ref=e631] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/team
+                - img [ref=e632]
+                - generic [ref=e640]: Teams
+            - listitem [ref=e641]:
+              - link "Settings" [ref=e642] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e643]
+                - generic [ref=e647]: Settings
+            - generic:
+              - listitem:
+                - generic "No upgrade available"
+            - listitem [ref=e649]:
+              - link "Sponsor us" [ref=e650] [cursor=pointer]:
+                - /url: https://coolify.io/sponsorships
+                - img [ref=e651]
+                - generic [ref=e655]: Sponsor us
+            - listitem [ref=e656]:
+              - generic "Send us feedback or get help!" [ref=e659] [cursor=pointer]:
+                - img [ref=e660]
+                - generic [ref=e662]: Feedback
+            - listitem [ref=e663]:
+              - button "Logout" [ref=e665]:
+                - img [ref=e666]
+                - generic [ref=e668]: Logout
+    - main [ref=e669]:
+      - generic [ref=e671]:
+        - heading "Configuration" [level=1] [ref=e672]
+        - navigation [ref=e673]:
+          - navigation [ref=e674]:
+            - list [ref=e675]:
+              - listitem [ref=e676]:
+                - generic [ref=e677]:
+                  - link "My first project" [ref=e678] [cursor=pointer]:
+                    - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92
+                  - button [ref=e679]:
+                    - img [ref=e680]
+              - listitem [ref=e682]:
+                - generic [ref=e683]:
+                  - link "production" [ref=e684] [cursor=pointer]:
+                    - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269
+                  - button [ref=e685]:
+                    - img [ref=e686]
+              - listitem [ref=e688]:
+                - link "supplier-hub (localhost)" [ref=e689] [cursor=pointer]:
+                  - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko
+              - generic [ref=e694]: Exited
+          - generic [ref=e695]:
+            - navigation [ref=e696]:
+              - link "Configuration" [ref=e697] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko
+              - link "Deployments" [ref=e698] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/deployment
+              - link "Logs" [ref=e699] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/logs
+                - generic [ref=e700]: Logs
+              - link "Terminal" [ref=e701] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/terminal
+              - button "Links" [ref=e704]:
+                - generic [ref=e705]: Links
+                - img [ref=e706]
+            - generic [ref=e709]:
+              - button "Advanced" [ref=e712]:
+                - generic [ref=e713]: Advanced
+                - img [ref=e714]
+              - button "Deploy" [ref=e717] [cursor=pointer]:
+                - img [ref=e718]
+                - text: Deploy
+        - generic [ref=e721]:
+          - generic [ref=e722]:
+            - link "General" [ref=e723] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko
+              - generic [ref=e724]: General
+            - link "Advanced" [ref=e725] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/advanced
+              - generic [ref=e726]: Advanced
+            - link "Environment Variables" [ref=e727] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/environment-variables
+              - generic [ref=e728]: Environment Variables
+            - link "Persistent Storage" [ref=e729] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/persistent-storage
+              - generic [ref=e730]: Persistent Storage
+            - link "Git Source" [ref=e731] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/source
+              - generic [ref=e732]: Git Source
+            - link "Servers" [ref=e733] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/servers
+              - generic [ref=e734]: Servers
+            - link "Scheduled Tasks" [ref=e735] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/scheduled-tasks
+              - generic [ref=e736]: Scheduled Tasks
+            - link "Webhooks" [ref=e737] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/webhooks
+              - generic [ref=e738]: Webhooks
+            - link "Preview Deployments" [ref=e739] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/preview-deployments
+              - generic [ref=e740]: Preview Deployments
+            - link "Healthcheck" [ref=e741] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/healthcheck
+              - generic [ref=e742]: Healthcheck
+            - link "Rollback" [ref=e743] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/rollback
+              - generic [ref=e744]: Rollback
+            - link "Resource Limits" [ref=e745] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/resource-limits
+              - generic [ref=e746]: Resource Limits
+            - link "Resource Operations" [ref=e747] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/resource-operations
+              - generic [ref=e748]: Resource Operations
+            - link "Metrics" [ref=e749] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/metrics
+              - generic [ref=e750]: Metrics
+            - link "Tags" [ref=e751] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/tags
+              - generic [ref=e752]: Tags
+            - link "Danger Zone" [ref=e753] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/application/usizo5k0rz4obuhe68adc0ko/danger
+              - generic [ref=e754]: Danger Zone
+          - generic [ref=e756]:
+            - generic [ref=e757]:
+              - generic [ref=e758]:
+                - heading "Environment Variables" [level=2] [ref=e759]
+                - button "+ Add" [ref=e762] [cursor=pointer]
+                - button "Developer view" [ref=e763] [cursor=pointer]
+              - generic [ref=e764]: Environment variables (secrets) for this resource.
+              - generic [ref=e765]:
+                - generic [ref=e768]:
+                  - generic [ref=e769]:
+                    - text: Sort alphabetically
+                    - img [ref=e772] [cursor=pointer]
+                  - checkbox "Sort alphabetically" [ref=e774] [cursor=pointer]
+                - generic [ref=e777]:
+                  - generic [ref=e778]:
+                    - text: Use Docker Build Secrets
+                    - img [ref=e781] [cursor=pointer]
+                  - checkbox "Use Docker Build Secrets" [ref=e783] [cursor=pointer]
+            - generic [ref=e784]:
+              - heading "Production Environment Variables" [level=3] [ref=e785]
+              - generic [ref=e786]: Environment (secrets) variables for Production.
+            - generic [ref=e787]: No environment variables found.
+  - list

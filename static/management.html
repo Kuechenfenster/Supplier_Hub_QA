@@ -60,6 +60,7 @@
         .badge-viewer { background: #6c757d; color: white; }
         .badge-active { background: #28a745; color: white; }
         .badge-pending { background: #ffc107; color: #000; }
+        .badge-suspended { background: #dc3545; color: white; }
         .badge-inactive { background: #6c757d; color: white; }
         .badge-colorant { background: #667eea; color: white; }
         .badge-base { background: #28a745; color: white; }
@@ -325,9 +326,9 @@
                 <div class="card">
                     <table>
                         <thead>
-                            <tr><th>Code</th><th>Name</th><th>Email</th><th>Status</th></tr>
+                            <tr><th>Code</th><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr>
                         </thead>
-                        <tbody id="suppliersTable"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody>
+                        <tbody id="suppliersTable"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -1240,10 +1241,36 @@
                 window.location.href = '/management/login';
                 return;
             }
+            if (suppliers.status === 403) {
+                document.getElementById('suppliersTable').innerHTML = '<tr><td colspan="5" class="empty">Access denied</td></tr>';
+                return;
+            }
             suppliers = await suppliers.json();
             document.getElementById('suppliersTable').innerHTML = suppliers.length ? suppliers.map(function(s) {
-                return '<tr><td>' + s.code + '</td><td>' + s.name + '</td><td>' + s.email + '</td><td><span class="badge badge-pending">' + (s.status || 'pending') + '</span></td></tr>';
-            }).join('') : '<tr><td colspan="4" class="empty">No suppliers registered</td></tr>';
+                var statusBadge = '<span class="badge badge-' + s.status + '">' + s.status + '</span>';
+                var actions = '';
+                if (s.status === 'pending') {
+                    actions = '<button class="btn btn-sm btn-success" onclick="approveSupplier(' + s.id + ')">Approve</button> ' +
+                              '<button class="btn btn-sm btn-danger" onclick="rejectSupplier(' + s.id + ')">Reject</button>';
+                } else {
+                    actions = '<span style="color:#999;font-size:12px;">—</span>';
+                }
+                return '<tr><td>' + s.code + '</td><td>' + s.name + '</td><td>' + s.email + '</td><td>' + statusBadge + '</td><td>' + actions + '</td></tr>';
+            }).join('') : '<tr><td colspan="5" class="empty">No suppliers registered</td></tr>';
+        }
+
+        async function approveSupplier(id) {
+            if (!confirm('Approve this supplier? They will be able to log in.')) return;
+            var resp = await fetch(API + '/api/suppliers/' + id + '/approve', { method: 'PUT', headers: getHeaders() });
+            if (resp.ok) { loadSuppliers(); loadStats(); }
+            else { alert('Failed to approve supplier.'); }
+        }
+
+        async function rejectSupplier(id) {
+            if (!confirm('Reject this supplier? They will be suspended and unable to log in.')) return;
+            var resp = await fetch(API + '/api/suppliers/' + id + '/reject', { method: 'PUT', headers: getHeaders() });
+            if (resp.ok) { loadSuppliers(); loadStats(); }
+            else { alert('Failed to reject supplier.'); }
         }
         
         async function loadActivity() {

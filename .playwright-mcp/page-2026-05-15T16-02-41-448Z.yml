@@ -1,0 +1,162 @@
+- generic [active] [ref=e163]:
+  - generic [ref=e164]:
+    - navigation [ref=e167]:
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - link "Coolify" [ref=e170] [cursor=pointer]:
+            - /url: /
+          - link "v4.0.0" [ref=e171] [cursor=pointer]:
+            - /url: https://github.com/coollabsio/coolify/releases/tag/v4.0.0
+        - button / [ref=e173]:
+          - img [ref=e174]
+          - generic [ref=e176]: /
+        - button "Preferences 9+" [ref=e179] [cursor=pointer]:
+          - img "Preferences" [ref=e180]
+          - generic [ref=e182]: 9+
+      - combobox [ref=e185]:
+        - option "Switch team" [disabled]
+        - option "Root Team" [selected]
+      - list [ref=e186]:
+        - listitem [ref=e187]:
+          - list [ref=e188]:
+            - listitem [ref=e189]:
+              - link "Dashboard" [ref=e190] [cursor=pointer]:
+                - /url: /
+                - img [ref=e191]
+                - generic [ref=e193]: Dashboard
+            - listitem [ref=e194]:
+              - link "Projects" [ref=e195] [cursor=pointer]:
+                - /url: /projects
+                - img [ref=e196]
+                - generic [ref=e201]: Projects
+            - listitem [ref=e202]:
+              - link "Servers" [ref=e203] [cursor=pointer]:
+                - /url: /servers
+                - img [ref=e204]
+                - generic [ref=e209]: Servers
+            - listitem [ref=e210]:
+              - link "Sources" [ref=e211] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/sources
+                - img [ref=e212]
+                - generic [ref=e214]: Sources
+            - listitem [ref=e215]:
+              - link "Destinations" [ref=e216] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/destinations
+                - img [ref=e217]
+                - generic [ref=e219]: Destinations
+            - listitem [ref=e220]:
+              - link "S3 Storages" [ref=e221] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/storages
+                - img [ref=e222]
+                - generic [ref=e227]: S3 Storages
+            - listitem [ref=e228]:
+              - link "Shared Variables" [ref=e229] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/shared-variables
+                - img [ref=e230]
+                - generic [ref=e234]: Shared Variables
+            - listitem [ref=e235]:
+              - link "Notifications" [ref=e236] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/notifications/email
+                - img [ref=e237]
+                - generic [ref=e239]: Notifications
+            - listitem [ref=e240]:
+              - link "Keys & Tokens" [ref=e241] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/security/private-key
+                - img [ref=e242]
+                - generic [ref=e244]: Keys & Tokens
+            - listitem [ref=e245]:
+              - link "Tags" [ref=e246] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/tags
+                - img [ref=e247]
+                - generic [ref=e251]: Tags
+            - listitem [ref=e252]:
+              - link "Terminal" [ref=e253] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/terminal
+                - img [ref=e254]
+                - generic [ref=e257]: Terminal
+            - listitem [ref=e258]:
+              - link "Profile" [ref=e259] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/profile
+                - img [ref=e260]
+                - generic [ref=e265]: Profile
+            - listitem [ref=e266]:
+              - link "Teams" [ref=e267] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/team
+                - img [ref=e268]
+                - generic [ref=e276]: Teams
+            - listitem [ref=e277]:
+              - link "Settings" [ref=e278] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e279]
+                - generic [ref=e283]: Settings
+            - generic:
+              - listitem:
+                - generic "No upgrade available"
+            - listitem [ref=e285]:
+              - link "Sponsor us" [ref=e286] [cursor=pointer]:
+                - /url: https://coolify.io/sponsorships
+                - img [ref=e287]
+                - generic [ref=e291]: Sponsor us
+            - listitem [ref=e292]:
+              - generic "Send us feedback or get help!" [ref=e295] [cursor=pointer]:
+                - img [ref=e296]
+                - generic [ref=e298]: Feedback
+            - listitem [ref=e299]:
+              - button "Logout" [ref=e301]:
+                - img [ref=e302]
+                - generic [ref=e304]: Logout
+    - main [ref=e305]:
+      - generic [ref=e4150]:
+        - heading "Select a Postgresql type" [level=2] [ref=e4151]
+        - generic [ref=e4152]: If you need extra extensions, you can select Supabase PostgreSQL (or others), otherwise select PostgreSQL 18 (default).
+        - generic [ref=e4153]:
+          - generic [ref=e4154] [cursor=pointer]:
+            - generic [ref=e4155]:
+              - generic [ref=e4156]: PostgreSQL 18 (default)
+              - generic [ref=e4157]: PostgreSQL is a powerful, open-source object-relational database system (no extensions).
+            - link "View documentation" [ref=e4158]:
+              - /url: https://hub.docker.com/_/postgres/
+              - img [ref=e4159]
+          - generic [ref=e4161] [cursor=pointer]:
+            - generic [ref=e4162]:
+              - generic [ref=e4163]: PostgreSQL 17
+              - generic [ref=e4164]: PostgreSQL is a powerful, open-source object-relational database system (no extensions).
+            - link "View documentation" [ref=e4165]:
+              - /url: https://hub.docker.com/_/postgres/
+              - img [ref=e4166]
+          - generic [ref=e4168] [cursor=pointer]:
+            - generic [ref=e4169]:
+              - generic [ref=e4170]: PostgreSQL 16
+              - generic [ref=e4171]: PostgreSQL is a powerful, open-source object-relational database system (no extensions).
+            - link "View documentation" [ref=e4172]:
+              - /url: https://hub.docker.com/_/postgres/
+              - img [ref=e4173]
+          - generic [ref=e4175] [cursor=pointer]:
+            - generic [ref=e4176]:
+              - generic [ref=e4177]: Supabase PostgreSQL (with extensions)
+              - generic [ref=e4178]: Supabase is a modern, open-source alternative to PostgreSQL with lots of extensions.
+            - link "View documentation" [ref=e4179]:
+              - /url: https://github.com/supabase/postgres
+              - img [ref=e4180]
+          - generic [ref=e4182] [cursor=pointer]:
+            - generic [ref=e4183]:
+              - generic [ref=e4184]: PostGIS (AMD only)
+              - generic [ref=e4185]: PostGIS is a PostgreSQL extension for geographic objects.
+            - link "View documentation" [ref=e4186]:
+              - /url: https://github.com/postgis/docker-postgis
+              - img [ref=e4187]
+          - generic [ref=e4189] [cursor=pointer]:
+            - generic [ref=e4190]:
+              - generic [ref=e4191]: PGVector (18)
+              - generic [ref=e4192]: PGVector is a PostgreSQL extension for vector data types.
+            - link "View documentation" [ref=e4193]:
+              - /url: https://github.com/pgvector/pgvector
+              - img [ref=e4194]
+          - generic [ref=e4196] [cursor=pointer]:
+            - generic [ref=e4197]:
+              - generic [ref=e4198]: PGVector (17)
+              - generic [ref=e4199]: PGVector is a PostgreSQL extension for vector data types.
+            - link "View documentation" [ref=e4200]:
+              - /url: https://github.com/pgvector/pgvector
+              - img [ref=e4201]
+  - list
