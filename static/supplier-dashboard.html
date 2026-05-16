@@ -131,18 +131,22 @@
             </div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Materials & Suppliers</div>
+                <div class="nav-group-title">Suppliers & Materials</div>
                 <a href="#" class="nav-item" data-page="raw-suppliers">
-                    <span>Raw Suppliers</span>
+                    <span>Material Suppliers</span>
                     <span class="count" id="countRawSuppliers">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="materials">
-                    <span>Material</span>
+                    <span>Registered Materials</span>
                     <span class="count" id="countMaterialsSide">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="substances">
                     <span>Substances & Mixtures</span>
                     <span class="count" id="countSubstancesSide">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="sourced-components">
+                    <span>Sourced Components</span>
+                    <span class="count" id="countSourcedComponents">0</span>
                 </a>
             </div>
 
@@ -262,6 +266,15 @@
                         <p class="empty-state" style="padding: 30px;">Substances & Mixtures page coming soon...</p>
                     </div>
 
+                    <!-- Sourced Components Content -->
+                    <div id="sourced-components-content" class="content-area" style="display: none;">
+                        <div class="section-header">
+                            <h3>Sourced Components</h3>
+                            <button class="btn-primary" onclick="refreshSourcedComponents()">Refresh</button>
+                        </div>
+                        <p class="empty-state" style="padding: 30px;">Sourced Components page coming soon...</p>
+                    </div>
+
                     <!-- Bought Components Content -->
                     <div id="bought-components-content" class="content-area" style="display: none;">
                         <div class="section-header">
@@ -361,7 +374,8 @@
                 'process-flow': t.pages.processFlowTitle,
                 'upcoming-audits': t.pages.upcomingAuditsTitle,
                 'corrective-action': t.pages.correctiveActionTitle,
-                'seal-samples': t.pages.sealSamplesTitle
+                'seal-samples': t.pages.sealSamplesTitle,
+                'sourced-components': t.pages.sourcedComponentsTitle
             };
             const descriptions = {
                 'dashboard': t.dashboard.description,
@@ -373,7 +387,8 @@
                 'process-flow': t.pages.processFlowDesc,
                 'upcoming-audits': t.pages.upcomingAuditsDesc,
                 'corrective-action': t.pages.correctiveActionDesc,
-                'seal-samples': t.pages.sealSamplesDesc
+                'seal-samples': t.pages.sealSamplesDesc,
+                'sourced-components': t.pages.sourcedComponentsDesc
             };
 
             document.getElementById('page-title').textContent = titles[page];
@@ -391,6 +406,7 @@
             if (page === 'upcoming-audits') loadUpcomingAudits();
             if (page === 'corrective-action') loadCorrectiveAction();
             if (page === 'seal-samples') loadSealSamples();
+            if (page === 'sourced-components') loadSourcedComponents();
         }
 
         function logout() {
@@ -569,6 +585,12 @@
             console.log('Loading Bought Components...');
         }
 
+        async function loadSourcedComponents() {
+            console.log('Loading Sourced Components...');
+        }
+
+        async function refreshSourcedComponents() { loadSourcedComponents(); }
+
         async function loadProducts() {
             console.log('Loading Products...');
         }
@@ -609,10 +631,11 @@
                 sidebar: {
                     navigation: 'Navigation',
                     overview: 'Overview',
-                    materialsSuppliers: 'Materials & Suppliers',
-                    rawSuppliers: 'Raw Suppliers',
-                    material: 'Material',
+                    materialsSuppliers: 'Suppliers & Materials',
+                    materialSuppliers: 'Material Suppliers',
+                    material: 'Registered Materials',
                     substances: 'Substances & Mixtures',
+                    sourcedComponents: 'Sourced Components',
                     productsComponents: 'Products & Components',
                     boughtComponents: 'Bought Components',
                     products: 'Products',
@@ -643,12 +666,14 @@
                 },
                 pages: {
                     comingSoon: 'page coming soon...',
-                    rawSuppliersTitle: 'Raw Suppliers',
-                    rawSuppliersDesc: 'Manage your raw material suppliers.',
-                    materialTitle: 'Material',
+                    rawSuppliersTitle: 'Material Suppliers',
+                    rawSuppliersDesc: 'Manage your material suppliers.',
+                    materialTitle: 'Registered Materials',
                     materialDesc: 'Material library and specifications.',
                     substancesTitle: 'Substances & Mixtures',
                     substancesDesc: 'Substances and mixtures database.',
+                    sourcedComponentsTitle: 'Sourced Components',
+                    sourcedComponentsDesc: 'Components sourced from external suppliers.',
                     boughtComponentsTitle: 'Bought Components',
                     boughtComponentsDesc: 'Components sourced from suppliers.',
                     productsTitle: 'Products',
@@ -689,10 +714,11 @@
                 sidebar: {
                     navigation: '导航',
                     overview: '概览',
-                    materialsSuppliers: '物料与供应商',
-                    rawSuppliers: '原始供应商',
-                    material: '物料',
+                    materialsSuppliers: '供应商与物料',
+                    materialSuppliers: '物料供应商',
+                    material: '已注册物料',
                     substances: '物质与混合物',
+                    sourcedComponents: '外购组件',
                     productsComponents: '产品与组件',
                     boughtComponents: '采购组件',
                     products: '产品',
@@ -723,12 +749,14 @@
                 },
                 pages: {
                     comingSoon: '功能开发中...',
-                    rawSuppliersTitle: '原始供应商',
-                    rawSuppliersDesc: '管理您的原材料供应商。',
-                    materialTitle: '物料',
+                    rawSuppliersTitle: '物料供应商',
+                    rawSuppliersDesc: '管理您的物料供应商。',
+                    materialTitle: '已注册物料',
                     materialDesc: '物料库和规格。',
                     substancesTitle: '物质与混合物',
                     substancesDesc: '物质和混合物数据库。',
+                    sourcedComponentsTitle: '外购组件',
+                    sourcedComponentsDesc: '从外部供应商采购的组件。',
                     boughtComponentsTitle: '采购组件',
                     boughtComponentsDesc: '从供应商处采购的组件。',
                     productsTitle: '产品',
@@ -798,9 +826,10 @@
             document.querySelectorAll('.sidebar .nav-item span:first-child').forEach((el, i) => {
                 const navItems = [
                     t.sidebar.overview,
-                    t.sidebar.rawSuppliers,
+                    t.sidebar.materialSuppliers,
                     t.sidebar.material,
                     t.sidebar.substances,
+                    t.sidebar.sourcedComponents,
                     t.sidebar.boughtComponents,
                     t.sidebar.products,
                     t.sidebar.sealSamples,
