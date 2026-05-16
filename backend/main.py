@@ -19,6 +19,8 @@ from auth_helpers import (
 )
 
 from bom_routes import router as bom_router
+from registration_routes import router as registration_router
+from registration_routes import router as registration_router
 
 try:
     from pipeline.models.database import init_db as pipeline_init_db
@@ -53,6 +55,12 @@ app.mount("/assets", StaticFiles(directory=os.path.join(BASE_DIR, "static", "ass
 # Register BOM router
 app.include_router(bom_router)
 
+# Register Supplier Registration router
+app.include_router(registration_router)
+
+# Register Supplier Registration router
+app.include_router(registration_router)
+
 # Initialize database
 init_db()
 
@@ -86,6 +94,16 @@ async def serve_supplier_login():
 @app.get("/supplier-dashboard", response_class=FileResponse)
 async def serve_supplier_dashboard():
     return "static/supplier-dashboard.html"
+
+
+@app.get("/supplier-registration", response_class=FileResponse)
+async def serve_supplier_registration():
+    return "static/supplier-registration.html"
+
+
+@app.get("/supplier-registration", response_class=FileResponse)
+async def serve_supplier_registration():
+    return "static/supplier-registration.html"
 
 
 # Pydantic Models

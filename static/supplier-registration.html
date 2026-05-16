@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Portal - Material Registration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f7fa; min-height: 100vh; }
+
+        /* ── Navbar ── */
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 20px; }
+        .navbar .user-info { display: flex; align-items: center; gap: 15px; }
+        .navbar .user-info span { font-size: 14px; }
+        .navbar .btn-nav { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
+        .navbar .btn-nav:hover { background: rgba(255,255,255,0.3); }
+
+        /* ── Main Container ── */
+        .container { max-width: 1024px; margin: 30px auto; padding: 0 20px; }
+
+        /* ── Step Indicator ── */
+        .step-indicator { display: flex; gap: 4px; margin-bottom: 32px; }
+        .step-dot { flex: 1; display: flex; align-items: center; }
+        .step-dot .dot-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; transition: all 0.3s; flex-shrink: 0; background: #e0e0e0; color: #999; }
+        .step-dot .dot-label { margin-left: 12px; font-size: 13px; color: #999; font-weight: 600; white-space: nowrap; }
+        .step-dot .connector { flex: 1; height: 3px; background: #e0e0e0; margin: 0 8px; }
+        .step-dot:last-child .connector { display: none; }
+        .step-dot.active .dot-circle { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.4); }
+        .step-dot.active .dot-label { color: #667eea; }
+        .step-dot.done .dot-circle { background: #28a745; color: white; }
+        .step-dot.done .dot-label { color: #28a745; }
+        .step-dot.done .connector { background: #28a745; }
+
+        /* ── Card ── */
+        .card { background: white; border-radius: 14px; padding: 32px; box-shadow: 0 2px 14px rgba(0,0,0,0.07); margin-bottom: 20px; }
+        .card-header { margin-bottom: 24px; }
+        .card-header h2 { color: #333; font-size: 22px; margin-bottom: 6px; }
+        .card-header p { color: #888; font-size: 13px; }
+
+        /* ── Form Layout ── */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-grid.span-full { grid-column: 1 / -1; }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .form-group label .required { color: #dc3545; margin-left: 2px; }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px;
+            font-size: 14px; color: #333; transition: border 0.2s; background: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .form-group input.error, .form-group select.error, .form-group textarea.error {
+            border-color: #dc3545; background: #fff8f8;
+        }
+        .form-group input.warning, .form-group select.warning {
+            border-color: #ffc107; background: #fffdf5;
+        }
+        .form-group .error-msg { color: #dc3545; font-size: 11px; margin-top: 4px; min-height: 16px; }
+        .field-warning { color: #b8860b; font-size: 11px; margin-top: 4px; }
+
+        /* ── Contact Group ── */
+        .contact-group { border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; }
+        .contact-group legend { font-size: 13px; font-weight: 700; color: #555; padding: 0 6px; }
+        .contact-group .form-grid { margin-top: 10px; }
+
+        /* ── Warning Banner ── */
+        .warning-banner { background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px; }
+        .warning-banner .icon { font-size: 20px; flex-shrink: 0; }
+        .warning-banner .text { font-size: 13px; color: #856404; line-height: 1.5; }
+        .warning-banner .text strong { display: block; margin-bottom: 4px; }
+        .error-banner { background: #f8d7da; border-color: #dc3545; }
+        .error-banner .text { color: #721c24; }
+        .success-banner { background: #d4edda; border-color: #28a745; }
+        .success-banner .text { color: #155724; }
+
+        /* ── Material Row ── */
+        .material-row { border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 16px; position: relative; background: #fcfcfc; }
+        .material-row .remove-btn { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #dc3545; cursor: pointer; font-size: 18px; padding: 4px 8px; border-radius: 4px; }
+        .material-row .remove-btn:hover { background: #f8d7da; }
+
+        /* ── Document Upload Zone ── */
+        .doc-section { border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fcfcfc; }
+        .doc-section h3 { font-size: 15px; color: #333; margin-bottom: 14px; }
+        .doc-section.required h3::after { content: " *"; color: #dc3545; }
+
+        .dropzone { border: 2px dashed #ccc; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; margin-bottom: 12px; }
+        .dropzone:hover, .dropzone.dragover { border-color: #667eea; background: #f0f2ff; }
+        .dropzone .dz-icon { font-size: 28px; margin-bottom: 6px; }
+        .dropzone .dz-text { font-size: 13px; color: #888; }
+        .dropzone .dz-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+        .dropzone.uploaded { border-color: #28a745; background: #f0fff4; }
+        .dropzone.uploaded .dz-text { color: #155724; }
+        .dropzone.uploaded .dz-hint { color: #28a745; }
+        .dropzone.error { border-color: #dc3545; background: #fff8f8; }
+
+        .file-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #333; margin-top: 8px; }
+        .file-info .remove-file { color: #dc3545; cursor: pointer; font-size: 11px; text-decoration: underline; margin-left: auto; }
+
+        .doc-meta { margin-top: 12px; }
+        .doc-meta .form-group { margin-bottom: 10px; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+        .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-group label { font-size: 14px; font-weight: 600; color: #444; cursor: pointer; }
+
+        /* ── Review Table ── */
+        .review-section { margin-bottom: 24px; }
+        .review-section h3 { font-size: 16px; color: #444; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+        .review-table { width: 100%; border-collapse: collapse; }
+        .review-table th, .review-table td { padding: 10px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+        .review-table th { background: #f8f9fa; color: #666; font-weight: 600; width: 180px; }
+        .review-table td { color: #333; }
+        .review-table .warn-row td { background: #fffdf5; }
+        .review-table .check-pass { color: #28a745; font-weight: 700; }
+        .review-table .check-warn { color: #b8860b; font-weight: 700; }
+        .review-table .check-fail { color: #dc3545; font-weight: 700; }
+
+        /* ── Buttons ── */
+        .btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 11px 28px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 18px rgba(102,126,234,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline { background: white; color: #667eea; border: 1.5px solid #667eea; padding: 11px 28px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .btn-outline:hover { background: #f0f2ff; }
+        .btn-add { background: #667eea; color: white; padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-add:hover { background: #5a6fd6; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; font-weight: 600; }
+
+        /* ── Material Selector (for documents step) ── */
+        .material-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+        .material-tab { padding: 8px 18px; border: 1.5px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; color: #666; font-weight: 600; transition: all 0.2s; }
+        .material-tab:hover { border-color: #667eea; color: #667eea; }
+        .material-tab.active { background: #667eea; color: white; border-color: #667eea; }
+        .material-tab .tab-check { margin-left: 6px; color: #28a745; }
+        .material-tab .tab-warn { margin-left: 6px; color: #ffc107; }
+
+        /* ── Spinner ── */
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Submission Confirmation ── */
+        .confirmation-box { text-align: center; padding: 40px; }
+        .confirmation-box .icon { font-size: 64px; margin-bottom: 16px; }
+        .confirmation-box h2 { color: #333; margin-bottom: 8px; }
+        .confirmation-box p { color: #888; font-size: 14px; margin-bottom: 20px; }
+
+        .toast { position: fixed; top: 20px; right: 20px; padding: 14px 22px; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; z-index: 9999; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transform: translateX(120%); transition: transform 0.3s; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: #28a745; }
+        .toast.error { background: #dc3545; }
+        .toast.warning { background: #ffc107; color: #333; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h1>Supplier Portal - Material Registration</h1>
+    <div class="user-info">
+        <span id="supplierName"></span>
+        <a href="/supplier-dashboard" class="btn-nav">Dashboard</a>
+        <button class="btn-nav" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Step Indicator -->
+    <div class="step-indicator" id="stepIndicator"></div>
+
+    <!-- Content Area -->
+    <div class="card" id="contentArea"></div>
+
+    <!-- Global Warning Banner -->
+    <div id="globalWarnings"></div>
+
+    <!-- Navigation Buttons -->
+    <div class="btn-row" id="navButtons"></div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const TOKEN = localStorage.getItem('supplierToken');
+if (!TOKEN) { window.location.href = '/supplier-login'; }
+
+const BASE = '/api/registration';
+const headers = () => ({ 'Authorization': `Bearer ${TOKEN}` });
+
+let currentStep = 1;
+let registrationData = null;
+let activeMaterialIndex = 0;
+let formState = {
+    step1: { name_en: '', name_cn: '', material_origin: '', facility_address: '',
+        sales_contact_name: '', sales_contact_email: '', sales_contact_phone: '',
+        qm_contact_name: '', qm_contact_email: '', qm_contact_phone: '' },
+    step2: [],   // [{ commercial_material_name, internal_factory_material_code, supplier_material_code, is_food_contact }]
+    step3: {},   // { [supplierMaterialCode]: { is_food_contact, files: { sds:{}, tds:{}, coa:{}, reach_rohs:{}, food_contact_doc:{} } } }
+    step3docs: {} // Cache for rendered doc states: { [supplierMaterialCode]: { sds: {lang,date}, tds:{state}, coa:{date} } }
+};
+let materialIds = {};   // supplier_material_code -> db id
+let sdsWarnings = {};   // supplier_material_code -> bool
+let lookupData = { sds_languages: [], physical_states: [], countries: [] };
+
+// ──────────── Init ────────────
+async function init() {
+    await loadMeta();
+    await loadDraft();
+    renderStepIndicator();
+    renderCurrentStep();
+}
+
+async function loadMeta() {
+    try {
+        const r = await fetch(BASE + '/metadata/lookup', { headers: headers() });
+        if (r.ok) lookupData = await r.json();
+    } catch(e) {}
+}
+
+async function loadDraft() {
+    try {
+        const r = await fetch(BASE + '/draft', { headers: headers() });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!data.exists || !data.registration) return;
+        registrationData = data.registration;
+
+        formState.step1 = {
+            name_en: registrationData.name_en || '',
+            name_cn: registrationData.name_cn || '',
+            material_origin: registrationData.material_origin || '',
+            facility_address: registrationData.facility_address || '',
+            sales_contact_name: registrationData.sales_contact?.full_name || '',
+            sales_contact_email: registrationData.sales_contact?.email || '',
+            sales_contact_phone: registrationData.sales_contact?.phone || '',
+            qm_contact_name: registrationData.qm_contact?.full_name || '',
+            qm_contact_email: registrationData.qm_contact?.email || '',
+            qm_contact_phone: registrationData.qm_contact?.phone || '',
+        };
+
+        formState.step2 = (registrationData.materials || []).map(m => ({
+            commercial_material_name: m.commercial_material_name,
+            internal_factory_material_code: m.internal_factory_material_code,
+            supplier_material_code: m.supplier_material_code,
+            is_food_contact: m.is_food_contact || false,
+        }));
+
+        (registrationData.materials || []).forEach(m => {
+            materialIds[m.supplier_material_code] = m.id;
+            formState.step3docs[m.supplier_material_code] = {};
+            sdsWarnings[m.supplier_material_code] = false;
+            if (m.documents) {
+                Object.keys(m.documents).forEach(docType => {
+                    const d = m.documents[docType];
+                    if (docType === 'sds') {
+                        formState.step3docs[m.supplier_material_code].sds = { lang: d.sds_language || '', date: d.sds_issue_date || '' };
+                        sdsWarnings[m.supplier_material_code] = d.sds_expiry_warning;
+                    } else if (docType === 'tds') {
+                        formState.step3docs[m.supplier_material_code].tds = { state: d.tds_physical_state || '' };
+                    } else if (docType === 'coa') {
+                        formState.step3docs[m.supplier_material_code].coa = { date: d.coa_test_date || '' };
+                    }
+                    formState.step3[m.supplier_material_code] = formState.step3[m.supplier_material_code] || { is_food_contact: m.is_food_contact, files: {} };
+                    formState.step3[m.supplier_material_code].files[docType] = { name: d.original_filename, id: d.id };
+                });
+            }
+        });
+    } catch(e) { console.error('Load draft error:', e); }
+}
+
+// ──────────── Navigation ────────────
+function setStep(step) {
+    currentStep = step;
+    renderStepIndicator();
+    renderCurrentStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderStepIndicator() {
+    const steps = ['1. Supplier Profile', '2. Material Codes', '3. Document Uploads', '4. Review & Submit'];
+    const container = document.getElementById('stepIndicator');
+    let html = '';
+    steps.forEach((label, i) => {
+        const stepNum = i + 1;
+        let cls = '';
+        if (stepNum === currentStep) cls = 'active';
+        else if (stepNum < currentStep) cls = 'done';
+        html += `<div class="step-dot ${cls}">
+            <div class="dot-circle">${cls === 'done' ? '&#10003;' : stepNum}</div>
+            <div class="dot-label">${label}</div>
+            <div class="connector"></div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function renderCurrentStep() {
+    clearWarnings();
+    switch(currentStep) {
+        case 1: renderStep1(); break;
+        case 2: renderStep2(); break;
+        case 3: renderStep3(); break;
+        case 4: renderStep4(); break;
+    }
+}
+
+// ──────────── Step 1: Supplier Profile ────────────
+function renderStep1() {
+    let html = `<div class="card-header"><h2>Step 1: Supplier &amp; Commercial Profile</h2><p>Enter your company details and contact information</p></div>`;
+    html += `<div class="form-grid">`;
+
+    html += field('name_en', 'Supplier Entity Name (English)', 'text', true, 2, 255);
+    html += field('name_cn', 'Supplier Entity Name (Chinese)', 'text', false);
+    html += selectField('material_origin', 'Material Origin', lookupData.countries, true);
+    html += `</div>`;
+
+    // Sales Contact
+    html += `<fieldset class="contact-group"><legend>Sales Contact Profile</legend><div class="form-grid">`;
+    html += field('sales_contact_name', 'Full Name', 'text', true);
+    html += field('sales_contact_email', 'Email Address', 'email', true);
+    html += field('sales_contact_phone', 'Phone Number (intl. format)', 'tel', true);
+    html += `</div></fieldset>`;
+
+    // QM Contact
+    html += `<fieldset class="contact-group" style="margin-top:16px;"><legend>Quality/Escalation Contact (QM Safeguard) <span style="color:#888;font-weight:400;font-size:11px;">— optional, defaults to Sales Contact</span></legend><div class="form-grid">`;
+    html += field('qm_contact_name', 'Full Name', 'text', false);
+    html += field('qm_contact_email', 'Email Address', 'email', false);
+    html += field('qm_contact_phone', 'Phone Number (intl. format)', 'tel', false);
+    html += `</div></fieldset>`;
+
+    html += `<div class="form-grid" style="margin-top:18px;">`;
+    html += `<div class="form-group full"><label>Manufacturing Facility Address <span class="required">*</span></label>
+        <textarea name="facility_address" id="facility_address" rows="3" required placeholder="Physical production site address">${esc(formState.step1.facility_address)}</textarea>
+        <div class="error-msg" id="err_facility_address"></div></div>`;
+    html += `</div>`;
+
+    document.getElementById('contentArea').innerHTML = html;
+
+    // Fill form
+    Object.keys(formState.step1).forEach(k => {
+        const el = document.getElementById(k);
+        if (el && el.type !== 'file') el.value = formState.step1[k] || '';
+    });
+
+    document.getElementById('navButtons').innerHTML = `
+        <div></div>
+        <button class="btn-primary" onclick="saveStep1()">Save &amp; Continue</button>
+    `;
+}
+
+async function saveStep1() {
+    const fd = new FormData();
+    const fields = ['name_en', 'name_cn', 'material_origin', 'facility_address',
+        'sales_contact_name', 'sales_contact_email', 'sales_contact_phone',
+        'qm_contact_name', 'qm_contact_email', 'qm_contact_phone'];
+
+    let valid = true;
+    fields.forEach(f => {
+        const v = document.getElementById(f)?.value || '';
+        fd.append(f, v);
+        clearFieldError(f);
+    });
+
+    // Validate
+    const nameEn = document.getElementById('name_en')?.value || '';
+    if (nameEn.length < 2 || nameEn.length > 255) { showFieldError('name_en', 'Must be 2-255 characters'); valid = false; }
+    const origin = document.getElementById('material_origin')?.value || '';
+    if (!lookupData.countries.includes(origin)) { showFieldError('material_origin', 'Select a valid country'); valid = false; }
+    const addr = document.getElementById('facility_address')?.value || '';
+    if (!addr.trim()) { showFieldError('facility_address', 'Required'); valid = false; }
+    ['sales_contact_name', 'sales_contact_email', 'sales_contact_phone'].forEach(f => {
+        if (!(document.getElementById(f)?.value || '').trim()) { showFieldError(f, 'Required'); valid = false; }
+    });
+    const scEmail = document.getElementById('sales_contact_email')?.value || '';
+    if (scEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(scEmail)) { showFieldError('sales_contact_email', 'Invalid email'); valid = false; }
+    const scPhone = document.getElementById('sales_contact_phone')?.value || '';
+    if (scPhone) { const digits = scPhone.replace(/\D/g, ''); if (digits.length < 7) { showFieldError('sales_contact_phone', 'At least 7 digits required'); valid = false; } }
+
+    if (!valid) return;
+
+    try {
+        const r = await fetch(BASE + '/step1-profile', { method: 'POST', headers: headers(), body: fd });
+        if (!r.ok) {
+            const err = await r.json();
+            showToast('error', err.detail?.[0]?.msg || err.detail || 'Validation failed');
+            return;
+        }
+        const data = await r.json();
+        showToast('success', 'Profile saved');
+        // Update formState from form
+        fields.forEach(f => { formState.step1[f] = document.getElementById(f)?.value || ''; });
+        await loadDraft();
+        setStep(2);
+    } catch(e) { showToast('error', 'Network error'); }
+}
+
+// ──────────── Step 2: Material Codes ────────────
+function renderStep2() {
+    let html = `<div class="card-header"><h2>Step 2: Raw Material Identifiers</h2><p>Add the materials you are registering</p></div>`;
+
+    if (formState.step2.length === 0) {
+        html += `<div style="text-align:center;padding:30px;color:#999;">No materials added yet. Click below to add your first material.</div>`;
+    }
+
+    formState.step2.forEach((mat, idx) => {
+        html += renderMaterialRow(mat, idx);
+    });
+
+    html += `<div style="margin-top:16px;"><button class="btn-add" onclick="addMaterial()">+ Add Material</button></div>`;
+
+    document.getElementById('contentArea').innerHTML = html;
+    document.getElementById('navButtons').innerHTML = `
+        <button class="btn-outline" onclick="setStep(1)">&larr; Back</button>
+        <button class="btn-primary" onclick="saveStep2()">Save &amp; Continue</button>
+    `;
+}
+
+function renderMaterialRow(mat, idx) {
+    return `<div class="material-row" id="matRow${idx}">
+        <button class="remove-btn" onclick="removeMaterial(${idx})" title="Remove">&times;</button>
+        <h4 style="font-size:14px;color:#666;margin-bottom:14px;">Material #${idx + 1}</h4>
+        <div class="form-grid">
+            <div class="form-group"><label>Supplier Commercial Material Name <span class="required">*</span></label>
+                <input type="text" id="mat_comm_${idx}" value="${esc(mat.commercial_material_name)}" placeholder="Brand / trade name on invoices" onchange="updateMatField(${idx}, 'commercial_material_name', this.value)">
+            </div>
+            <div class="form-group"><label>Internal Factory Material Code <span class="required">*</span></label>
+                <input type="text" id="mat_int_${idx}" value="${esc(mat.internal_factory_material_code)}" placeholder="Your internal SKU / ERP ID" onchange="updateMatField(${idx}, 'internal_factory_material_code', this.value)">
+            </div>
+            <div class="form-group"><label>Supplier Material Code <span class="required">*</span></label>
+                <input type="text" id="mat_sup_${idx}" value="${esc(mat.supplier_material_code)}" placeholder="Supplier's catalog identifier" onchange="updateMatField(${idx}, 'supplier_material_code', this.value)">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="mat_fc_${idx}" ${mat.is_food_contact ? 'checked' : ''} onchange="updateMatField(${idx}, 'is_food_contact', this.checked)">
+                    <label for="mat_fc_${idx}">Food Contact Material</label>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function updateMatField(idx, key, val) {
+    if (idx < formState.step2.length) {
+        formState.step2[idx][key] = val;
+    }
+}
+
+function addMaterial() {
+    formState.step2.push({ commercial_material_name: '', internal_factory_material_code: '', supplier_material_code: '', is_food_contact: false });
+    renderStep2();
+}
+
+function removeMaterial(idx) {
+    const mat = formState.step2[idx];
+    delete formState.step3[mat.supplier_material_code];
+    delete formState.step3docs[mat.supplier_material_code];
+    delete materialIds[mat.supplier_material_code];
+    delete sdsWarnings[mat.supplier_material_code];
+    formState.step2.splice(idx, 1);
+    renderStep2();
+}
+
+async function saveStep2() {
+    // Sync form fields back to formState
+    formState.step2.forEach((mat, idx) => {
+        mat.commercial_material_name = document.getElementById(`mat_comm_${idx}`)?.value || mat.commercial_material_name;
+        mat.internal_factory_material_code = document.getElementById(`mat_int_${idx}`)?.value || mat.internal_factory_material_code;
+        mat.supplier_material_code = document.getElementById(`mat_sup_${idx}`)?.value || mat.supplier_material_code;
+        mat.is_food_contact = document.getElementById(`mat_fc_${idx}`)?.checked || false;
+    });
+
+    if (formState.step2.length === 0) { showToast('error', 'Add at least one material'); return; }
+    let valid = true;
+    formState.step2.forEach((m, i) => {
+        if (!m.commercial_material_name.trim()) { showToast('error', `Material #${i+1}: Commercial name required`); valid = false; }
+        if (!m.internal_factory_material_code.trim()) { showToast('error', `Material #${i+1}: Internal code required`); valid = false; }
+        if (!m.supplier_material_code.trim()) { showToast('error', `Material #${i+1}: Supplier code required`); valid = false; }
+    });
+    if (!valid) return;
+
+    const fd = new FormData();
+    fd.append('payload', JSON.stringify(formState.step2));
+    try {
+        const r = await fetch(BASE + '/step2-materials', { method: 'POST', headers: headers(), body: fd });
+        if (!r.ok) { const err = await r.json(); showToast('error', err.detail || 'Failed'); return; }
+        showToast('success', 'Materials saved');
+        await loadDraft();
+        setStep(3);
+    } catch(e) { showToast('error', 'Network error'); }
+}
+
+// ──────────── Step 3: Document Uploads ────────────
+function renderStep3() {
+    if (formState.step2.length === 0) {
+        document.getElementById('contentArea').innerHTML = `<div class="card-header"><h2>Step 3: Document Uploads</h2></div><div style="text-align:center;padding:30px;color:#999;">Add materials in Step 2 first.</div>`;
+        document.getElementById('navButtons').innerHTML = `<button class="btn-outline" onclick="setStep(2)">&larr; Back</button>`;
+        return;
+    }
+
+    if (!(activeMaterialIndex < formState.step2.length)) activeMaterialIndex = 0;
+    const mat = formState.step2[activeMaterialIndex];
+    const docState = formState.step3docs[mat.supplier_material_code] || {};
+    const existingFiles = (formState.step3[mat.supplier_material_code] || {}).files || {};
+
+    let html = `<div class="card-header"><h2>Step 3: Document Upload Vault &amp; Technical Metadata</h2><p>Upload required compliance documents for each material</p></div>`;
+
+    // Material tabs
+    html += `<div class="material-tabs">`;
+    formState.step2.forEach((m, i) => {
+        const files = (formState.step3[m.supplier_material_code] || {}).files || {};
+        const required = ['sds', 'tds', 'coa', 'reach_rohs'];
+        let uploaded = required.filter(t => files[t]).length;
+        let icon = uploaded === 4 ? '<span class="tab-check">&#10003;</span>' : (uploaded > 0 ? `<span class="tab-warn">${uploaded}/4</span>` : '');
+        html += `<button class="material-tab ${i === activeMaterialIndex ? 'active' : ''}" onclick="switchMaterialTab(${i})">
+            ${esc(m.commercial_material_name || 'Material #' + (i+1))}${icon}
+        </button>`;
+    });
+    html += `</div>`;
+
+    // Document sections
+    html += renderDocSection('sds', '1. Safety Data Sheet (SDS)', mat, docState, existingFiles);
+    html += renderDocSection('tds', '2. Technical Data Sheet (TDS)', mat, docState, existingFiles);
+    html += renderDocSection('coa', '3. Certificate of Analysis (CoA)', mat, docState, existingFiles);
+    html += renderDocSection('reach_rohs', '4. REACH SVHC / RoHS Compliance Statement', mat, docState, existingFiles);
+
+    html += renderFoodContactSection(mat);
+
+    document.getElementById('contentArea').innerHTML = html;
+
+    // Re-attach dropzone events
+    document.querySelectorAll('.dropzone').forEach(dz => {
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+        dz.addEventListener('drop', e => {
+            e.preventDefault(); dz.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFileSelect(dz.dataset.docType, files[0]);
+        });
+        dz.addEventListener('click', () => {
+            const input = dz.querySelector('input[type="file"]');
+            if (input) input.click();
+        });
+    });
+
+    if (sdsWarnings[mat.supplier_material_code]) {
+        showGlobalWarning('Warning: This SDS exceeds the 3-year compliance lifecycle guideline.', 'warning');
+    }
+
+    document.getElementById('navButtons').innerHTML = `
+        <button class="btn-outline" onclick="setStep(2)">&larr; Back</button>
+        <button class="btn-primary" onclick="setStep(4)">Review &amp; Submit</button>
+    `;
+}
+
+function switchMaterialTab(idx) {
+    activeMaterialIndex = idx;
+    renderStep3();
+    document.getElementById('navButtons').innerHTML = `
+        <button class="btn-outline" onclick="setStep(2)">&larr; Back</button>
+        <button class="btn-primary" onclick="setStep(4)">Review &amp; Submit</button>
+    `;
+}
+
+function renderDocSection(docType, title, mat, docState, existingFiles) {
+    const existing = existingFiles[docType];
+    let metaHtml = '';
+    let metaFields = '';
+
+    if (docType === 'sds') {
+        metaFields = `<div class="form-group"><label>SDS Language <span class="required">*</span></label>
+            <select id="sds_language" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'sds', 'lang', this.value)">
+                ${lookupData.sds_languages.map(l => `<option value="${l}" ${(docState.sds?.lang || '') === l ? 'selected' : ''}>${l}</option>`).join('')}
+            </select></div>
+            <div class="form-group"><label>SDS Issue / Revision Date <span class="required">*</span></label>
+            <input type="date" id="sds_issue_date" value="${docState.sds?.date || ''}" onchange="onSdsDateChange('${esc(mat.supplier_material_code)}', this.value)">
+            <div class="error-msg" id="sds_date_warn"></div></div>`;
+    } else if (docType === 'tds') {
+        metaFields = `<div class="form-group"><label>Physical State <span class="required">*</span></label>
+            <select id="tds_physical_state" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'tds', 'state', this.value)">
+                <option value="">-- Select --</option>
+                ${lookupData.physical_states.map(s => `<option value="${s}" ${(docState.tds?.state || '') === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select></div>`;
+    } else if (docType === 'coa') {
+        metaFields = `<div class="form-group"><label>Test / Execution Date <span class="required">*</span></label>
+            <input type="date" id="coa_test_date" value="${docState.coa?.date || ''}" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'coa', 'date', this.value)"></div>`;
+    }
+
+    if (metaFields) {
+        metaHtml = `<div class="doc-meta"><div class="form-grid">${metaFields}</div></div>`;
+    }
+
+    let dzClass = existing ? 'uploaded' : '';
+    let dzText = existing ? `Uploaded: ${existing.name}` : 'Drag &amp; drop PDF here or click to browse';
+    let dzHint = existing ? 'Drop or click to replace' : 'PDF only, max 10 MB';
+
+    return `<div class="doc-section required">
+        <h3>${title}</h3>
+        <div class="dropzone ${dzClass}" data-doc-type="${docType}">
+            <div class="dz-icon">&#128196;</div>
+            <div class="dz-text">${dzText}</div>
+            <div class="dz-hint">${dzHint}</div>
+            <input type="file" accept=".pdf" style="display:none" onchange="handleFileSelect('${docType}', this.files[0])">
+        </div>
+        ${existing ? `<div class="file-info"><span>&#128206; ${existing.name}</span><span class="remove-file" onclick="removeFile('${esc(mat.supplier_material_code)}', '${docType}')">Remove</span></div>` : ''}
+        ${metaHtml}
+        <div id="uploadStatus_${docType}" style="font-size:12px;margin-top:6px;"></div>
+    </div>`;
+}
+
+function renderFoodContactSection(mat) {
+    const existing = (formState.step3[mat.supplier_material_code] || {}).files || {};
+    return `<div class="doc-section" id="food_contact_section" style="${mat.is_food_contact ? '' : 'display:none;'}">
+        <h3>5. Food Contact Declaration of Compliance (DoC) <span class="required">*</span></h3>
+        <div class="checkbox-group">
+            <input type="checkbox" id="food_contact_toggle" ${mat.is_food_contact ? 'checked' : ''} onchange="toggleFoodContact('${esc(mat.supplier_material_code)}', this.checked)">
+            <label for="food_contact_toggle">This is a Food Contact Material</label>
+        </div>
+        <div id="food_contact_dropzone_area" style="${mat.is_food_contact ? '' : 'display:none;'}">
+            <div class="dropzone ${existing.food_contact_doc ? 'uploaded' : ''}" data-doc-type="food_contact_doc">
+                <div class="dz-icon">&#128196;</div>
+                <div class="dz-text">${existing.food_contact_doc ? `Uploaded: ${existing.food_contact_doc.name}` : 'Drag &amp; drop PDF here or click to browse'}</div>
+                <div class="dz-hint">${existing.food_contact_doc ? 'Drop or click to replace' : 'PDF only, max 10 MB'}</div>
+                <input type="file" accept=".pdf" style="display:none" onchange="handleFileSelect('food_contact_doc', this.files[0])">
+            </div>
+            ${existing.food_contact_doc ? `<div class="file-info"><span>&#128206; ${existing.food_contact_doc.name}</span><span class="remove-file" onclick="removeFile('${esc(mat.supplier_material_code)}', 'food_contact_doc')">Remove</span></div>` : ''}
+        </div>
+        <div id="uploadStatus_food_contact_doc" style="font-size:12px;margin-top:6px;"></div>
+    </div>`;
+}
+
+function onSdsDateChange(code, val) {
+    saveDocMeta(code, 'sds', 'date', val);
+    const warn = document.getElementById('sds_date_warn');
+    if (warn && val) {
+        const issueDate = new Date(val);
+        const threeYearsAgo = new Date();
+        threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+        if (issueDate < threeYearsAgo) {
+            warn.textContent = 'Warning: This SDS exceeds the 3-year compliance lifecycle guideline.';
+            warn.style.color = '#b8860b';
+            sdsWarnings[code] = true;
+            showGlobalWarning('Warning: This SDS exceeds the 3-year compliance lifecycle guideline.', 'warning');
+        } else {
+            warn.textContent = '';
+            sdsWarnings[code] = false;
+            clearWarnings();
+        }
+    }
+}
+
+function toggleFoodContact(code, checked) {
+    const mat = formState.step2.find(m => m.supplier_material_code === code);
+    if (mat) mat.is_food_contact = checked;
+    const section = document.getElementById('food_contact_section');
+    const area = document.getElementById('food_contact_dropzone_area');
+    if (section) section.style.display = checked ? '' : 'none';
+    if (area) area.style.display = checked ? '' : 'none';
+}
+
+function saveDocMeta(code, docType, key, val) {
+    formState.step3docs[code] = formState.step3docs[code] || {};
+    formState.step3docs[code][docType] = formState.step3docs[code][docType] || {};
+    formState.step3docs[code][docType][key] = val;
+}
+
+async function handleFileSelect(docType, file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf') { showToast('error', 'Only PDF files are accepted.'); return; }
+    if (file.size > 10 * 1024 * 1024) { showToast('error', 'File exceeds 10 MB limit.'); return; }
+
+    const mat = formState.step2[activeMaterialIndex];
+    const code = mat.supplier_material_code;
+    const materialId = materialIds[code];
+
+    if (!materialId) { showToast('error', 'Save materials in Step 2 first.'); return; }
+
+    const uploadKey = 'uploadStatus_' + docType;
+    document.getElementById(uploadKey).innerHTML = '<span style="color:#667eea;">Uploading...</span>';
+
+    const fd = new FormData();
+    fd.append('material_id', materialId);
+    fd.append('document_type', docType);
+    fd.append('file', file);
+    fd.append('is_food_contact', mat.is_food_contact);
+
+    if (docType === 'sds') {
+        const langSel = document.getElementById('sds_language');
+        const dateInp = document.getElementById('sds_issue_date');
+        fd.append('sds_language', langSel?.value || '');
+        fd.append('sds_issue_date', dateInp?.value || '');
+    } else if (docType === 'tds') {
+        const stateSel = document.getElementById('tds_physical_state');
+        fd.append('tds_physical_state', stateSel?.value || '');
+    } else if (docType === 'coa') {
+        fd.append('coa_test_date', document.getElementById('coa_test_date')?.value || '');
+    }
+
+    try {
+        const r = await fetch(BASE + '/step3-documents/single', { method: 'POST', headers: headers(), body: fd });
+        const result = await r.json();
+        if (!r.ok) {
+            document.getElementById(uploadKey).innerHTML = `<span style="color:#dc3545;">${result.detail || 'Upload failed'}</span>`;
+            return;
+        }
+        document.getElementById(uploadKey).innerHTML = '<span style="color:#28a745;">Uploaded</span>';
+
+        // Update state
+        formState.step3[code] = formState.step3[code] || { is_food_contact: mat.is_food_contact, files: {} };
+        formState.step3[code].files[docType] = { name: file.name, id: result.id };
+        if (result.warnings && result.warnings.length > 0) {
+            sdsWarnings[code] = true;
+            showGlobalWarning(result.warnings[0], 'warning');
+        }
+
+        renderStep3();
+    } catch(e) {
+        document.getElementById(uploadKey).innerHTML = '<span style="color:#dc3545;">Network error</span>';
+    }
+}
+
+async function removeFile(code, docType) {
+    const files = (formState.step3[code] || {}).files || {};
+    const fileInfo = files[docType];
+    if (!fileInfo) return;
+
+    try {
+        await fetch(BASE + `/document/${fileInfo.id}`, { method: 'DELETE', headers: headers() });
+    } catch(e) {}
+
+    delete files[docType];
+    if (docType === 'sds') sdsWarnings[code] = false;
+    renderStep3();
+}
+
+// ──────────── Step 4: Review & Submit ────────────
+function renderStep4() {
+    let html = `<div class="card-header"><h2>Step 4: Review &amp; Submit</h2><p>Verify all information before final submission</p></div>`;
+
+    // Section A: Supplier Profile
+    html += `<div class="review-section"><h3>A. Supplier &amp; Commercial Profile</h3>`;
+    html += `<table class="review-table">
+        <tr><th>Supplier Name (EN)</th><td>${esc(formState.step1.name_en)}</td></tr>
+        <tr><th>Supplier Name (CN)</th><td>${esc(formState.step1.name_cn || '—')}</td></tr>
+        <tr><th>Material Origin</th><td>${esc(formState.step1.material_origin)}</td></tr>
+        <tr><th>Sales Contact</th><td>${esc(formState.step1.sales_contact_name)} / ${esc(formState.step1.sales_contact_email)} / ${esc(formState.step1.sales_contact_phone)}</td></tr>
+        <tr><th>QM Contact</th><td>${formState.step1.qm_contact_name ? esc(formState.step1.qm_contact_name) + ' / ' + esc(formState.step1.qm_contact_email) : '<em>Defaults to Sales Contact</em>'}</td></tr>
+        <tr><th>Facility Address</th><td>${esc(formState.step1.facility_address)}</td></tr>
+    </table></div>`;
+
+    // Section B: Materials
+    html += `<div class="review-section"><h3>B. Raw Material Identifiers</h3>`;
+    formState.step2.forEach((mat, i) => {
+        html += `<table class="review-table" style="margin-bottom:12px;">
+            <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">Material #${i + 1}</th></tr>
+            <tr><th>Commercial Name</th><td>${esc(mat.commercial_material_name)}</td></tr>
+            <tr><th>Internal Code</th><td>${esc(mat.internal_factory_material_code)}</td></tr>
+            <tr><th>Supplier Code</th><td>${esc(mat.supplier_material_code)}</td></tr>
+            <tr><th>Food Contact</th><td>${mat.is_food_contact ? 'Yes' : 'No'}</td></tr>
+        </table>`;
+    });
+    html += `</div>`;
+
+    // Section C: Documents
+    html += `<div class="review-section"><h3>C. Document Upload Vault</h3>`;
+    formState.step2.forEach(mat => {
+        const files = (formState.step3[mat.supplier_material_code] || {}).files || {};
+        const docState = formState.step3docs[mat.supplier_material_code] || {};
+        html += `<table class="review-table" style="margin-bottom:12px;">
+            <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">${esc(mat.commercial_material_name)}</th></tr>
+            <tr class="${!files.sds ? 'warn-row' : ''}"><th>SDS</th><td>${files.sds ? esc(files.sds.name) + ' | Lang: ' + (docState.sds?.lang || '—') + ' | Date: ' + (docState.sds?.date || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
+            <tr class="${!files.tds ? 'warn-row' : ''}"><th>TDS</th><td>${files.tds ? esc(files.tds.name) + ' | State: ' + (docState.tds?.state || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
+            <tr class="${!files.coa ? 'warn-row' : ''}"><th>CoA</th><td>${files.coa ? esc(files.coa.name) + ' | Date: ' + (docState.coa?.date || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
+            <tr class="${!files.reach_rohs ? 'warn-row' : ''}"><th>REACH/RoHS</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span class="check-fail">MISSING</span>'}</td></tr>
+            ${mat.is_food_contact ? `<tr class="${!files.food_contact_doc ? 'warn-row' : ''}"><th>Food Contact DoC</th><td>${files.food_contact_doc ? esc(files.food_contact_doc.name) : '<span class="check-fail">MISSING</span>'}</td></tr>` : ''}
+        </table>`;
+    });
+    html += `</div>`;
+
+    // SDS Warnings Summary
+    let sdsWarnMat = formState.step2.filter(m => sdsWarnings[m.supplier_material_code]);
+    if (sdsWarnMat.length > 0) {
+        html += `<div class="warning-banner"><div class="icon">&#9888;</div><div class="text"><strong>SDS Compliance Warning</strong>
+            The following materials have SDS documents exceeding the 3-year lifecycle: ${sdsWarnMat.map(m => esc(m.commercial_material_name)).join(', ')}.
+            <br>These will be <strong>blocked</strong> from submission. Please upload updated SDS documents.</div></div>`;
+    }
+
+    document.getElementById('contentArea').innerHTML = html;
+    document.getElementById('navButtons').innerHTML = `
+        <button class="btn-outline" onclick="setStep(3)">&larr; Back to Documents</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()">Submit Registration</button>
+    `;
+}
+
+async function submitRegistration() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+    try {
+        const r = await fetch(BASE + '/submit', { method: 'POST', headers: headers() });
+        const result = await r.json();
+        if (!r.ok) {
+            btn.disabled = false;
+            btn.innerHTML = 'Submit Registration';
+            if (result.blocked_sds) {
+                showGlobalWarning(result.detail, 'error');
+                result.blocked_sds.forEach(b => showGlobalWarning(b, 'error'));
+            } else if (result.checks) {
+                showGlobalWarning(result.detail, 'error');
+                result.checks.forEach(c => showGlobalWarning(c, 'error'));
+            } else {
+                showToast('error', result.detail || 'Submission failed');
+            }
+            return;
+        }
+
+        document.getElementById('contentArea').innerHTML = `
+            <div class="confirmation-box">
+                <div class="icon">&#9989;</div>
+                <h2>Registration Submitted</h2>
+                <p>Your supplier and material registration has been submitted for review.</p>
+                <p style="color:#888;font-size:12px;">Reference ID: <strong>${result.id}</strong> | Status: <strong>${result.status}</strong></p>
+                <button class="btn-primary" onclick="window.location.href='/supplier-dashboard'">Return to Dashboard</button>
+            </div>`;
+        document.getElementById('navButtons').innerHTML = '';
+        document.getElementById('stepIndicator').innerHTML = '';
+        showToast('success', 'Registration submitted for review!');
+    } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = 'Submit Registration';
+        showToast('error', 'Network error');
+    }
+}
+
+// ──────────── Helpers ────────────
+function field(id, label, type, required, min, max) {
+    return `<div class="form-group"><label for="${id}">${label} ${required ? '<span class="required">*</span>' : ''}</label>
+        <input type="${type}" id="${id}" name="${id}" ${required ? 'required' : ''} ${min ? 'minlength="'+min+'"' : ''} ${max ? 'maxlength="'+max+'"' : ''} placeholder="${label}">
+        <div class="error-msg" id="err_${id}"></div></div>`;
+}
+
+function selectField(id, label, options, required) {
+    let opts = `<option value="">-- Select --</option>`;
+    if (options) options.forEach(o => opts += `<option value="${o}">${o}</option>`);
+    return `<div class="form-group ${required ? 'full' : ''}"><label for="${id}">${label} ${required ? '<span class="required">*</span>' : ''}</label>
+        <select id="${id}" name="${id}" ${required ? 'required' : ''}>${opts}</select>
+        <div class="error-msg" id="err_${id}"></div></div>`;
+}
+
+function showFieldError(id, msg) {
+    const el = document.getElementById('err_' + id);
+    if (el) el.textContent = msg;
+    const inp = document.getElementById(id);
+    if (inp) inp.classList.add('error');
+}
+
+function clearFieldError(id) {
+    const el = document.getElementById('err_' + id);
+    if (el) el.textContent = '';
+    const inp = document.getElementById(id);
+    if (inp) inp.classList.remove('error');
+}
+
+function showGlobalWarning(msg, level) {
+    const container = document.getElementById('globalWarnings');
+    const cls = level === 'error' ? 'error-banner' : 'warning-banner';
+    container.innerHTML = `<div class="warning-banner ${cls}"><div class="icon">${level === 'error' ? '&#10060;' : '&#9888;'}</div><div class="text">${msg}</div></div>`;
+}
+
+function clearWarnings() {
+    document.getElementById('globalWarnings').innerHTML = '';
+}
+
+function showToast(level, msg) {
+    const toast = document.getElementById('toast');
+    toast.className = 'toast ' + level;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+function logout() {
+    localStorage.removeItem('supplierToken');
+    window.location.href = '/supplier-login';
+}
+
+// Load supplier name
+(async () => {
+    try {
+        const r = await fetch('/api/suppliers/me', { headers: headers() });
+        if (r.ok) {
+            const data = await r.json();
+            document.getElementById('supplierName').textContent = data.name + ' (' + data.code + ')';
+        }
+    } catch(e) {}
+})();
+
+init();
+</script>
+</body>
+</html>
