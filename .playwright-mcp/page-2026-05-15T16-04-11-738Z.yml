@@ -1,0 +1,282 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link "Coolify" [ref=e8] [cursor=pointer]:
+            - /url: /
+          - link "v4.0.0" [ref=e9] [cursor=pointer]:
+            - /url: https://github.com/coollabsio/coolify/releases/tag/v4.0.0
+        - button / [ref=e11]:
+          - img [ref=e12]
+          - generic [ref=e14]: /
+        - button "Preferences 9+" [ref=e17] [cursor=pointer]:
+          - img "Preferences" [ref=e18]
+          - generic [ref=e20]: 9+
+      - combobox [ref=e23]:
+        - option "Switch team" [disabled]
+        - option "Root Team" [selected]
+      - list [ref=e24]:
+        - listitem [ref=e25]:
+          - list [ref=e26]:
+            - listitem [ref=e27]:
+              - link "Dashboard" [ref=e28] [cursor=pointer]:
+                - /url: /
+                - img [ref=e29]
+                - generic [ref=e31]: Dashboard
+            - listitem [ref=e32]:
+              - link "Projects" [ref=e33] [cursor=pointer]:
+                - /url: /projects
+                - img [ref=e34]
+                - generic [ref=e39]: Projects
+            - listitem [ref=e40]:
+              - link "Servers" [ref=e41] [cursor=pointer]:
+                - /url: /servers
+                - img [ref=e42]
+                - generic [ref=e47]: Servers
+            - listitem [ref=e48]:
+              - link "Sources" [ref=e49] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/sources
+                - img [ref=e50]
+                - generic [ref=e52]: Sources
+            - listitem [ref=e53]:
+              - link "Destinations" [ref=e54] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/destinations
+                - img [ref=e55]
+                - generic [ref=e57]: Destinations
+            - listitem [ref=e58]:
+              - link "S3 Storages" [ref=e59] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/storages
+                - img [ref=e60]
+                - generic [ref=e65]: S3 Storages
+            - listitem [ref=e66]:
+              - link "Shared Variables" [ref=e67] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/shared-variables
+                - img [ref=e68]
+                - generic [ref=e72]: Shared Variables
+            - listitem [ref=e73]:
+              - link "Notifications" [ref=e74] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/notifications/email
+                - img [ref=e75]
+                - generic [ref=e77]: Notifications
+            - listitem [ref=e78]:
+              - link "Keys & Tokens" [ref=e79] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/security/private-key
+                - img [ref=e80]
+                - generic [ref=e82]: Keys & Tokens
+            - listitem [ref=e83]:
+              - link "Tags" [ref=e84] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/tags
+                - img [ref=e85]
+                - generic [ref=e89]: Tags
+            - listitem [ref=e90]:
+              - link "Terminal" [ref=e91] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/terminal
+                - img [ref=e92]
+                - generic [ref=e95]: Terminal
+            - listitem [ref=e96]:
+              - link "Profile" [ref=e97] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/profile
+                - img [ref=e98]
+                - generic [ref=e103]: Profile
+            - listitem [ref=e104]:
+              - link "Teams" [ref=e105] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/team
+                - img [ref=e106]
+                - generic [ref=e114]: Teams
+            - listitem [ref=e115]:
+              - link "Settings" [ref=e116] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e117]
+                - generic [ref=e121]: Settings
+            - generic:
+              - listitem:
+                - generic "No upgrade available"
+            - listitem [ref=e123]:
+              - link "Sponsor us" [ref=e124] [cursor=pointer]:
+                - /url: https://coolify.io/sponsorships
+                - img [ref=e125]
+                - generic [ref=e129]: Sponsor us
+            - listitem [ref=e130]:
+              - generic "Send us feedback or get help!" [ref=e133] [cursor=pointer]:
+                - img [ref=e134]
+                - generic [ref=e136]: Feedback
+            - listitem [ref=e137]:
+              - button "Logout" [ref=e139]:
+                - img [ref=e140]
+                - generic [ref=e142]: Logout
+    - main [ref=e143]:
+      - generic [ref=e145]:
+        - heading "Configuration" [level=1] [ref=e146]
+        - navigation [ref=e147]:
+          - navigation [ref=e148]:
+            - list [ref=e149]:
+              - listitem [ref=e150]:
+                - generic [ref=e151]:
+                  - link "My first project" [ref=e152] [cursor=pointer]:
+                    - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92
+                  - button [ref=e153]:
+                    - img [ref=e154]
+              - listitem [ref=e156]:
+                - generic [ref=e157]:
+                  - link "production" [ref=e158] [cursor=pointer]:
+                    - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269
+                  - button [ref=e159]:
+                    - img [ref=e160]
+              - listitem [ref=e162]:
+                - link "postgresql-database-wegms2h8e6ag448xkb78r02v (localhost)" [ref=e163] [cursor=pointer]:
+                  - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v
+              - generic [ref=e168]: Exited
+          - generic [ref=e169]:
+            - navigation [ref=e170]:
+              - link "Configuration" [ref=e171] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v
+              - link "Logs" [ref=e172] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/logs
+              - link "Terminal" [ref=e173] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/terminal
+              - link "Backups" [ref=e174] [cursor=pointer]:
+                - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/backups
+            - button "Start" [active] [ref=e177] [cursor=pointer]:
+              - img [ref=e178]
+              - text: Start
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - link "General" [ref=e183] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v
+              - generic [ref=e184]: General
+            - link "Environment Variables" [ref=e185] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/environment-variables
+              - generic [ref=e186]: Environment Variables
+            - link "Servers" [ref=e187] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/servers
+              - generic [ref=e188]: Servers
+            - link "Persistent Storage" [ref=e189] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/persistent-storage
+              - generic [ref=e190]: Persistent Storage
+            - link "Import Backup" [ref=e191] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/import-backup
+              - generic [ref=e192]: Import Backup
+            - link "Webhooks" [ref=e193] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/webhooks
+              - generic [ref=e194]: Webhooks
+            - link "Resource Limits" [ref=e195] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/resource-limits
+              - generic [ref=e196]: Resource Limits
+            - link "Resource Operations" [ref=e197] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/resource-operations
+              - generic [ref=e198]: Resource Operations
+            - link "Metrics" [ref=e199] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/metrics
+              - generic [ref=e200]: Metrics
+            - link "Tags" [ref=e201] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/tags
+              - generic [ref=e202]: Tags
+            - link "Danger Zone" [ref=e203] [cursor=pointer]:
+              - /url: http://192.168.8.76:8000/project/n6lshme24c2ic5lrqzsrbf92/environment/ld069oga7nfhoddle4q0g269/database/wegms2h8e6ag448xkb78r02v/danger
+              - generic [ref=e204]: Danger Zone
+          - generic [ref=e206]:
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - heading "General" [level=2] [ref=e209]
+                - button "Save" [ref=e210] [cursor=pointer]
+              - generic [ref=e211]:
+                - generic [ref=e212]:
+                  - generic [ref=e213]: Name
+                  - textbox [ref=e332]: postgresql-database-wegms2h8e6ag448xkb78r02v
+                - generic [ref=e215]:
+                  - generic [ref=e216]: Description
+                  - textbox [ref=e333]
+                - generic [ref=e218]:
+                  - generic [ref=e219]:
+                    - text: Image
+                    - generic [ref=e220]: "*"
+                    - img [ref=e223] [cursor=pointer]
+                  - textbox [ref=e334]: postgres:18-alpine
+              - generic [ref=e226]: If you change the values in the database, please sync it here, otherwise automations (like backups) won't work.
+              - generic [ref=e227]:
+                - generic [ref=e228]:
+                  - generic [ref=e229]: Username
+                  - 'textbox "If empty: postgres" [ref=e335]': postgres
+                - generic [ref=e231]:
+                  - generic [ref=e232]:
+                    - text: Password
+                    - generic [ref=e233]: "*"
+                  - generic [ref=e234]:
+                    - button "Toggle password visibility" [ref=e235] [cursor=pointer]:
+                      - img [ref=e236]
+                    - textbox [ref=e336]: QA4PQn0HQ0E5WsNiFZYDzHJD9FzJ8hWhFRGcoF74UltcMjUUYyTuf2gLsoTdejCn
+                - generic [ref=e241]:
+                  - generic [ref=e242]: Initial Database
+                  - textbox "If empty, it will be the same as Username." [ref=e337]: postgres
+              - generic [ref=e244]:
+                - generic [ref=e245]:
+                  - generic [ref=e246]: Initial Database Arguments
+                  - textbox "If empty, use default. See in docker docs." [ref=e338]
+                - generic [ref=e248]:
+                  - generic [ref=e249]: Host Auth Method
+                  - textbox "If empty, use default. See in docker docs." [ref=e339]
+              - generic [ref=e251]:
+                - generic [ref=e252]:
+                  - text: Custom Docker Options
+                  - img [ref=e255] [cursor=pointer]
+                - textbox "--cap-add SYS_ADMIN --device=/dev/fuse --security-opt apparmor:unconfined --ulimit nofile=1024:1024 --tmpfs /run:rw,noexec,nosuid,size=65536k" [ref=e340]
+              - generic [ref=e258]:
+                - heading "Network" [level=3] [ref=e259]
+                - generic [ref=e261]:
+                  - generic [ref=e262]:
+                    - text: Ports Mappings
+                    - img [ref=e265] [cursor=pointer]
+                  - textbox "3000:5432" [ref=e341]
+                - generic [ref=e268]:
+                  - generic [ref=e269]:
+                    - text: Postgres URL (internal)
+                    - img [ref=e272] [cursor=pointer]
+                  - generic [ref=e274]:
+                    - button "Toggle password visibility" [ref=e275] [cursor=pointer]:
+                      - img [ref=e276]
+                    - textbox [ref=e342]: postgres://postgres:QA4PQn0HQ0E5WsNiFZYDzHJD9FzJ8hWhFRGcoF74UltcMjUUYyTuf2gLsoTdejCn@wegms2h8e6ag448xkb78r02v:5432/postgres
+              - heading "SSL Configuration" [level=3] [ref=e283]
+              - generic [ref=e285]:
+                - generic [ref=e288]:
+                  - generic [ref=e289]: Enable SSL
+                  - checkbox "Enable SSL" [ref=e343] [cursor=pointer]
+                - generic [ref=e291]:
+                  - heading "Proxy" [level=3] [ref=e293]
+                  - generic [ref=e296]:
+                    - generic [ref=e297]: Make it publicly available
+                    - checkbox "Make it publicly available" [ref=e344] [cursor=pointer]
+                  - generic [ref=e299]:
+                    - generic [ref=e300]:
+                      - generic [ref=e301]: Public Port
+                      - spinbutton [ref=e345]
+                    - generic [ref=e303]:
+                      - generic [ref=e304]:
+                        - text: Proxy Timeout (seconds)
+                        - img [ref=e307] [cursor=pointer]
+                      - spinbutton [ref=e346]: "3600"
+                - generic [ref=e311]:
+                  - generic [ref=e312]: Custom PostgreSQL Configuration
+                  - textbox [ref=e347]
+            - generic [ref=e314]:
+              - heading "Advanced" [level=3] [ref=e315]
+              - generic [ref=e318]:
+                - generic [ref=e319]:
+                  - text: Drain Logs
+                  - img [ref=e322] [cursor=pointer]
+                - checkbox "Drain Logs" [ref=e348] [cursor=pointer]
+              - generic [ref=e325]:
+                - generic [ref=e326]:
+                  - heading "Initialization scripts" [level=3] [ref=e327]
+                  - button "+ Add" [ref=e329] [cursor=pointer]
+                - generic [ref=e331]: No initialization scripts found.
+  - img
+  - list
+  - generic [ref=e354]:
+    - generic [ref=e356]:
+      - heading "Database Startup" [level=2] [ref=e357]
+      - button [ref=e358]:
+        - img [ref=e359]
+    - generic [ref=e365]:
+      - heading "Logs" [level=3] [ref=e366]
+      - img [ref=e368]
