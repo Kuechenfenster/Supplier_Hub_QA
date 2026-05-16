@@ -184,7 +184,7 @@
 </div>
 
 <script>
-const TOKEN = localStorage.getItem('supplierToken');
+const TOKEN = localStorage.getItem('supplier_token');
 if (!TOKEN) { window.location.href = '/supplier-login'; }
 
 const BASE = '/api/registration';
@@ -890,14 +890,17 @@ function esc(str) {
 }
 
 function logout() {
-    localStorage.removeItem('supplierToken');
+    localStorage.removeItem('supplier_token');
+    localStorage.removeItem('supplier_id');
+    localStorage.removeItem('supplier_name');
+    localStorage.removeItem('supplier_email');
     window.location.href = '/supplier-login';
 }
 
 // Load supplier name
 (async () => {
     try {
-        const r = await fetch('/api/suppliers/me', { headers: headers() });
+        const r = await fetch('/api/suppliers/me', { headers: { 'Authorization': `Bearer ${TOKEN}` } });
         if (r.ok) {
             const data = await r.json();
             document.getElementById('supplierName').textContent = data.name + ' (' + data.code + ')';
