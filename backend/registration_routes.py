@@ -393,17 +393,17 @@ async def save_step3_documents(
     material_id: int = Form(...),
     is_food_contact: bool = Form(False),
 
-    sds_file: UploadFile = File(...),
-    sds_language: str = Form(...),
-    sds_issue_date: str = Form(...),
+    sds_file: Optional[UploadFile] = File(None),
+    sds_language: Optional[str] = Form(None),
+    sds_issue_date: Optional[str] = Form(None),
 
-    tds_file: UploadFile = File(...),
-    tds_physical_state: str = Form(...),
+    tds_file: Optional[UploadFile] = File(None),
+    tds_physical_state: Optional[str] = Form(None),
 
-    coa_file: UploadFile = File(...),
-    coa_test_date: str = Form(...),
+    coa_file: Optional[UploadFile] = File(None),
+    coa_test_date: Optional[str] = Form(None),
 
-    reach_rohs_file: UploadFile = File(...),
+    reach_rohs_file: Optional[UploadFile] = File(None),
 
     food_contact_doc_file: Optional[UploadFile] = File(None),
 
@@ -423,51 +423,54 @@ async def save_step3_documents(
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
 
-    if sds_language not in SDS_LANGUAGES:
+    if sds_language and sds_language not in SDS_LANGUAGES:
         raise HTTPException(status_code=400, detail=f"Invalid SDS language. Options: {SDS_LANGUAGES}")
-    if tds_physical_state not in TDS_PHYSICAL_STATES:
+    if tds_physical_state and tds_physical_state not in TDS_PHYSICAL_STATES:
         raise HTTPException(status_code=400, detail=f"Invalid physical state. Options: {TDS_PHYSICAL_STATES}")
 
-    try:
-        sds_date = date.fromisoformat(sds_issue_date)
-    except (ValueError, TypeError):
-        raise HTTPException(status_code=400, detail="Invalid SDS issue date format (YYYY-MM-DD).")
+    sds_date = None
+    if sds_issue_date:
+        try:
+            sds_date = date.fromisoformat(sds_issue_date)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid SDS issue date format (YYYY-MM-DD).")
 
-    try:
-        coa_date = date.fromisoformat(coa_test_date)
-    except (ValueError, TypeError):
-        raise HTTPException(status_code=400, detail="Invalid CoA test date format (YYYY-MM-DD).")
+    coa_date = None
+    if coa_test_date:
+        try:
+            coa_date = date.fromisoformat(coa_test_date)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid CoA test date format (YYYY-MM-DD).")
 
-    expiry_warning = check_sds_expiry(sds_date)
+    expiry_warning = check_sds_expiry(sds_date) if sds_date else False
 
     if is_food_contact and not food_contact_doc_file:
         raise HTTPException(status_code=400, detail="Food Contact DoC file is required when Food Contact Material is checked.")
 
-    all_files = {
-        "sds": sds_file,
-        "tds": tds_file,
-        "coa": coa_file,
-        "reach_rohs": reach_rohs_file,
-    }
+    all_files = {}
+    if sds_file: all_files["sds"] = sds_file
+    if tds_file: all_files["tds"] = tds_file
+    if coa_file: all_files["coa"] = coa_file
+    if reach_rohs_file: all_files["reach_rohs"] = reach_rohs_file
     if is_food_contact and food_contact_doc_file:
         all_files["food_contact_doc"] = food_contact_doc_file
 
     for key, f in all_files.items():
-        if f:
-            validate_file(f)
+        validate_file(f)
 
     for key in ["sds", "tds", "coa", "reach_rohs"]:
-        if key in all_files:
-            existing = db.query(SupplierDocument).filter(
-                SupplierDocument.material_id == material.id,
-                SupplierDocument.document_type == key,
-            ).first()
-            if existing:
-                try:
-                    os.remove(existing.file_path)
-                except OSError:
-                    pass
-                db.delete(existing)
+        if key not in all_files:
+            continue
+        existing = db.query(SupplierDocument).filter(
+            SupplierDocument.material_id == material.id,
+            SupplierDocument.document_type == key,
+        ).first()
+        if existing:
+            try:
+                os.remove(existing.file_path)
+            except OSError:
+                pass
+            db.delete(existing)
 
         file_info = save_upload_file(all_files[key], reg.id, key)
         doc = SupplierDocument(
@@ -644,7 +647,7 @@ async def submit_registration(
 
     required_checks = []
 
-# Check profile fields
+    # Check profile fields
     if not reg.name_en:
         required_checks.append("Step 1: Supplier name (English) is required.")
     if not reg.facility_address:
@@ -655,12 +658,10 @@ async def submit_registration(
         required_checks.append("Step 2: At least one material is required.")
 
     for mat in reg.materials:
-        docs_by_type = {d.document_type: d for d in mat.documents}
-        for req_type in ["sds", "tds", "coa", "reach_rohs"]:
-            if req_type not in docs_by_type:
-                required_checks.append(f"Step 3: '{req_type.upper()}' missing for material '{mat.commercial_material_name}'.")
-        if mat.is_food_contact and "food_contact_doc" not in docs_by_type:
-            required_checks.append(f"Step 3: 'Food Contact DoC' missing for material '{mat.commercial_material_name}'.")
+        if mat.is_food_contact:
+            docs_by_type = {d.document_type: d for d in mat.documents}
+            if "food_contact_doc" not in docs_by_type:
+                required_checks.append(f"Step 3: 'Food Contact DoC' missing for material '{mat.commercial_material_name}'.")
 
     if required_checks:
         return JSONResponse(

@@ -502,15 +502,14 @@ function renderStep3() {
     const docState = formState.step3docs[mat.supplier_material_code] || {};
     const existingFiles = (formState.step3[mat.supplier_material_code] || {}).files || {};
 
-    let html = `<div class="card-header"><h2>Step 3: Document Upload Vault &amp; Technical Metadata</h2><p>Upload required compliance documents for each material</p></div>`;
+    let html = `<div class="card-header"><h2>Step 3: Document Upload Vault &amp; Technical Metadata</h2><p>Upload compliance documents for each material (all optional)</p></div>`;
 
     // Material tabs
     html += `<div class="material-tabs">`;
     formState.step2.forEach((m, i) => {
         const files = (formState.step3[m.supplier_material_code] || {}).files || {};
         const required = ['sds', 'tds', 'coa', 'reach_rohs'];
-        let uploaded = required.filter(t => files[t]).length;
-        let icon = uploaded === 4 ? '<span class="tab-check">&#10003;</span>' : (uploaded > 0 ? `<span class="tab-warn">${uploaded}/4</span>` : '');
+let icon = '';
         html += `<button class="material-tab ${i === activeMaterialIndex ? 'active' : ''}" onclick="switchMaterialTab(${i})">
             ${esc(m.commercial_material_name || 'Material #' + (i+1))}${icon}
         </button>`;
@@ -593,7 +592,7 @@ function renderDocSection(docType, title, mat, docState, existingFiles) {
     let dzText = existing ? `Uploaded: ${existing.name}` : 'Drag &amp; drop PDF here or click to browse';
     let dzHint = existing ? 'Drop or click to replace' : 'PDF only, max 10 MB';
 
-    return `<div class="doc-section required">
+    return `<div class="doc-section">
         <h3>${title}</h3>
         <div class="dropzone ${dzClass}" data-doc-type="${docType}">
             <div class="dz-icon">&#128196;</div>
@@ -767,11 +766,11 @@ function renderStep4() {
         const docState = formState.step3docs[mat.supplier_material_code] || {};
         html += `<table class="review-table" style="margin-bottom:12px;">
             <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">${esc(mat.commercial_material_name)}</th></tr>
-            <tr class="${!files.sds ? 'warn-row' : ''}"><th>SDS</th><td>${files.sds ? esc(files.sds.name) + ' | Lang: ' + (docState.sds?.lang || '—') + ' | Date: ' + (docState.sds?.date || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
-            <tr class="${!files.tds ? 'warn-row' : ''}"><th>TDS</th><td>${files.tds ? esc(files.tds.name) + ' | State: ' + (docState.tds?.state || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
-            <tr class="${!files.coa ? 'warn-row' : ''}"><th>CoA</th><td>${files.coa ? esc(files.coa.name) + ' | Date: ' + (docState.coa?.date || '—') : '<span class="check-fail">MISSING</span>'}</td></tr>
-            <tr class="${!files.reach_rohs ? 'warn-row' : ''}"><th>REACH/RoHS</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span class="check-fail">MISSING</span>'}</td></tr>
-            ${mat.is_food_contact ? `<tr class="${!files.food_contact_doc ? 'warn-row' : ''}"><th>Food Contact DoC</th><td>${files.food_contact_doc ? esc(files.food_contact_doc.name) : '<span class="check-fail">MISSING</span>'}</td></tr>` : ''}
+            <tr class="${!files.sds ? '' : ''}"><th>SDS</th><td>${files.sds ? esc(files.sds.name) + ' | Lang: ' + (docState.sds?.lang || '—') + ' | Date: ' + (docState.sds?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr class="${!files.tds ? '' : ''}"><th>TDS</th><td>${files.tds ? esc(files.tds.name) + ' | State: ' + (docState.tds?.state || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr class="${!files.coa ? '' : ''}"><th>CoA</th><td>${files.coa ? esc(files.coa.name) + ' | Date: ' + (docState.coa?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr class="${!files.reach_rohs ? '' : ''}"><th>REACH/RoHS</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span style="color:#888;">—</span>'}</td></tr>
+            ${mat.is_food_contact ? `<tr class="${!files.food_contact_doc ? '' : ''}"><th>Food Contact DoC</th><td>${files.food_contact_doc ? esc(files.food_contact_doc.name) : '<span style="color:#888;">—</span>'}</td></tr>` : ''}
         </table>`;
     });
     html += `</div>`;
