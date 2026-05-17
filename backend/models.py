@@ -89,12 +89,12 @@ class SupplierRegistration(Base):
     # Section A: Supplier & Commercial Profile
     name_en = Column(String(255), nullable=False)
     name_cn = Column(String(255), nullable=True)
-    material_origin = Column(String(2), nullable=False)  # ISO 2-letter country code
+    material_origin = Column(String(100), nullable=True)  # ISO 2-letter country code
 
     # Sales Contact
-    sales_contact_name = Column(String(255), nullable=False)
-    sales_contact_email = Column(String(255), nullable=False)
-    sales_contact_phone = Column(String(50), nullable=False)
+    sales_contact_name = Column(String(255), nullable=True)
+    sales_contact_email = Column(String(255), nullable=True)
+    sales_contact_phone = Column(String(50), nullable=True)
 
     # Quality/Escalation Contact (QM Safeguard)
     qm_contact_name = Column(String(255), nullable=True)

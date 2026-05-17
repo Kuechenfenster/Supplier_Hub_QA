@@ -24,21 +24,33 @@ os.makedirs(UPLOAD_BASE, exist_ok=True)
 ALLOWED_CONTENT_TYPES = {"application/pdf"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
-ISO_COUNTRIES = {
-    "AF", "AL", "DZ", "AD", "AO", "AG", "AR", "AM", "AU", "AT", "AZ", "BS", "BH", "BD", "BB",
-    "BY", "BE", "BZ", "BJ", "BT", "BO", "BA", "BW", "BR", "BN", "BG", "BF", "BI", "CV", "KH",
-    "CM", "CA", "CF", "TD", "CL", "CN", "CO", "KM", "CG", "CR", "HR", "CU", "CY", "CZ", "DK",
-    "DJ", "DM", "DO", "EC", "EG", "SV", "GQ", "ER", "EE", "SZ", "ET", "FJ", "FI", "FR", "GA",
-    "GM", "GE", "DE", "GH", "GR", "GD", "GT", "GN", "GW", "GY", "HT", "HN", "HK", "HU", "IS",
-    "IN", "ID", "IR", "IQ", "IE", "IL", "IT", "JM", "JP", "JO", "KZ", "KE", "KI", "KP", "KR",
-    "KW", "KG", "LA", "LV", "LB", "LS", "LR", "LY", "LI", "LT", "LU", "MG", "MW", "MY", "MV",
-    "ML", "MT", "MH", "MR", "MU", "MX", "FM", "MD", "MC", "MN", "ME", "MA", "MZ", "MM", "NA",
-    "NR", "NP", "NL", "NZ", "NI", "NE", "NG", "MK", "NO", "OM", "PK", "PW", "PS", "PA", "PG",
-    "PY", "PE", "PH", "PL", "PT", "QA", "RO", "RU", "RW", "KN", "LC", "VC", "WS", "SM", "ST",
-    "SA", "SN", "RS", "SC", "SL", "SG", "SK", "SI", "SB", "SO", "ZA", "SS", "ES", "LK", "SD",
-    "SR", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TO", "TT", "TN", "TR", "TM",
-    "TV", "UG", "UA", "AE", "GB", "US", "UY", "UZ", "VU", "VA", "VE", "VN", "YE", "ZM", "ZW"
-}
+COUNTRY_NAMES = [
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia",
+    "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus",
+    "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil",
+    "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada",
+    "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
+    "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+    "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+    "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
+    "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hong Kong", "Hungary",
+    "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan",
+    "Jordan", "Kazakhstan", "Kenya", "Kiribati", "North Korea", "South Korea", "Kuwait", "Kyrgyzstan",
+    "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania",
+    "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands",
+    "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro",
+    "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand",
+    "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau",
+    "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+    "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia",
+    "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia",
+    "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia",
+    "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan",
+    "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
+    "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan",
+    "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States",
+    "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+]
 
 SDS_LANGUAGES = ["English", "German", "French", "Traditional Chinese", "Simplified Chinese", "Other"]
 TDS_PHYSICAL_STATES = ["Liquid", "Powder", "Granules", "Pellets", "Solid"]
@@ -103,8 +115,8 @@ class ContactProfile(BaseModel):
 class SupplierProfileSchema(BaseModel):
     name_en: str
     name_cn: Optional[str] = None
-    material_origin: str
-    sales_contact: ContactProfile
+    material_origin: Optional[str] = None
+    sales_contact: Optional[ContactProfile] = None
     qm_contact: Optional[ContactProfile] = None
     facility_address: str
 
@@ -115,10 +127,22 @@ class SupplierProfileSchema(BaseModel):
         return v.strip()
 
     @validator("material_origin")
-    def valid_iso_code(cls, v):
-        if v.strip().upper() not in ISO_COUNTRIES:
-            raise ValueError(f"Invalid ISO 2-letter country code: {v}")
-        return v.strip().upper()
+    def valid_country(cls, v):
+        if v and v.strip() and v.strip() not in COUNTRY_NAMES:
+            raise ValueError(f"Invalid country: {v}")
+        return v.strip() if v else None
+
+    @validator("facility_address")
+    def address_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Facility address is required")
+        return v.strip()
+
+    @validator("material_origin")
+    def valid_country(cls, v):
+        if v and v.strip() and v.strip() not in COUNTRY_NAMES:
+            raise ValueError(f"Invalid country: {v}")
+        return v.strip() if v else None
 
     @validator("facility_address")
     def address_not_empty(cls, v):
@@ -156,7 +180,7 @@ class MaterialIdentifierSchema(BaseModel):
 
 @router.get("/countries")
 async def list_countries():
-    return sorted(ISO_COUNTRIES)
+    return sorted(COUNTRY_NAMES)
 
 
 @router.get("/metadata/lookup")
@@ -164,7 +188,7 @@ async def lookup_metadata():
     return {
         "sds_languages": SDS_LANGUAGES,
         "physical_states": TDS_PHYSICAL_STATES,
-        "countries": sorted(ISO_COUNTRIES),
+        "countries": sorted(COUNTRY_NAMES),
     }
 
 
@@ -232,10 +256,10 @@ async def get_draft(
 async def save_step1_profile(
     name_en: str = Form(..., min_length=2, max_length=255),
     name_cn: str = Form(""),
-    material_origin: str = Form(..., min_length=2, max_length=2),
-    sales_contact_name: str = Form(...),
-    sales_contact_email: str = Form(...),
-    sales_contact_phone: str = Form(...),
+    material_origin: str = Form(""),
+    sales_contact_name: str = Form(""),
+    sales_contact_email: str = Form(""),
+    sales_contact_phone: str = Form(""),
     qm_contact_name: str = Form(""),
     qm_contact_email: str = Form(""),
     qm_contact_phone: str = Form(""),
@@ -243,20 +267,28 @@ async def save_step1_profile(
     supplier: Supplier = Depends(get_current_supplier),
     db: Session = Depends(get_db),
 ):
-    profile = SupplierProfileSchema(
-        name_en=name_en,
-        name_cn=name_cn or None,
-        material_origin=material_origin,
-        sales_contact=ContactProfile(
+    sales_contact = None
+    if sales_contact_name.strip() or sales_contact_email.strip() or sales_contact_phone.strip():
+        sales_contact = ContactProfile(
             full_name=sales_contact_name,
             email=sales_contact_email,
             phone=sales_contact_phone,
-        ),
-        qm_contact=ContactProfile(
+        )
+
+    qm_contact = None
+    if qm_contact_name.strip():
+        qm_contact = ContactProfile(
             full_name=qm_contact_name,
             email=qm_contact_email,
             phone=qm_contact_phone,
-        ) if qm_contact_name.strip() else None,
+        )
+
+    profile = SupplierProfileSchema(
+        name_en=name_en,
+        name_cn=name_cn or None,
+        material_origin=material_origin or None,
+        sales_contact=sales_contact,
+        qm_contact=qm_contact,
         facility_address=facility_address,
     )
 
@@ -271,18 +303,23 @@ async def save_step1_profile(
     reg.name_en = profile.name_en
     reg.name_cn = profile.name_cn
     reg.material_origin = profile.material_origin
-    reg.sales_contact_name = profile.sales_contact.full_name
-    reg.sales_contact_email = profile.sales_contact.email
-    reg.sales_contact_phone = profile.sales_contact.phone
+    if profile.sales_contact:
+        reg.sales_contact_name = profile.sales_contact.full_name
+        reg.sales_contact_email = profile.sales_contact.email
+        reg.sales_contact_phone = profile.sales_contact.phone
+        if not profile.qm_contact:
+            reg.qm_contact_name = profile.sales_contact.full_name
+            reg.qm_contact_email = profile.sales_contact.email
+            reg.qm_contact_phone = profile.sales_contact.phone
+    else:
+        reg.sales_contact_name = None
+        reg.sales_contact_email = None
+        reg.sales_contact_phone = None
 
     if profile.qm_contact:
         reg.qm_contact_name = profile.qm_contact.full_name
         reg.qm_contact_email = profile.qm_contact.email
         reg.qm_contact_phone = profile.qm_contact.phone
-    else:
-        reg.qm_contact_name = profile.sales_contact.full_name
-        reg.qm_contact_email = profile.sales_contact.email
-        reg.qm_contact_phone = profile.sales_contact.phone
 
     reg.facility_address = profile.facility_address
     reg.updated_at = datetime.utcnow()
@@ -607,11 +644,9 @@ async def submit_registration(
 
     required_checks = []
 
-    # Check profile fields
-    if not reg.name_en or not reg.material_origin:
-        required_checks.append("Step 1: Supplier profile is incomplete (name_en, material_origin required).")
-    if not reg.sales_contact_name or not reg.sales_contact_email:
-        required_checks.append("Step 1: Sales contact is incomplete.")
+# Check profile fields
+    if not reg.name_en:
+        required_checks.append("Step 1: Supplier name (English) is required.")
     if not reg.facility_address:
         required_checks.append("Step 1: Facility address is required.")
 

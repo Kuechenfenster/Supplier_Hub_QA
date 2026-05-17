@@ -314,14 +314,14 @@ function renderStep1() {
 
     html += field('name_en', 'Supplier Entity Name (English)', 'text', true, 2, 255);
     html += field('name_cn', 'Supplier Entity Name (Chinese)', 'text', false);
-    html += selectField('material_origin', 'Material Origin', lookupData.countries, true);
+    html += selectField('material_origin', 'Material Origin', lookupData.countries, false);
     html += `</div>`;
 
     // Sales Contact
-    html += `<fieldset class="contact-group"><legend>Sales Contact Profile</legend><div class="form-grid">`;
-    html += field('sales_contact_name', 'Full Name', 'text', true);
-    html += field('sales_contact_email', 'Email Address', 'email', true);
-    html += field('sales_contact_phone', 'Phone Number (intl. format)', 'tel', true);
+    html += `<fieldset class="contact-group"><legend>Sales Contact Profile <span style="color:#888;font-weight:400;font-size:11px;">— optional</span></legend><div class="form-grid">`;
+    html += field('sales_contact_name', 'Full Name', 'text', false);
+    html += field('sales_contact_email', 'Email Address', 'email', false);
+    html += field('sales_contact_phone', 'Phone Number (intl. format)', 'tel', false);
     html += `</div></fieldset>`;
 
     // QM Contact
@@ -368,12 +368,9 @@ async function saveStep1() {
     const nameEn = document.getElementById('name_en')?.value || '';
     if (nameEn.length < 2 || nameEn.length > 255) { showFieldError('name_en', 'Must be 2-255 characters'); valid = false; }
     const origin = document.getElementById('material_origin')?.value || '';
-    if (!lookupData.countries.includes(origin)) { showFieldError('material_origin', 'Select a valid country'); valid = false; }
+    if (origin && !lookupData.countries.includes(origin)) { showFieldError('material_origin', 'Select a valid country'); valid = false; }
     const addr = document.getElementById('facility_address')?.value || '';
     if (!addr.trim()) { showFieldError('facility_address', 'Required'); valid = false; }
-    ['sales_contact_name', 'sales_contact_email', 'sales_contact_phone'].forEach(f => {
-        if (!(document.getElementById(f)?.value || '').trim()) { showFieldError(f, 'Required'); valid = false; }
-    });
     const scEmail = document.getElementById('sales_contact_email')?.value || '';
     if (scEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(scEmail)) { showFieldError('sales_contact_email', 'Invalid email'); valid = false; }
     const scPhone = document.getElementById('sales_contact_phone')?.value || '';
@@ -744,8 +741,8 @@ function renderStep4() {
     html += `<table class="review-table">
         <tr><th>Supplier Name (EN)</th><td>${esc(formState.step1.name_en)}</td></tr>
         <tr><th>Supplier Name (CN)</th><td>${esc(formState.step1.name_cn || '—')}</td></tr>
-        <tr><th>Material Origin</th><td>${esc(formState.step1.material_origin)}</td></tr>
-        <tr><th>Sales Contact</th><td>${esc(formState.step1.sales_contact_name)} / ${esc(formState.step1.sales_contact_email)} / ${esc(formState.step1.sales_contact_phone)}</td></tr>
+        <tr><th>Material Origin</th><td>${esc(formState.step1.material_origin || '—')}</td></tr>
+        <tr><th>Sales Contact</th><td>${formState.step1.sales_contact_name ? esc(formState.step1.sales_contact_name) + ' / ' + esc(formState.step1.sales_contact_email) + ' / ' + esc(formState.step1.sales_contact_phone) : '<em>Not provided</em>'}</td></tr>
         <tr><th>QM Contact</th><td>${formState.step1.qm_contact_name ? esc(formState.step1.qm_contact_name) + ' / ' + esc(formState.step1.qm_contact_email) : '<em>Defaults to Sales Contact</em>'}</td></tr>
         <tr><th>Facility Address</th><td>${esc(formState.step1.facility_address)}</td></tr>
     </table></div>`;
