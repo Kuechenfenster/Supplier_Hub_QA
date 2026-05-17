@@ -9,10 +9,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 import uvicorn
 
-from models import init_db, get_db, InternalUser, Department, Supplier, SessionLocal
+from models import init_db, get_db, InternalUser, Department, Supplier, SessionLocal, engine
 from auth_helpers import (
     hash_password, verify_password, create_jwt_token, decode_jwt_token,
     get_current_user, get_current_supplier, log_audit, security, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRY
@@ -61,8 +61,20 @@ app.include_router(registration_router)
 # Register Supplier Registration router
 app.include_router(registration_router)
 
-# Initialize database
+# ─── Database Init & Migration Fixes — runs once on startup ───
 init_db()
+
+if DATABASE_URL.startswith("postgres"):
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE supplier_registrations ALTER COLUMN material_origin TYPE VARCHAR(100)"))
+            conn.execute(text("ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_name DROP NOT NULL"))
+            conn.execute(text("ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_email DROP NOT NULL"))
+            conn.execute(text("ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_phone DROP NOT NULL"))
+            conn.commit()
+            print("✅ Registration column migrations applied")
+    except Exception as e:
+        print(f"⚠️ Registration migration skipped (may already be applied): {e}")
 
 # Frontend HTML Routes
 @app.get("/", response_class=FileResponse)
