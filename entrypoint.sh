@@ -26,6 +26,9 @@ except Exception as e:
     done
 fi
 
+echo "==> Running database migrations..."
+python backend/migrate.py || true
+
 echo "==> Running admin seed..."
 python backend/init_db.py || true
 
