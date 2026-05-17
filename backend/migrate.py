@@ -490,8 +490,76 @@ migrations = [
     """CREATE INDEX IF NOT EXISTS idx_substance_tracking_trace ON substance_tracking(trace_id)""",
     """CREATE INDEX IF NOT EXISTS idx_safety_assessment_sku ON safety_assessments(product_sku)""",
     """CREATE INDEX IF NOT EXISTS idx_safety_assessment_status ON safety_assessments(status)""",
-    """CREATE INDEX IF NOT EXISTS idx_assessment_checklist_assessment ON assessment_checklist(assessment_id)""",
+"""CREATE INDEX IF NOT EXISTS idx_assessment_checklist_assessment ON assessment_checklist(assessment_id)""",
     """CREATE INDEX IF NOT EXISTS idx_assessment_result_assessment ON assessment_results(assessment_id)""",
+
+    # ==================================================================
+    # Registration Module Tables (Create)
+    # ==================================================================
+    """CREATE TABLE IF NOT EXISTS supplier_registrations (
+        id SERIAL PRIMARY KEY,
+        supplier_id INTEGER NOT NULL,
+        registration_status VARCHAR(20) DEFAULT 'draft',
+        name_en VARCHAR(255) NOT NULL,
+        name_cn VARCHAR(255),
+        material_origin VARCHAR(100),
+        sales_contact_name VARCHAR(255),
+        sales_contact_email VARCHAR(255),
+        sales_contact_phone VARCHAR(50),
+        qm_contact_name VARCHAR(255),
+        qm_contact_email VARCHAR(255),
+        qm_contact_phone VARCHAR(50),
+        facility_address TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        submitted_at TIMESTAMP
+    )""",
+    """CREATE TABLE IF NOT EXISTS material_registrations (
+        id SERIAL PRIMARY KEY,
+        registration_id INTEGER NOT NULL,
+        commercial_material_name VARCHAR(255) NOT NULL,
+        internal_factory_material_code VARCHAR(100) NOT NULL,
+        supplier_material_code VARCHAR(100) NOT NULL,
+        is_food_contact BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS supplier_documents (
+        id SERIAL PRIMARY KEY,
+        registration_id INTEGER NOT NULL,
+        material_id INTEGER NOT NULL,
+        document_type VARCHAR(30) NOT NULL,
+        file_path VARCHAR(500) NOT NULL,
+        original_filename VARCHAR(255) NOT NULL,
+        file_size_bytes INTEGER NOT NULL,
+        sds_language VARCHAR(50),
+        sds_issue_date DATE,
+        sds_expiry_warning BOOLEAN DEFAULT FALSE,
+        tds_physical_state VARCHAR(30),
+        coa_test_date DATE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id),
+        FOREIGN KEY (material_id) REFERENCES material_registrations(id)
+    )""",
+
+    # ==================================================================
+    # Registration Module Migration Fixes (Alter existing columns)
+    # ==================================================================
+    """ALTER TABLE supplier_registrations ALTER COLUMN material_origin TYPE VARCHAR(100)""",
+    """ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_name DROP NOT NULL""",
+    """ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_email DROP NOT NULL""",
+    """ALTER TABLE supplier_registrations ALTER COLUMN sales_contact_phone DROP NOT NULL""",
+
+    # Registration Indexes
+    """CREATE INDEX IF NOT EXISTS idx_supplier_reg_supplier ON supplier_registrations(supplier_id)""",
+    """CREATE INDEX IF NOT EXISTS idx_supplier_reg_status ON supplier_registrations(registration_status)""",
+    """CREATE INDEX IF NOT EXISTS idx_material_reg_registration ON material_registrations(registration_id)""",
+    """CREATE INDEX IF NOT EXISTS idx_material_reg_supplier_code ON material_registrations(registration_id, supplier_material_code)""",
+    """CREATE INDEX IF NOT EXISTS idx_supplier_doc_registration ON supplier_documents(registration_id)""",
+    """CREATE INDEX IF NOT EXISTS idx_supplier_doc_material ON supplier_documents(material_id)""",
+    """CREATE INDEX IF NOT EXISTS idx_supplier_doc_type ON supplier_documents(document_type)""",
 ]
 
 print("=" * 60)
