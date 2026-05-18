@@ -133,7 +133,7 @@
             <div class="nav-group">
                 <div class="nav-group-title">Suppliers & Materials</div>
                 <a href="#" class="nav-item" data-page="raw-suppliers">
-                    <span>Material Suppliers</span>
+                    <span>Manufactures</span>
                     <span class="count" id="countRawSuppliers">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="materials">
@@ -242,7 +242,7 @@
 <!-- Raw Suppliers Content -->
                     <div id="raw-suppliers-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Material Suppliers</h3>
+                            <h3>Manufactures</h3>
                             <div style="display:flex;gap:10px;">
                                 <button class="btn-primary" onclick="openRegistrationWizard()">+ Register New Supplier</button>
                                 <button class="btn-primary" id="btnAddMaterial" style="display:none;background:linear-gradient(135deg, #28a745 0%, #20c997 100%);" onclick="openRegistrationWizard()">+ Add New Material</button>
@@ -743,7 +743,7 @@ async function loadRawSuppliers() {
                     navigation: 'Navigation',
                     overview: 'Overview',
                     materialsSuppliers: 'Suppliers & Materials',
-                    materialSuppliers: 'Material Suppliers',
+                    materialSuppliers: 'Manufactures',
                     material: 'Registered Materials',
                     substances: 'Substances & Mixtures',
                     sourcedComponents: 'Sourced Components',
@@ -777,7 +777,7 @@ async function loadRawSuppliers() {
                 },
                 pages: {
                     comingSoon: 'page coming soon...',
-                    rawSuppliersTitle: 'Material Suppliers',
+                    rawSuppliersTitle: 'Manufactures',
                     rawSuppliersDesc: 'Manage your material suppliers.',
                     materialTitle: 'Registered Materials',
                     materialDesc: 'Material library and specifications.',
