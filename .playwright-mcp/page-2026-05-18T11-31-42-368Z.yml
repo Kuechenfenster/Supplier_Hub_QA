@@ -1,0 +1,71 @@
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - heading "Supplier Portal" [level=1] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: "Language:"
+        - combobox "Language:" [ref=e7] [cursor=pointer]:
+          - option "English" [selected]
+          - option "中文 (Chinese)"
+      - generic [ref=e8]: Demo Supplier Co.
+      - button "Logout" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - complementary [ref=e11]:
+      - generic [ref=e12]: Navigation
+      - generic [ref=e13]:
+        - generic [ref=e14]: Overview
+        - link "Overview" [ref=e15] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e16]:
+        - generic [ref=e17]: Suppliers & Materials
+        - link "Manufactures 0" [ref=e18] [cursor=pointer]:
+          - /url: "#"
+        - link "Registered Materials 0" [ref=e19] [cursor=pointer]:
+          - /url: "#"
+        - link "Substances & Mixtures 0" [ref=e20] [cursor=pointer]:
+          - /url: "#"
+        - link "Sourced Components 0" [ref=e21] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e22]:
+        - generic [ref=e23]: Products & Components
+        - link "Bought Components 0" [ref=e24] [cursor=pointer]:
+          - /url: "#"
+        - link "Products 0" [ref=e25] [cursor=pointer]:
+          - /url: "#"
+        - link "Seal Samples" [ref=e26] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e27]:
+        - generic [ref=e28]: Process
+        - link "Process Flow" [ref=e29] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e30]:
+        - generic [ref=e31]: Vendor Compliance
+        - link "Upcoming Audits" [ref=e32] [cursor=pointer]:
+          - /url: "#"
+        - link "Corrective Action Plan" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "Manufactures" [level=2] [ref=e69]
+          - paragraph [ref=e38]: Register your manufactures (Tier 2, Raw Material, Component/Part, Printer).
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - heading "Manufactures" [level=3] [ref=e72]
+            - button "+ Register Manufacture" [ref=e73] [cursor=pointer]
+          - generic [ref=e78]:
+            - generic [ref=e79]: Manufacture Name *
+            - textbox "e.g. ABC Plastics Ltd." [active] [ref=e80]: ABC Plastics Ltd.
+            - generic [ref=e81]: Supply Type *
+            - combobox [ref=e82]:
+              - option "-- Select Type --"
+              - option "Tier 2 Supplier (Plastic, Metal, Fabric, Electrical, Batteries, Packaging)" [selected]
+              - option "Raw Material (Substances/Mixtures, Pigments, Paint, Ink, Glue, Fragrances)"
+              - option "Component / Part Supplier (Pre-fabricated, Springs, Wheels, Stamping, Die Cast)"
+              - option "Printer"
+            - generic [ref=e83]:
+              - button "Save" [ref=e84] [cursor=pointer]
+              - button "Cancel" [ref=e85] [cursor=pointer]
+          - generic [ref=e75]:
+            - paragraph [ref=e76]: No manufactures registered yet.
+            - paragraph [ref=e77]: Register your manufactures before adding materials.

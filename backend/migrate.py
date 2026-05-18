@@ -515,7 +515,7 @@ migrations = [
         submitted_at TIMESTAMP
     )""",
     """CREATE TABLE IF NOT EXISTS registered_manufactures (
-        id SERIAL PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         registration_id INTEGER NOT NULL,
         manufacture_name VARCHAR(255) NOT NULL,
         supply_type VARCHAR(30) NOT NULL,

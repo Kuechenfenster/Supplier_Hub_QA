@@ -287,7 +287,6 @@ async def create_manufacture(
     db.add(mfg)
     reg.updated_at = datetime.utcnow()
     db.commit()
-    db.refresh(mfg)
 
     return {
         "id": mfg.id,
@@ -330,7 +329,6 @@ async def update_manufacture(
     mfg.updated_at = datetime.utcnow()
     reg.updated_at = datetime.utcnow()
     db.commit()
-    db.refresh(mfg)
 
     return {
         "id": mfg.id,
