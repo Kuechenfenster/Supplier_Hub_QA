@@ -330,17 +330,38 @@
                             </div>
                         </div>
                         <div id="materialDocsForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
-                            <h4 style="margin-bottom:12px;">Upload Documents for: <span id="docMaterialName"></span></h4>
+                            <h4 style="margin-bottom:12px;">Documents for: <span id="docMaterialName"></span></h4>
                             <input type="hidden" id="docMaterialId">
                             <input type="hidden" id="docSupplyType">
                             <div id="docUploadFields"></div>
                             <div style="margin-top:16px;display:flex;gap:10px;">
-                                <button class="btn-primary" onclick="uploadDocuments()">Upload</button>
+                                <button class="btn-primary" onclick="showUploadModal()">+ Upload Document</button>
                                 <button class="btn-outline" onclick="cancelDocForm()">Close</button>
                             </div>
+                            <div id="docHistoryTable" style="margin-top:20px;"></div>
                         </div>
                         <div id="materialsList">
                             <div class="loading">Loading materials...</div>
+                        </div>
+                        <!-- Upload Modal -->
+                        <div id="uploadModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+                            <div style="background:#fff;border-radius:12px;padding:30px;width:500px;max-width:90vw;max-height:90vh;overflow-y:auto;">
+                                <h3 style="margin-bottom:20px;">Upload Document</h3>
+                                <label style="font-weight:600;display:block;margin-bottom:4px;">Document Type *</label>
+                                <select id="uploadDocType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;"></select>
+                                <label style="font-weight:600;display:block;margin-bottom:4px;">Document Creation Date</label>
+                                <input type="date" id="uploadDocDate" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;">
+                                <div id="dropZone" style="border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
+                                    <p style="color:#888;margin:0;">Drag & drop file here or click to browse</p>
+                                    <p style="color:#aaa;font-size:11px;margin-top:4px;">Max 10 MB. PDF only.</p>
+                                    <input type="file" id="uploadFileInput" accept=".pdf" style="display:none;">
+                                    <p id="uploadFileName" style="color:#667eea;font-weight:600;margin-top:8px;display:none;"></p>
+                                </div>
+                                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                                    <button class="btn-outline" onclick="closeUploadModal()">Cancel</button>
+                                    <button class="btn-primary" onclick="submitUpload()">Upload</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -864,8 +885,9 @@
             } catch(e) {}
         }
 
-        function showAddMaterialForm() {
+function showAddMaterialForm() {
             document.getElementById('materialForm').style.display = 'block';
+            document.getElementById('materialsList').style.display = 'none';
             document.getElementById('editMatId').value = '';
             document.getElementById('matCommercialName').value = '';
             document.getElementById('matSupplierCode').value = '';
@@ -877,6 +899,7 @@
 
         function cancelMaterialForm() {
             document.getElementById('materialForm').style.display = 'none';
+            document.getElementById('materialsList').style.display = 'block';
         }
 
         async function saveMaterial() {
@@ -885,7 +908,6 @@
             const commercialName = document.getElementById('matCommercialName').value.trim();
             const supplierCode = document.getElementById('matSupplierCode').value.trim();
             const internalCode = document.getElementById('matInternalCode').value.trim();
-            const editId = document.getElementById('editMatId').value;
 
             if (!mfgId) { alert('Please select a manufacture.'); return; }
             if (!commercialName) { alert('Commercial material name is required.'); return; }
@@ -904,18 +926,10 @@
             };
 
             try {
-                let resp;
-                if (editId) {
-                    resp = await fetch('/api/registration/step2-materials', {
-                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
-                        body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
-                    });
-                } else {
-                    resp = await fetch('/api/registration/step2-materials', {
-                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
-                        body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
-                    });
-                }
+                const resp = await fetch('/api/registration/step2-materials', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
+                    body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
+                });
                 if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save material.'); return; }
                 cancelMaterialForm();
                 loadMaterials();
@@ -933,6 +947,8 @@
             } catch(e) { alert('Network error.'); }
         }
 
+        let currentDocsCache = {};
+
         async function openDocUpload(matId, matName, supplyType) {
             document.getElementById('materialDocsForm').style.display = 'block';
             document.getElementById('docMaterialId').value = matId;
@@ -940,106 +956,140 @@
             document.getElementById('docMaterialName').textContent = matName;
 
             const expectedTypes = DOC_TYPES_BY_SUPPLY[supplyType] || [];
-            let fields = '<p style="font-size:12px;color:#888;margin-bottom:14px;">Max 10 MB per file. Supported formats: PDF. A file date can be provided for each document.</p>';
-            expectedTypes.forEach(dt => {
-                fields += `<div class="doc-upload-row">
-                    <label>${DOC_TYPE_LABELS[dt] || dt}:</label>
-                    <input type="file" id="file_${dt}" accept=".pdf">
-                    <span style="font-size:11px;color:#888;white-space:nowrap;">File Date:</span>
-                    <input type="date" id="date_${dt}" title="Document creation date" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:135px;">
-                </div>`;
-            });
+            let fields = '<p style="font-size:12px;color:#888;margin-bottom:10px;">Max 10 MB per file. PDF only. Upload documents via the button below.</p>';
             document.getElementById('docUploadFields').innerHTML = fields;
 
-            // Load existing docs
-            try {
-                const resp = await fetch('/api/registration/draft', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await resp.json();
-                const mats = (data.registration && data.registration.materials) || [];
-                const found = mats.find(m => m.id === matId);
-                if (found && found.documents) {
-                    Object.keys(found.documents).forEach(dt => {
-                        const info = found.documents[dt];
-                        const row = document.getElementById('file_' + dt);
-                        if (row) {
-                            const parent = row.parentElement;
-                            let label = parent.querySelector('.existing-doc');
-                            if (!label) {
-                                label = document.createElement('small');
-                                label.className = 'existing-doc';
-                                label.style.cssText = 'color:#28a745;display:block;margin-top:4px;';
-                                parent.appendChild(label);
-                            }
-                            const uploadDate = info.created_at ? new Date(info.created_at).toLocaleDateString() : new Date().toLocaleDateString();
-                            const fileDate = info.document_issue_date ? new Date(info.document_issue_date + 'T00:00:00').toLocaleDateString() : '—';
-                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} | File Date: ${fileDate} | Uploaded: ${uploadDate} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
-                        }
-                    });
-                }
-            } catch(e) {}
+            const resp = await fetch('/api/registration/draft', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await resp.json();
+            const mats = (data.registration && data.registration.materials) || [];
+            const found = mats.find(m => m.id === matId);
+            currentDocsCache = found ? (found.documents || {}) : {};
+            renderDocHistory(parseInt(matId));
         }
 
         function cancelDocForm() {
             document.getElementById('materialDocsForm').style.display = 'none';
+            currentDocsCache = {};
         }
 
-        async function uploadDocuments() {
-            const matId = parseInt(document.getElementById('docMaterialId').value);
+        function showUploadModal() {
             const supType = document.getElementById('docSupplyType').value;
             const expectedTypes = DOC_TYPES_BY_SUPPLY[supType] || [];
-            let uploaded = 0;
-            for (const dt of expectedTypes) {
-                const fileInput = document.getElementById('file_' + dt);
-                if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                    const dateInput = document.getElementById('date_' + dt);
-                    const issueDate = dateInput ? dateInput.value : '';
-                    const formData = new FormData();
-                    formData.append('material_id', matId);
-                    formData.append('document_type', dt);
-                    formData.append('file', fileInput.files[0]);
-                    if (dt === 'sds') {
-                        const lang = prompt('SDS Language (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
-                        if (!lang) continue;
-                        formData.append('sds_language', lang);
-                        const issue = prompt('SDS Issue Date (YYYY-MM-DD):', issueDate || '');
-                        if (!issue) continue;
-                        formData.append('sds_issue_date', issue);
-                    }
-                    if (issueDate) {
-                        formData.append('document_issue_date', issueDate);
-                    }
-                    try {
-                        const resp = await fetch('/api/registration/step3-documents/single', {
-                            method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
-                        });
-                        if (resp.ok) {
-                            uploaded++;
-                            fileInput.value = '';
-                        } else {
-                            const err = await resp.json();
-                            console.error('Upload error:', dt, err.detail);
-                        }
-                    } catch(e) { console.error('Upload error:', dt, e); }
-                }
-            }
-            if (uploaded > 0) {
-                alert(uploaded + ' document(s) uploaded successfully.');
-                cancelDocForm();
-                loadMaterials();
-            }
+            const sel = document.getElementById('uploadDocType');
+            sel.innerHTML = '';
+            expectedTypes.forEach(dt => {
+                sel.innerHTML += `<option value="${dt}">${DOC_TYPE_LABELS[dt] || dt}</option>`;
+            });
+            document.getElementById('uploadDocDate').value = '';
+            document.getElementById('uploadFileName').style.display = 'none';
+            document.getElementById('uploadFileName').textContent = '';
+            document.getElementById('uploadFileInput').value = '';
+            document.getElementById('uploadModal').style.display = 'flex';
         }
 
-        async function deleteDocument(docId, matId, docType) {
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        async function submitUpload() {
+            const matId = parseInt(document.getElementById('docMaterialId').value);
+            const dt = document.getElementById('uploadDocType').value;
+            const docDate = document.getElementById('uploadDocDate').value;
+            const fileInput = document.getElementById('uploadFileInput');
+
+            if (!dt) { alert('Please select a document type.'); return; }
+            if (!fileInput.files || fileInput.files.length === 0) { alert('Please select a file.'); return; }
+
+            const formData = new FormData();
+            formData.append('material_id', matId);
+            formData.append('document_type', dt);
+            formData.append('file', fileInput.files[0]);
+            if (docDate) formData.append('document_issue_date', docDate);
+            if (dt === 'sds') {
+                const lang = prompt('SDS Language (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
+                if (!lang) return;
+                formData.append('sds_language', lang);
+                const issue = prompt('SDS Issue Date (YYYY-MM-DD):', docDate || '');
+                if (!issue) return;
+                formData.append('sds_issue_date', issue);
+            }
+
+            try {
+                const resp = await fetch('/api/registration/step3-documents/single', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
+                });
+                if (resp.ok) {
+                    alert('Document uploaded successfully.');
+                    closeUploadModal();
+                    const draftResp = await fetch('/api/registration/draft', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const draftData = await draftResp.json();
+                    const mats = (draftData.registration && draftData.registration.materials) || [];
+                    const found = mats.find(m => m.id === matId);
+                    currentDocsCache = found ? (found.documents || {}) : {};
+                    renderDocHistory(dt);
+                    loadMaterials();
+                } else {
+                    const err = await resp.json();
+                    alert(err.detail || 'Upload failed.');
+                }
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function deleteDocument(docId, docType) {
             if (!confirm('Remove ' + DOC_TYPE_LABELS[docType] + '?')) return;
             try {
                 const resp = await fetch('/api/registration/document/' + docId, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!resp.ok) { alert('Failed to delete document.'); return; }
-                openDocUpload(matId, document.getElementById('docMaterialName').textContent, document.getElementById('docSupplyType').value);
+                delete currentDocsCache[docType];
+                renderDocHistory();
+                loadMaterials();
             } catch(e) { alert('Network error.'); }
+        }
+
+        function renderDocHistory() {
+            const container = document.getElementById('docHistoryTable');
+            const entries = Object.entries(currentDocsCache);
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color:#888;margin-top:16px;">No documents uploaded yet.</p>';
+                return;
+            }
+            const today = new Date();
+            let rows = entries.map(([dt, info]) => {
+                const filename = info.original_filename || '—';
+                const fileDate = info.document_issue_date
+                    ? new Date(info.document_issue_date + 'T00:00:00').toLocaleDateString()
+                    : '—';
+                const uploadDate = info.created_at
+                    ? new Date(info.created_at).toLocaleDateString()
+                    : '—';
+                let age = '—';
+                if (info.document_issue_date) {
+                    const diffDays = Math.floor((today - new Date(info.document_issue_date + 'T00:00:00')) / 86400000);
+                    if (diffDays < 30) age = diffDays + ' days';
+                    else if (diffDays < 365) age = Math.floor(diffDays / 30) + ' mo';
+                    else age = Math.floor(diffDays / 365) + ' yr';
+                }
+                const viewUrl = info.id ? `/api/registration/document/${info.id}/view` : '#';
+                return `<tr>
+                    <td>${DOC_TYPE_LABELS[dt] || dt}</td>
+                    <td>${escHtml(filename)}</td>
+                    <td>${fileDate}</td>
+                    <td>${age}</td>
+                    <td>${uploadDate}</td>
+                    <td style="display:flex;gap:4px;">
+                        <button class="btn-sm-outline" onclick="window.open('${viewUrl}', '_blank')">View</button>
+                        <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, '${dt}')">✕</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            container.innerHTML = `<h4 style="margin-bottom:10px;">Uploaded Documents</h4>
+            <table class="review-table"><thead><tr><th>Document Type</th><th>Filename</th><th>File Date</th><th>Age</th><th>Uploaded</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
         }
 
         async function loadRawSuppliers() {
