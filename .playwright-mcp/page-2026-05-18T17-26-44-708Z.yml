@@ -1,0 +1,103 @@
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - heading "Supplier Portal" [level=1] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: "Language:"
+        - combobox "Language:" [ref=e7] [cursor=pointer]:
+          - option "English" [selected]
+          - option "中文 (Chinese)"
+      - generic [ref=e8]: Demo Supplier Co.
+      - button "Logout" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - complementary [ref=e11]:
+      - generic [ref=e12]: Navigation
+      - generic [ref=e13]:
+        - generic [ref=e14]: Overview
+        - link "Overview" [ref=e15] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e16]:
+        - generic [ref=e17]: Suppliers & Materials
+        - link "Manufactures 0" [ref=e18] [cursor=pointer]:
+          - /url: "#"
+        - link "Registered Materials 2" [active] [ref=e69] [cursor=pointer]:
+          - /url: "#"
+        - link "Substances & Mixtures 0" [ref=e20] [cursor=pointer]:
+          - /url: "#"
+        - link "Sourced Components 0" [ref=e21] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e22]:
+        - generic [ref=e23]: Products & Components
+        - link "Bought Components 0" [ref=e24] [cursor=pointer]:
+          - /url: "#"
+        - link "Products 0" [ref=e25] [cursor=pointer]:
+          - /url: "#"
+        - link "Seal Samples" [ref=e26] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e27]:
+        - generic [ref=e28]: Process
+        - link "Process Flow" [ref=e29] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e30]:
+        - generic [ref=e31]: Vendor Compliance
+        - link "Upcoming Audits" [ref=e32] [cursor=pointer]:
+          - /url: "#"
+        - link "Corrective Action Plan" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "Registered Materials" [level=2] [ref=e70]
+          - paragraph [ref=e38]: Register materials linked to a manufacture and upload compliance documents.
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - heading "Registered Materials" [level=3] [ref=e73]
+            - generic [ref=e74]:
+              - button "+ Register Material" [ref=e75] [cursor=pointer]
+              - button "Refresh" [ref=e76] [cursor=pointer]
+          - table [ref=e78]:
+            - rowgroup [ref=e79]:
+              - row "Material Name Manufacture Type Supplier Code Internal Code Documents Actions" [ref=e80]:
+                - columnheader "Material Name" [ref=e81]
+                - columnheader "Manufacture" [ref=e82]
+                - columnheader "Type" [ref=e83]
+                - columnheader "Supplier Code" [ref=e84]
+                - columnheader "Internal Code" [ref=e85]
+                - columnheader "Documents" [ref=e86]
+                - columnheader "Actions" [ref=e87]
+            - rowgroup [ref=e88]:
+              - 'row "flop Tommy Lee Printer flop floppy Factory FSC Certificate: missing REACH SVHC / RoHS Compliance Statement: missing Other Supporting Documents: missing Edit Docs Deactivate" [ref=e89]':
+                - cell "flop" [ref=e90]:
+                  - strong [ref=e91]: flop
+                - cell "Tommy Lee" [ref=e92]
+                - cell "Printer" [ref=e93]:
+                  - generic [ref=e94]: Printer
+                - cell "flop" [ref=e95]
+                - cell "floppy" [ref=e96]
+                - 'cell "Factory FSC Certificate: missing REACH SVHC / RoHS Compliance Statement: missing Other Supporting Documents: missing" [ref=e97]':
+                  - text: "Factory FSC Certificate: missing"
+                  - text: "REACH SVHC / RoHS Compliance Statement: missing"
+                  - text: "Other Supporting Documents: missing"
+                - cell "Edit Docs Deactivate" [ref=e98]:
+                  - button "Edit" [ref=e99] [cursor=pointer]
+                  - button "Docs" [ref=e100] [cursor=pointer]
+                  - button "Deactivate" [ref=e101] [cursor=pointer]
+              - 'row "Bubble Gum BASF Loop Raw Material Bubble Gum Bubble Gum SDS (Safety Data Sheet): ✓ TDS (Technical Data Sheet): missing CoA (Certificate of Analysis): missing REACH SVHC / RoHS Compliance Statement: missing IFRA Documentation: missing Other Supporting Documents: missing Edit Docs Deactivate" [ref=e102]':
+                - cell "Bubble Gum" [ref=e103]:
+                  - strong [ref=e104]: Bubble Gum
+                - cell "BASF Loop" [ref=e105]
+                - cell "Raw Material" [ref=e106]:
+                  - generic [ref=e107]: Raw Material
+                - cell "Bubble Gum" [ref=e108]
+                - cell "Bubble Gum" [ref=e109]
+                - 'cell "SDS (Safety Data Sheet): ✓ TDS (Technical Data Sheet): missing CoA (Certificate of Analysis): missing REACH SVHC / RoHS Compliance Statement: missing IFRA Documentation: missing Other Supporting Documents: missing" [ref=e110]':
+                  - generic [ref=e111]: "SDS (Safety Data Sheet): ✓"
+                  - text: "TDS (Technical Data Sheet): missing"
+                  - text: "CoA (Certificate of Analysis): missing"
+                  - text: "REACH SVHC / RoHS Compliance Statement: missing"
+                  - text: "IFRA Documentation: missing"
+                  - text: "Other Supporting Documents: missing"
+                - cell "Edit Docs Deactivate" [ref=e112]:
+                  - button "Edit" [ref=e113] [cursor=pointer]
+                  - button "Docs" [ref=e114] [cursor=pointer]
+                  - button "Deactivate" [ref=e115] [cursor=pointer]

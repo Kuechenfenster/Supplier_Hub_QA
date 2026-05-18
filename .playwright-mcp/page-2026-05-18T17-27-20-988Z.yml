@@ -1,0 +1,78 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - heading "Supplier Portal" [level=1] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: "Language:"
+        - combobox "Language:" [ref=e7] [cursor=pointer]:
+          - option "English" [selected]
+          - option "中文 (Chinese)"
+      - generic [ref=e8]: Demo Supplier Co.
+      - button "Logout" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - complementary [ref=e11]:
+      - generic [ref=e12]: Navigation
+      - generic [ref=e13]:
+        - generic [ref=e14]: Overview
+        - link "Overview" [ref=e15] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e16]:
+        - generic [ref=e17]: Suppliers & Materials
+        - link "Manufactures 0" [ref=e18] [cursor=pointer]:
+          - /url: "#"
+        - link "Registered Materials 2" [ref=e69] [cursor=pointer]:
+          - /url: "#"
+        - link "Substances & Mixtures 0" [ref=e20] [cursor=pointer]:
+          - /url: "#"
+        - link "Sourced Components 0" [ref=e21] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e22]:
+        - generic [ref=e23]: Products & Components
+        - link "Bought Components 0" [ref=e24] [cursor=pointer]:
+          - /url: "#"
+        - link "Products 0" [ref=e25] [cursor=pointer]:
+          - /url: "#"
+        - link "Seal Samples" [ref=e26] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e27]:
+        - generic [ref=e28]: Process
+        - link "Process Flow" [ref=e29] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e30]:
+        - generic [ref=e31]: Vendor Compliance
+        - link "Upcoming Audits" [ref=e32] [cursor=pointer]:
+          - /url: "#"
+        - link "Corrective Action Plan" [ref=e33] [cursor=pointer]:
+          - /url: "#"
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "Registered Materials" [level=2] [ref=e70]
+          - paragraph [ref=e38]: Register materials linked to a manufacture and upload compliance documents.
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - heading "Registered Materials" [level=3] [ref=e73]
+            - generic [ref=e74]:
+              - button "+ Register Material" [ref=e75] [cursor=pointer]
+              - button "Refresh" [ref=e76] [cursor=pointer]
+          - generic [ref=e116]:
+            - 'heading "Edit: flop" [level=4] [ref=e117]'
+            - generic [ref=e118]: Linked Manufacture *
+            - combobox [ref=e119]:
+              - option "-- Select Manufacture --"
+              - option "XYZ Raw Materials Ltd. (Raw Material)"
+              - option "Tommy Lee (Printer)" [selected]
+              - option "BASF Loop (Raw Material)"
+              - option "ABC Plastics Ltd. (Tier 2)"
+            - generic [ref=e120]: Supply Type
+            - textbox [disabled] [ref=e121]: Printer
+            - generic [ref=e122]: Supplier Commercial Material Name *
+            - textbox "e.g. ABS Resin PA-757" [ref=e123]: flop
+            - generic [ref=e124]: Supplier Material Code
+            - textbox "Supplier catalog/reference code" [ref=e125]: flop
+            - generic [ref=e126]: Factory Internal Material Code
+            - textbox "Your internal SKU/ERP code" [ref=e127]: floppy
+            - generic [ref=e128]:
+              - button "Save Material" [ref=e129] [cursor=pointer]
+              - button "Cancel" [ref=e130] [cursor=pointer]
+              - button "Deactivate" [ref=e131] [cursor=pointer]
