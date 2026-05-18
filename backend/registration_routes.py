@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from models import (
     SessionLocal, get_db, Supplier, SupplierRegistration,
-    MaterialRegistration, SupplierDocument
+    MaterialRegistration, SupplierDocument, RegisteredManufacture
 )
 from auth_helpers import get_current_supplier
 
@@ -54,6 +54,16 @@ COUNTRY_NAMES = [
 
 SDS_LANGUAGES = ["English", "German", "French", "Traditional Chinese", "Simplified Chinese", "Other"]
 TDS_PHYSICAL_STATES = ["Liquid", "Powder", "Granules", "Pellets", "Solid"]
+SUPPLY_TYPES = ["tier2", "raw_material", "component_part", "printer"]
+
+ALLOWED_DOC_TYPES = ["sds", "tds", "coa", "reach_rohs", "food_contact_doc", "technical_drawing", "ifra_doc", "fsc_cert", "other_supporting"]
+
+DOC_TYPES_BY_SUPPLY = {
+    "tier2": ["sds", "tds", "coa", "reach_rohs", "other_supporting"],
+    "raw_material": ["sds", "tds", "coa", "reach_rohs", "ifra_doc", "other_supporting"],
+    "component_part": ["technical_drawing", "reach_rohs", "other_supporting"],
+    "printer": ["fsc_cert", "reach_rohs", "other_supporting"],
+}
 
 
 def validate_file(file: UploadFile):
@@ -152,10 +162,18 @@ class SupplierProfileSchema(BaseModel):
 
 
 class MaterialIdentifierSchema(BaseModel):
+    manufacture_id: int
     commercial_material_name: str
     internal_factory_material_code: str
     supplier_material_code: str
+    supply_type: str
     is_food_contact: bool = False
+
+    @validator("supply_type")
+    def valid_supply_type(cls, v):
+        if v not in SUPPLY_TYPES:
+            raise ValueError(f"Invalid supply type. Options: {SUPPLY_TYPES}")
+        return v
 
     @validator("commercial_material_name")
     def commercial_name_required(cls, v):
@@ -176,6 +194,25 @@ class MaterialIdentifierSchema(BaseModel):
         return v.strip()
 
 
+class ManufactureSchema(BaseModel):
+    manufacture_name: str
+    supply_type: str
+
+    @validator("manufacture_name")
+    def name_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Manufacture name is required")
+        if len(v.strip()) < 2 or len(v.strip()) > 255:
+            raise ValueError("Manufacture name must be 2-255 characters")
+        return v.strip()
+
+    @validator("supply_type")
+    def valid_supply_type(cls, v):
+        if v not in SUPPLY_TYPES:
+            raise ValueError(f"Invalid supply type. Options: {SUPPLY_TYPES}")
+        return v
+
+
 # ──────────────────────────── Routes ────────────────────────────
 
 @router.get("/countries")
@@ -189,7 +226,150 @@ async def lookup_metadata():
         "sds_languages": SDS_LANGUAGES,
         "physical_states": TDS_PHYSICAL_STATES,
         "countries": sorted(COUNTRY_NAMES),
+        "supply_types": SUPPLY_TYPES,
+        "doc_types_by_supply": DOC_TYPES_BY_SUPPLY,
     }
+
+
+@router.get("/manufactures")
+async def list_manufactures(
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.supplier_id == supplier.id
+    ).first()
+    if not reg:
+        return {"manufactures": []}
+
+    mfgs = db.query(RegisteredManufacture).filter(
+        RegisteredManufacture.registration_id == reg.id
+    ).order_by(RegisteredManufacture.created_at.desc()).all()
+
+    return {
+        "manufactures": [
+            {
+                "id": m.id,
+                "manufacture_name": m.manufacture_name,
+                "supply_type": m.supply_type,
+                "material_count": len(m.materials) if m.materials else 0,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+            for m in mfgs
+        ]
+    }
+
+
+@router.post("/manufactures")
+async def create_manufacture(
+    payload: ManufactureSchema,
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.supplier_id == supplier.id
+    ).first()
+    if not reg:
+        raise HTTPException(status_code=400, detail="Complete Step 1 (Supplier Profile) first.")
+
+    existing = db.query(RegisteredManufacture).filter(
+        RegisteredManufacture.registration_id == reg.id,
+        RegisteredManufacture.manufacture_name == payload.manufacture_name,
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="A manufacture with this name already exists.")
+
+    mfg = RegisteredManufacture(
+        registration_id=reg.id,
+        manufacture_name=payload.manufacture_name,
+        supply_type=payload.supply_type,
+    )
+    db.add(mfg)
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(mfg)
+
+    return {
+        "id": mfg.id,
+        "manufacture_name": mfg.manufacture_name,
+        "supply_type": mfg.supply_type,
+        "message": "Manufacture registered successfully.",
+    }
+
+
+@router.put("/manufactures/{manufacture_id}")
+async def update_manufacture(
+    manufacture_id: int,
+    payload: ManufactureSchema,
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.supplier_id == supplier.id
+    ).first()
+    if not reg:
+        raise HTTPException(status_code=400, detail="No registration found.")
+
+    mfg = db.query(RegisteredManufacture).filter(
+        RegisteredManufacture.id == manufacture_id,
+        RegisteredManufacture.registration_id == reg.id,
+    ).first()
+    if not mfg:
+        raise HTTPException(status_code=404, detail="Manufacture not found")
+
+    dup = db.query(RegisteredManufacture).filter(
+        RegisteredManufacture.registration_id == reg.id,
+        RegisteredManufacture.manufacture_name == payload.manufacture_name,
+        RegisteredManufacture.id != manufacture_id,
+    ).first()
+    if dup:
+        raise HTTPException(status_code=400, detail="A manufacture with this name already exists.")
+
+    mfg.manufacture_name = payload.manufacture_name
+    mfg.supply_type = payload.supply_type
+    mfg.updated_at = datetime.utcnow()
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(mfg)
+
+    return {
+        "id": mfg.id,
+        "manufacture_name": mfg.manufacture_name,
+        "supply_type": mfg.supply_type,
+        "message": "Manufacture updated.",
+    }
+
+
+@router.delete("/manufactures/{manufacture_id}")
+async def delete_manufacture(
+    manufacture_id: int,
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.supplier_id == supplier.id
+    ).first()
+    if not reg:
+        raise HTTPException(status_code=400, detail="No registration found.")
+
+    mfg = db.query(RegisteredManufacture).filter(
+        RegisteredManufacture.id == manufacture_id,
+        RegisteredManufacture.registration_id == reg.id,
+    ).first()
+    if not mfg:
+        raise HTTPException(status_code=404, detail="Manufacture not found")
+
+    if mfg.materials:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete manufacture with {len(mfg.materials)} registered material(s). Remove materials first.",
+        )
+
+    db.delete(mfg)
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {"message": "Manufacture deleted."}
 
 
 @router.get("/draft")
@@ -203,7 +383,7 @@ async def get_draft(
     if not reg:
         return {"exists": False, "registration": None}
 
-    materials_data = []
+    produces_data = []
     for mat in reg.materials:
         docs_data = {}
         for d in mat.documents:
@@ -219,11 +399,22 @@ async def get_draft(
             }
         materials_data.append({
             "id": mat.id,
+            "manufacture_id": mat.manufacture_id,
             "commercial_material_name": mat.commercial_material_name,
             "internal_factory_material_code": mat.internal_factory_material_code,
             "supplier_material_code": mat.supplier_material_code,
+            "supply_type": mat.supply_type,
             "is_food_contact": mat.is_food_contact,
             "documents": docs_data,
+        })
+
+    manufactures_data = []
+    for mfg in reg.manufactures:
+        manufactures_data.append({
+            "id": mfg.id,
+            "manufacture_name": mfg.manufacture_name,
+            "supply_type": mfg.supply_type,
+            "material_count": len(mfg.materials) if mfg.materials else 0,
         })
 
     return {
@@ -245,6 +436,7 @@ async def get_draft(
                 "phone": reg.qm_contact_phone,
             },
             "facility_address": reg.facility_address,
+            "manufactures": manufactures_data,
             "materials": materials_data,
             "created_at": reg.created_at.isoformat() if reg.created_at else None,
             "submitted_at": reg.submitted_at.isoformat() if reg.submitted_at else None,
@@ -352,7 +544,15 @@ async def save_step2_materials(
 
     validated = []
     for item in materials_data:
-        validated.append(MaterialIdentifierSchema(**item))
+        schema = MaterialIdentifierSchema(**item)
+        # Verify manufacture belongs to this registration
+        mfg = db.query(RegisteredManufacture).filter(
+            RegisteredManufacture.id == schema.manufacture_id,
+            RegisteredManufacture.registration_id == reg.id,
+        ).first()
+        if not mfg:
+            raise HTTPException(status_code=400, detail=f"Manufacture ID {schema.manufacture_id} not found.")
+        validated.append(schema)
 
     existing_materials = {m.supplier_material_code: m for m in reg.materials}
     kept_ids = set()
@@ -360,16 +560,20 @@ async def save_step2_materials(
     for mat_schema in validated:
         if mat_schema.supplier_material_code in existing_materials:
             mat = existing_materials[mat_schema.supplier_material_code]
+            mat.manufacture_id = mat_schema.manufacture_id
             mat.commercial_material_name = mat_schema.commercial_material_name
             mat.internal_factory_material_code = mat_schema.internal_factory_material_code
+            mat.supply_type = mat_schema.supply_type
             mat.is_food_contact = mat_schema.is_food_contact
             mat.updated_at = datetime.utcnow()
         else:
             mat = MaterialRegistration(
                 registration_id=reg.id,
+                manufacture_id=mat_schema.manufacture_id,
                 commercial_material_name=mat_schema.commercial_material_name,
                 internal_factory_material_code=mat_schema.internal_factory_material_code,
                 supplier_material_code=mat_schema.supplier_material_code,
+                supply_type=mat_schema.supply_type,
                 is_food_contact=mat_schema.is_food_contact,
             )
             db.add(mat)
@@ -406,6 +610,11 @@ async def save_step3_documents(
     reach_rohs_file: Optional[UploadFile] = File(None),
 
     food_contact_doc_file: Optional[UploadFile] = File(None),
+
+    technical_drawing_file: Optional[UploadFile] = File(None),
+    ifra_doc_file: Optional[UploadFile] = File(None),
+    fsc_cert_file: Optional[UploadFile] = File(None),
+    other_supporting_file: Optional[UploadFile] = File(None),
 
     supplier: Supplier = Depends(get_current_supplier),
     db: Session = Depends(get_db),
@@ -454,11 +663,16 @@ async def save_step3_documents(
     if reach_rohs_file: all_files["reach_rohs"] = reach_rohs_file
     if is_food_contact and food_contact_doc_file:
         all_files["food_contact_doc"] = food_contact_doc_file
+    if technical_drawing_file: all_files["technical_drawing"] = technical_drawing_file
+    if ifra_doc_file: all_files["ifra_doc"] = ifra_doc_file
+    if fsc_cert_file: all_files["fsc_cert"] = fsc_cert_file
+    if other_supporting_file: all_files["other_supporting"] = other_supporting_file
 
     for key, f in all_files.items():
         validate_file(f)
 
-    for key in ["sds", "tds", "coa", "reach_rohs"]:
+    for key in ["sds", "tds", "coa", "reach_rohs", "food_contact_doc",
+                "technical_drawing", "ifra_doc", "fsc_cert", "other_supporting"]:
         if key not in all_files:
             continue
         existing = db.query(SupplierDocument).filter(
@@ -489,29 +703,6 @@ async def save_step3_documents(
             doc.tds_physical_state = tds_physical_state
         elif key == "coa":
             doc.coa_test_date = coa_date
-        db.add(doc)
-
-    if is_food_contact and "food_contact_doc" in all_files:
-        existing_fcd = db.query(SupplierDocument).filter(
-            SupplierDocument.material_id == material.id,
-            SupplierDocument.document_type == "food_contact_doc",
-        ).first()
-        if existing_fcd:
-            try:
-                os.remove(existing_fcd.file_path)
-            except OSError:
-                pass
-            db.delete(existing_fcd)
-
-        fc_info = save_upload_file(food_contact_doc_file, reg.id, "food_contact_doc")
-        doc = SupplierDocument(
-            registration_id=reg.id,
-            material_id=material.id,
-            document_type="food_contact_doc",
-            file_path=fc_info["file_path"],
-            original_filename=fc_info["original_filename"],
-            file_size_bytes=fc_info["file_size_bytes"],
-        )
         db.add(doc)
 
     material.is_food_contact = is_food_contact
@@ -562,7 +753,7 @@ async def upload_single_document(
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
 
-    if document_type not in ("sds", "tds", "coa", "reach_rohs", "food_contact_doc"):
+    if document_type not in ALLOWED_DOC_TYPES:
         raise HTTPException(status_code=400, detail=f"Unknown document type: {document_type}")
 
     validate_file(file)

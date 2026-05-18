@@ -100,6 +100,28 @@
         .priority-high { background: #f8d7da; color: #721c24; }
         .priority-medium { background: #fff3cd; color: #856404; }
         .priority-low { background: #d4edda; color: #155724; }
+
+        /* Form and table styles */
+        .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+        .form-row label { font-weight: 600; min-width: 120px; line-height: 36px; }
+        .form-row input, .form-row select { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .review-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .review-table th, .review-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+        .review-table th { background: #f8f9fa; font-weight: 600; color: #555; }
+        .review-table tr:hover { background: #f8f9fa; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-tier2 { background: #cce5ff; color: #004085; }
+        .badge-raw { background: #fff3cd; color: #856404; }
+        .badge-comp { background: #d4edda; color: #155724; }
+        .badge-printer { background: #e2d9f3; color: #5a3d7a; }
+        .doc-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 6px; }
+        .doc-upload-row label { min-width: 180px; font-size: 13px; font-weight: 600; }
+        .doc-upload-row input[type="file"] { flex: 1; }
+        .doc-file-name { font-size: 12px; color: #28a745; margin-left: 8px; }
+        .doc-file-name.missing { color: #dc3545; }
+        .btn-sm-danger { padding: 4px 10px; font-size: 12px; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-sm-danger:hover { background: #c82333; }
+        .btn-sm-outline { padding: 4px 10px; font-size: 12px; background: #fff; color: #667eea; border: 1px solid #667eea; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -239,33 +261,75 @@
                         </div>
                     </div>
 
-<!-- Raw Suppliers Content -->
+<!-- Raw Suppliers / Manufactures Content -->
                     <div id="raw-suppliers-content" class="content-area" style="display: none;">
                         <div class="section-header">
                             <h3>Manufactures</h3>
+                            <button class="btn-primary" onclick="showAddManufactureForm()">+ Register Manufacture</button>
+                        </div>
+                        <div id="manufactureForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Manufacture Name *</label>
+                            <input id="mfgName" placeholder="e.g. ABC Plastics Ltd." style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supply Type *</label>
+                            <select id="mfgSupplyType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
+                                <option value="">-- Select Type --</option>
+                                <option value="tier2">Tier 2 Supplier (Plastic, Metal, Fabric, Electrical, Batteries, Packaging)</option>
+                                <option value="raw_material">Raw Material (Substances/Mixtures, Pigments, Paint, Ink, Glue, Fragrances)</option>
+                                <option value="component_part">Component / Part Supplier (Pre-fabricated, Springs, Wheels, Stamping, Die Cast)</option>
+                                <option value="printer">Printer</option>
+                            </select>
                             <div style="display:flex;gap:10px;">
-                                <button class="btn-primary" onclick="openRegistrationWizard()">+ Register New Supplier</button>
-                                <button class="btn-primary" id="btnAddMaterial" style="display:none;background:linear-gradient(135deg, #28a745 0%, #20c997 100%);" onclick="openRegistrationWizard()">+ Add New Material</button>
-                                <button class="btn-outline" onclick="loadRawSuppliers()">Refresh</button>
+                                <input type="hidden" id="editMfgId">
+                                <button class="btn-primary" onclick="saveManufacture()">Save</button>
+                                <button class="btn-outline" onclick="cancelManufactureForm()">Cancel</button>
                             </div>
                         </div>
-                        <div id="rawSuppliersList">
-                            <div class="loading">Loading supplier registrations...</div>
-                        </div>
-                    </div>
-                        </div>
-                        <div id="rawSuppliersList">
-                            <div class="loading">Loading supplier registrations...</div>
+                        <div id="manufacturesList">
+                            <div class="loading">Loading manufactures...</div>
                         </div>
                     </div>
 
                     <!-- Materials Content -->
                     <div id="materials-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Material</h3>
-                            <button class="btn-primary" onclick="refreshMaterials()">Refresh</button>
+                            <h3>Registered Materials</h3>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn-primary" onclick="showAddMaterialForm()">+ Register Material</button>
+                                <button class="btn-outline" onclick="loadMaterials()">Refresh</button>
+                            </div>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Material page coming soon...</p>
+                        <div id="materialForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
+                            <input type="hidden" id="editMatId">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Linked Manufacture *</label>
+                            <select id="matManufactureId" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                                <option value="">-- Select Manufacture --</option>
+                            </select>
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supply Type</label>
+                            <input id="matSupplyType" disabled style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;background:#e9ecef;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supplier Commercial Material Name *</label>
+                            <input id="matCommercialName" placeholder="e.g. ABS Resin PA-757" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supplier Material Code</label>
+                            <input id="matSupplierCode" placeholder="Supplier catalog/reference code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;">Factory Internal Material Code</label>
+                            <input id="matInternalCode" placeholder="Your internal SKU/ERP code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn-primary" onclick="saveMaterial()">Save Material</button>
+                                <button class="btn-outline" onclick="cancelMaterialForm()">Cancel</button>
+                            </div>
+                        </div>
+                        <div id="materialDocsForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="margin-bottom:12px;">Upload Documents for: <span id="docMaterialName"></span></h4>
+                            <input type="hidden" id="docMaterialId">
+                            <input type="hidden" id="docSupplyType">
+                            <div id="docUploadFields"></div>
+                            <div style="margin-top:16px;display:flex;gap:10px;">
+                                <button class="btn-primary" onclick="uploadDocuments()">Upload</button>
+                                <button class="btn-outline" onclick="cancelDocForm()">Close</button>
+                            </div>
+                        </div>
+                        <div id="materialsList">
+                            <div class="loading">Loading materials...</div>
+                        </div>
                     </div>
 
                     <!-- Substances Content -->
@@ -408,7 +472,7 @@
             currentSection = page;
 
             // Load data for the page if available
-            if (page === 'raw-suppliers') loadRawSuppliers();
+            if (page === 'raw-suppliers') loadManufactures();
             if (page === 'materials') loadMaterials();
             if (page === 'substances') loadSubstances();
             if (page === 'bought-components') loadBoughtComponents();
@@ -556,109 +620,12 @@
         loadProducts();
 
         // Page-specific functions (placeholders for now)
-async function loadRawSuppliers() {
-            const container = document.getElementById('rawSuppliersList');
-            const btnAddMat = document.getElementById('btnAddMaterial');
-            container.innerHTML = '<div class="loading">Loading supplier registrations...</div>';
-
-            try {
-                const response = await fetch('/api/registration/draft', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!response.ok) { container.innerHTML = '<div class="empty-state">Unable to load registrations.</div>'; return; }
-
-                const data = await response.json();
-                if (!data.exists || !data.registration) {
-                    if (btnAddMat) btnAddMat.style.display = 'none';
-                    container.innerHTML = `<div class="empty-state">
-                        <p>No supplier registration found.</p>
-                        <p style="margin-top:12px;">Register your materials and compliance documents to begin the approval process.</p>
-                        <button class="btn-primary" style="margin-top:16px;" onclick="openRegistrationWizard()">+ Register New Supplier</button>
-                    </div>`;
-                    document.getElementById('countRawSuppliers').textContent = '0';
-                    return;
-                }
-
-                const reg = data.registration;
-                if (btnAddMat) btnAddMat.style.display = 'inline-block';
-
-                const statusBadge = {
-                    'draft': '<span class="priority-badge" style="background:#e0e0e0;color:#666;">Draft</span>',
-                    'submitted': '<span class="priority-badge" style="background:#cce5ff;color:#004085;">Submitted</span>',
-                    'under_review': '<span class="priority-badge" style="background:#fff3cd;color:#856404;">Under Review</span>',
-                    'approved': '<span class="priority-badge" style="background:#d4edda;color:#155724;">Approved</span>',
-                    'rejected': '<span class="priority-badge" style="background:#f8d7da;color:#721c24;">Rejected</span>',
-                };
-                const badge = statusBadge[reg.status] || statusBadge['draft'];
-
-                let matsRows = '';
-                (reg.materials || []).forEach(mat => {
-                    const docs = mat.documents || {};
-                    const docCount = Object.keys(docs).length;
-                    matsRows += `<tr>
-                        <td><strong>${escHtml(mat.commercial_material_name)}</strong></td>
-                        <td>${escHtml(mat.internal_factory_material_code)}</td>
-                        <td>${escHtml(mat.supplier_material_code)}</td>
-                        <td>${mat.is_food_contact ? 'Yes' : 'No'}</td>
-                        <td>${docCount}</td>
-                        <td style="display:flex;gap:6px;">
-                            <button class="btn-primary btn-sm" onclick="editMaterial('${escHtml(mat.supplier_material_code)}')">Edit</button>
-                            <button class="btn-outline btn-sm" style="color:#dc3545;border-color:#dc3545;" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name)}')">Deactivate</button>
-                        </td>
-                    </tr>`;
-                });
-
-                const canEdit = reg.status === 'draft' || reg.status === 'rejected';
-
-                container.innerHTML = `
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                        <div>
-                            <strong style="font-size:16px;">${escHtml(reg.name_en || 'Unnamed Supplier')}</strong>
-                            ${badge}
-                            ${reg.submitted_at ? `<span style="font-size:12px;color:#888;margin-left:8px;">Submitted: ${new Date(reg.submitted_at).toLocaleDateString()}</span>` : ''}
-                        </div>
-                    </div>
-
-                    <table class="review-table" style="margin-bottom:12px;">
-                        <tr><th>Origin Country</th><td>${escHtml(reg.material_origin || '—')}</td></tr>
-                        <tr><th>Sales Contact</th><td>${reg.sales_contact?.full_name ? escHtml(reg.sales_contact.full_name + ' / ' + reg.sales_contact.email) : '<em>Not provided</em>'}</td></tr>
-                        <tr><th>Facility Address</th><td>${escHtml(reg.facility_address)}</td></tr>
-                    </table>
-
-                    <h4 style="margin-bottom:10px;">Registered Materials (${(reg.materials || []).length})</h4>
-                    <table class="review-table">
-                        <thead><tr><th>Material Name</th><th>Internal Code</th><th>Supplier Code</th><th>Food Contact</th><th>Docs</th><th style="width:160px;">Actions</th></tr></thead>
-                        <tbody>${matsRows || '<tr><td colspan="6" style="color:#888;">No materials registered</td></tr>'}</tbody>
-                    </table>
-                `;
-
-                document.getElementById('countRawSuppliers').textContent = (reg.materials || []).length;
-            } catch(e) {
-                container.innerHTML = '<div class="empty-state">Error loading registrations.</div>';
-            }
-        }
-
-        function openRegistrationWizard() {
-            window.open('/supplier-registration', '_blank');
-        }
-
-        function editMaterial(supplierCode) {
-            window.open('/supplier-registration#step3&mat=' + encodeURIComponent(supplierCode), '_blank');
-        }
-
-        async function deactivateMaterial(matId, matName) {
-            if (!confirm('Deactivate material "' + matName + '"? This will remove it and all associated documents.')) return;
-            try {
-                const response = await fetch('/api/registration/material/' + matId, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!response.ok) { alert('Failed to deactivate material.'); return; }
-                loadRawSuppliers();
-            } catch(e) {
-                alert('Network error while deactivating.');
-            }
-        }
+        const DOC_TYPES_BY_SUPPLY = {
+            tier2: ['sds', 'tds', 'coa', 'reach_rohs', 'other_supporting'],
+            raw_material: ['sds', 'tds', 'coa', 'reach_rohs', 'ifra_doc', 'other_supporting'],
+            component_part: ['technical_drawing', 'reach_rohs', 'other_supporting'],
+            printer: ['fsc_cert', 'reach_rohs', 'other_supporting']
+        };
 
         function escHtml(str) {
             if (!str) return '';
@@ -667,17 +634,355 @@ async function loadRawSuppliers() {
             return div.innerHTML;
         }
 
+        // ============ Manufactures CRUD ============
+        let manufacturesCache = [];
+
+        async function loadManufactures() {
+            const container = document.getElementById('manufacturesList');
+            container.innerHTML = '<div class="loading">Loading manufactures...</div>';
+            try {
+                const resp = await fetch('/api/registration/manufactures', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { container.innerHTML = '<div class="empty-state">Unable to load manufactures.</div>'; return; }
+                const data = await resp.json();
+                manufacturesCache = data.manufactures || [];
+                document.getElementById('countRawSuppliers').textContent = manufacturesCache.length;
+
+                if (manufacturesCache.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No manufactures registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;">Register your manufactures before adding materials.</p></div>';
+                    return;
+                }
+                const typeLabels = { tier2: 'Tier 2 Supplier', raw_material: 'Raw Material', component_part: 'Component / Part Supplier', printer: 'Printer' };
+                const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
+                let rows = manufacturesCache.map(m => `<tr>
+                    <td><strong>${escHtml(m.manufacture_name)}</strong></td>
+                    <td><span class="badge ${typeBadges[m.supply_type] || ''}">${typeLabels[m.supply_type] || m.supply_type}</span></td>
+                    <td>${m.material_count || 0}</td>
+                    <td style="display:flex;gap:6px;">
+                        <button class="btn-sm-outline" onclick="editManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}', '${m.supply_type}')">Edit</button>
+                        <button class="btn-sm-danger" onclick="deleteManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}')">Delete</button>
+                    </td>
+                </tr>`).join('');
+                container.innerHTML = `<table class="review-table"><thead><tr><th>Manufacture Name</th><th>Supply Type</th><th>Materials</th><th style="width:160px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading manufactures.</div>'; }
+        }
+
+        function showAddManufactureForm() {
+            document.getElementById('manufactureForm').style.display = 'block';
+            document.getElementById('editMfgId').value = '';
+            document.getElementById('mfgName').value = '';
+            document.getElementById('mfgSupplyType').value = '';
+        }
+
+        function editManufacture(id, name, type) {
+            document.getElementById('manufactureForm').style.display = 'block';
+            document.getElementById('editMfgId').value = id;
+            document.getElementById('mfgName').value = name;
+            document.getElementById('mfgSupplyType').value = type;
+        }
+
+        function cancelManufactureForm() {
+            document.getElementById('manufactureForm').style.display = 'none';
+        }
+
+        async function saveManufacture() {
+            const name = document.getElementById('mfgName').value.trim();
+            const type = document.getElementById('mfgSupplyType').value;
+            const editId = document.getElementById('editMfgId').value;
+            if (!name) { alert('Manufacture name is required.'); return; }
+            if (!type) { alert('Supply type is required.'); return; }
+            try {
+                let resp;
+                if (editId) {
+                    resp = await fetch('/api/registration/manufactures/' + editId, {
+                        method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ manufacture_name: name, supply_type: type })
+                    });
+                } else {
+                    resp = await fetch('/api/registration/manufactures', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ manufacture_name: name, supply_type: type })
+                    });
+                }
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save.'); return; }
+                cancelManufactureForm();
+                loadManufactures();
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function deleteManufacture(id, name) {
+            if (!confirm('Delete manufacture "' + name + '"?')) return;
+            try {
+                const resp = await fetch('/api/registration/manufactures/' + id, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to delete.'); return; }
+                loadManufactures();
+            } catch(e) { alert('Network error.'); }
+        }
+
+
+        // ============ Registered Materials CRUD ============
+        const DOC_TYPE_LABELS = {
+            sds: 'SDS (Safety Data Sheet)',
+            tds: 'TDS (Technical Data Sheet)',
+            coa: 'CoA (Certificate of Analysis)',
+            reach_rohs: 'REACH SVHC / RoHS Compliance Statement',
+            food_contact_doc: 'Food Contact DoC',
+            technical_drawing: 'Technical Drawing',
+            ifra_doc: 'IFRA Documentation',
+            fsc_cert: 'Factory FSC Certificate',
+            other_supporting: 'Other Supporting Documents'
+        };
 
         async function loadMaterials() {
-            console.log('Loading Materials...');
-            const response = await fetch('/api/bom/materials', {
-                headers: { 'Authorization': 'Bearer ' + token }
+            const container = document.getElementById('materialsList');
+            container.innerHTML = '<div class="loading">Loading materials...</div>';
+            try {
+                const resp = await fetch('/api/registration/draft', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { container.innerHTML = '<div class="empty-state">Unable to load materials.</div>'; return; }
+                const data = await resp.json();
+                if (!data.exists || !data.registration) {
+                    container.innerHTML = '<div class="empty-state"><p>No registration found. Register manufactures first.</p></div>';
+                    document.getElementById('countMaterialsSide').textContent = '0';
+                    return;
+                }
+                const reg = data.registration;
+                const mats = reg.materials || [];
+                const mfgs = reg.manufactures || [];
+                const mfgMap = {};
+                mfgs.forEach(m => { mfgMap[m.id] = m.manufacture_name; });
+
+                document.getElementById('countMaterialsSide').textContent = mats.length;
+
+                if (mats.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No materials registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;">Register a manufacture first, then add materials.</p></div>';
+                    return;
+                }
+
+                const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
+                let rows = mats.map(mat => {
+                    const docs = mat.documents || {};
+                    const docKeys = Object.keys(docs);
+                    let docInfo = docKeys.map(k => {
+                        const hasFile = docs[k] && docs[k].original_filename;
+                        return `<span class="doc-file-name ${hasFile ? '' : 'missing'}">${DOC_TYPE_LABELS[k] || k}: ${hasFile ? '<span style="color:#28a745;">✓</span>' : '<span style="color:#dc3545;">✗</span>'}</span><br>`;
+                    }).join('');
+
+                    // Show expected doc types that are missing
+                    const expectedTypes = (DOC_TYPES_BY_SUPPLY && DOC_TYPES_BY_SUPPLY[mat.supply_type]) || [];
+                    let missingTypes = expectedTypes.filter(t => !docKeys.includes(t));
+                    let missingInfo = missingTypes.map(k => `<span class="doc-file-name missing">${DOC_TYPE_LABELS[k] || k}: missing</span><br>`).join('');
+
+                    return `<tr>
+                        <td><strong>${escHtml(mat.commercial_material_name)}</strong></td>
+                        <td>${escHtml(mfgMap[mat.manufacture_id] || 'Unknown')}</td>
+                        <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${mat.supply_type}</span></td>
+                        <td>${escHtml(mat.supplier_material_code)}</td>
+                        <td>${escHtml(mat.internal_factory_material_code)}</td>
+                        <td style="font-size:11px;">${docInfo}${missingInfo}</td>
+                        <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
+                            <button class="btn-sm-danger" onclick="deleteMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Delete</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+
+                container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:140px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading materials.</div>'; }
+        }
+
+        async function loadManufactureDropdown() {
+            try {
+                const resp = await fetch('/api/registration/manufactures', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                const sel = document.getElementById('matManufactureId');
+                sel.innerHTML = '<option value="">-- Select Manufacture --</option>';
+                (data.manufactures || []).forEach(m => {
+                    sel.innerHTML += `<option value="${m.id}" data-type="${m.supply_type}">${escHtml(m.manufacture_name)} (${m.supply_type})</option>`;
+                });
+                sel.onchange = function() {
+                    const opt = sel.selectedOptions[0];
+                    const supType = opt ? opt.getAttribute('data-type') : '';
+                    document.getElementById('matSupplyType').value = supType ? supType.replace(/_/g, ' ') : '';
+                };
+            } catch(e) {}
+        }
+
+        function showAddMaterialForm() {
+            document.getElementById('materialForm').style.display = 'block';
+            document.getElementById('editMatId').value = '';
+            document.getElementById('matCommercialName').value = '';
+            document.getElementById('matSupplierCode').value = '';
+            document.getElementById('matInternalCode').value = '';
+            document.getElementById('matManufactureId').value = '';
+            document.getElementById('matSupplyType').value = '';
+            loadManufactureDropdown();
+        }
+
+        function cancelMaterialForm() {
+            document.getElementById('materialForm').style.display = 'none';
+        }
+
+        async function saveMaterial() {
+            const mfgId = document.getElementById('matManufactureId').value;
+            const supType = document.getElementById('matSupplyType').value;
+            const commercialName = document.getElementById('matCommercialName').value.trim();
+            const supplierCode = document.getElementById('matSupplierCode').value.trim();
+            const internalCode = document.getElementById('matInternalCode').value.trim();
+            const editId = document.getElementById('editMatId').value;
+
+            if (!mfgId) { alert('Please select a manufacture.'); return; }
+            if (!commercialName) { alert('Commercial material name is required.'); return; }
+            if (!supplierCode) { alert('Supplier material code is required.'); return; }
+            if (!internalCode) { alert('Factory internal material code is required.'); return; }
+
+            const materialPayload = {
+                manufacture_id: parseInt(mfgId),
+                commercial_material_name: commercialName,
+                supplier_material_code: supplierCode,
+                internal_factory_material_code: internalCode,
+                supply_type: supType.replace(/ /g, '_'),
+                is_food_contact: false
+            };
+
+            try {
+                let resp;
+                if (editId) {
+                    resp = await fetch('/api/registration/step2-materials', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
+                        body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
+                    });
+                } else {
+                    resp = await fetch('/api/registration/step2-materials', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
+                        body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
+                    });
+                }
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save material.'); return; }
+                cancelMaterialForm();
+                loadMaterials();
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function deleteMaterial(matId, matName) {
+            if (!confirm('Delete material "' + matName + '"? All associated documents will be removed.')) return;
+            try {
+                const resp = await fetch('/api/registration/material/' + matId, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to delete material.'); return; }
+                loadMaterials();
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function openDocUpload(matId, matName, supplyType) {
+            document.getElementById('materialDocsForm').style.display = 'block';
+            document.getElementById('docMaterialId').value = matId;
+            document.getElementById('docSupplyType').value = supplyType;
+            document.getElementById('docMaterialName').textContent = matName;
+
+            const expectedTypes = DOC_TYPES_BY_SUPPLY[supplyType] || [];
+            let fields = '';
+            expectedTypes.forEach(dt => {
+                fields += `<div class="doc-upload-row">
+                    <label>${DOC_TYPE_LABELS[dt] || dt}:</label>
+                    <input type="file" id="file_${dt}" accept=".pdf">
+                </div>`;
             });
-            if (response.ok) {
-                const data = await response.json();
-                document.getElementById('countMaterialsSide').textContent = data.count || 0;
-                console.log('Materials:', data);
+            document.getElementById('docUploadFields').innerHTML = fields;
+
+            // Load existing docs
+            try {
+                const resp = await fetch('/api/registration/draft', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                const mats = (data.registration && data.registration.materials) || [];
+                const found = mats.find(m => m.id === matId);
+                if (found && found.documents) {
+                    Object.keys(found.documents).forEach(dt => {
+                        const info = found.documents[dt];
+                        const row = document.getElementById('file_' + dt);
+                        if (row) {
+                            const parent = row.parentElement;
+                            let label = parent.querySelector('.existing-doc');
+                            if (!label) {
+                                label = document.createElement('small');
+                                label.className = 'existing-doc';
+                                label.style.cssText = 'color:#28a745;display:block;margin-top:4px;';
+                                parent.appendChild(label);
+                            }
+                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function cancelDocForm() {
+            document.getElementById('materialDocsForm').style.display = 'none';
+        }
+
+        async function uploadDocuments() {
+            const matId = parseInt(document.getElementById('docMaterialId').value);
+            const supType = document.getElementById('docSupplyType').value;
+            const expectedTypes = DOC_TYPES_BY_SUPPLY[supType] || [];
+            let uploaded = 0;
+            for (const dt of expectedTypes) {
+                const fileInput = document.getElementById('file_' + dt);
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('material_id', matId);
+                    formData.append('document_type', dt);
+                    formData.append('file', fileInput.files[0]);
+                    if (dt === 'sds') {
+                        const lang = prompt('SDS Language (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
+                        if (!lang) continue;
+                        formData.append('sds_language', lang);
+                        const issue = prompt('SDS Issue Date (YYYY-MM-DD):', '');
+                        if (!issue) continue;
+                        formData.append('sds_issue_date', issue);
+                    }
+                    try {
+                        const resp = await fetch('/api/registration/step3-documents/single', {
+                            method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
+                        });
+                        if (resp.ok) {
+                            uploaded++;
+                            fileInput.value = '';
+                        } else {
+                            const err = await resp.json();
+                            console.error('Upload error:', dt, err.detail);
+                        }
+                    } catch(e) { console.error('Upload error:', dt, e); }
+                }
             }
+            if (uploaded > 0) {
+                alert(uploaded + ' document(s) uploaded successfully.');
+                cancelDocForm();
+                loadMaterials();
+            }
+        }
+
+        async function deleteDocument(docId, matId, docType) {
+            if (!confirm('Remove ' + DOC_TYPE_LABELS[docType] + '?')) return;
+            try {
+                const resp = await fetch('/api/registration/document/' + docId, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to delete document.'); return; }
+                openDocUpload(matId, document.getElementById('docMaterialName').textContent, document.getElementById('docSupplyType').value);
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function loadRawSuppliers() {
+            loadManufactures();
         }
 
         async function loadSubstances() {
@@ -702,7 +1007,7 @@ async function loadRawSuppliers() {
 
         async function refreshSourcedComponents() { loadSourcedComponents(); }
 
-        async function loadProducts() {
+        async function loadProductsPage() {
             console.log('Loading Products...');
         }
 
@@ -778,9 +1083,9 @@ async function loadRawSuppliers() {
                 pages: {
                     comingSoon: 'page coming soon...',
                     rawSuppliersTitle: 'Manufactures',
-                    rawSuppliersDesc: 'Manage your material suppliers.',
+                    rawSuppliersDesc: 'Register your manufactures (Tier 2, Raw Material, Component/Part, Printer).',
                     materialTitle: 'Registered Materials',
-                    materialDesc: 'Material library and specifications.',
+                    materialDesc: 'Register materials linked to a manufacture and upload compliance documents.',
                     substancesTitle: 'Substances & Mixtures',
                     substancesDesc: 'Substances and mixtures database.',
                     sourcedComponentsTitle: 'Sourced Components',
@@ -826,7 +1131,7 @@ async function loadRawSuppliers() {
                     navigation: '导航',
                     overview: '概览',
                     materialsSuppliers: '供应商与物料',
-                    materialSuppliers: '物料供应商',
+                    materialSuppliers: '制造商',
                     material: '已注册物料',
                     substances: '物质与混合物',
                     sourcedComponents: '外购组件',
@@ -860,10 +1165,10 @@ async function loadRawSuppliers() {
                 },
                 pages: {
                     comingSoon: '功能开发中...',
-                    rawSuppliersTitle: '物料供应商',
-                    rawSuppliersDesc: '管理您的物料供应商。',
+                    rawSuppliersTitle: '制造商',
+                    rawSuppliersDesc: '注册您的制造商（Tier 2供应商、原材料、组件/零件、印刷商）。',
                     materialTitle: '已注册物料',
-                    materialDesc: '物料库和规格。',
+                    materialDesc: '注册关联到制造商的物料并上传合规文件。',
                     substancesTitle: '物质与混合物',
                     substancesDesc: '物质和混合物数据库。',
                     sourcedComponentsTitle: '外购组件',
