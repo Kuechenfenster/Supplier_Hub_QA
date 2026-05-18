@@ -119,6 +119,12 @@ class RegisteredManufacture(Base):
     registration_id = Column(Integer, ForeignKey("supplier_registrations.id"), nullable=False, index=True)
     manufacture_name = Column(String(255), nullable=False)
     supply_type = Column(String(30), nullable=False)  # tier2, raw_material, component_part, printer
+    sales_contact_name = Column(String(100))
+    sales_contact_email = Column(String(200))
+    sales_contact_phone = Column(String(50))
+    tech_contact_name = Column(String(100))
+    tech_contact_email = Column(String(200))
+    tech_contact_phone = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -211,6 +217,12 @@ def init_db():
         for stmt in [
             "ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS manufacture_id INTEGER DEFAULT 1",
             "ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS supply_type VARCHAR(30) DEFAULT 'tier2'",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_name VARCHAR(100)",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_email VARCHAR(200)",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_phone VARCHAR(50)",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_name VARCHAR(100)",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_email VARCHAR(200)",
+            "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_phone VARCHAR(50)",
         ]:
             try:
                 conn.execute(sa_text(stmt))

@@ -763,6 +763,7 @@
                     return;
                 }
 
+                const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
                 const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
                 let rows = mats.map(mat => {
                     const docs = mat.documents || {};
@@ -780,7 +781,7 @@
                     return `<tr>
                         <td><strong>${escHtml(mat.commercial_material_name)}</strong></td>
                         <td>${escHtml(mfgMap[mat.manufacture_id] || 'Unknown')}</td>
-                        <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${mat.supply_type}</span></td>
+                        <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${typeLabels[mat.supply_type] || mat.supply_type}</span></td>
                         <td>${escHtml(mat.supplier_material_code)}</td>
                         <td>${escHtml(mat.internal_factory_material_code)}</td>
                         <td style="font-size:11px;">${docInfo}${missingInfo}</td>
@@ -804,12 +805,14 @@
                 const sel = document.getElementById('matManufactureId');
                 sel.innerHTML = '<option value="">-- Select Manufacture --</option>';
                 (data.manufactures || []).forEach(m => {
-                    sel.innerHTML += `<option value="${m.id}" data-type="${m.supply_type}">${escHtml(m.manufacture_name)} (${m.supply_type})</option>`;
+                    const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
+                    sel.innerHTML += `<option value="${m.id}" data-type="${m.supply_type}">${escHtml(m.manufacture_name)} (${typeLabels[m.supply_type] || m.supply_type})</option>`;
                 });
                 sel.onchange = function() {
                     const opt = sel.selectedOptions[0];
                     const supType = opt ? opt.getAttribute('data-type') : '';
-                    document.getElementById('matSupplyType').value = supType ? supType.replace(/_/g, ' ') : '';
+                    const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
+                    document.getElementById('matSupplyType').value = supType ? (typeLabels[supType] || supType) : '';
                 };
             } catch(e) {}
         }
@@ -842,12 +845,14 @@
             if (!supplierCode) { alert('Supplier material code is required.'); return; }
             if (!internalCode) { alert('Factory internal material code is required.'); return; }
 
+            const supTypeReverse = { 'Tier 2': 'tier2', 'Raw Material': 'raw_material', 'Components': 'component_part', 'Printer': 'printer' };
+
             const materialPayload = {
                 manufacture_id: parseInt(mfgId),
                 commercial_material_name: commercialName,
                 supplier_material_code: supplierCode,
                 internal_factory_material_code: internalCode,
-                supply_type: supType.replace(/ /g, '_'),
+                supply_type: supTypeReverse[supType] || supType,
                 is_food_contact: false
             };
 

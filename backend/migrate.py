@@ -585,6 +585,19 @@ migrations = [
     # SQLite-style add column (executed via try/except)
     """ALTER TABLE material_registrations ADD COLUMN manufacture_id INTEGER DEFAULT 1""",
     """ALTER TABLE material_registrations ADD COLUMN supply_type VARCHAR(30) DEFAULT 'tier2'""",
+    # Registered Manufacture contact columns
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_name VARCHAR(100)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_email VARCHAR(200)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS sales_contact_phone VARCHAR(50)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_name VARCHAR(100)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_email VARCHAR(200)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_phone VARCHAR(50)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN sales_contact_name VARCHAR(100)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN sales_contact_email VARCHAR(200)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN sales_contact_phone VARCHAR(50)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_name VARCHAR(100)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_email VARCHAR(200)""",
+    """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_phone VARCHAR(50)""",
 ]
 
 print("=" * 60)
