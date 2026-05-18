@@ -205,6 +205,18 @@ class AuditLog(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Ensure new columns exist (ALTER TABLE for PostgreSQL, skipped gracefully on SQLite)
+    from sqlalchemy import text as sa_text
+    with engine.connect() as conn:
+        for stmt in [
+            "ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS manufacture_id INTEGER DEFAULT 1",
+            "ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS supply_type VARCHAR(30) DEFAULT 'tier2'",
+        ]:
+            try:
+                conn.execute(sa_text(stmt))
+                conn.commit()
+            except Exception:
+                pass
 
 def get_db():
     db = SessionLocal()

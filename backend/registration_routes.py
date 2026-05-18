@@ -246,13 +246,28 @@ async def list_manufactures(
         RegisteredManufacture.registration_id == reg.id
     ).order_by(RegisteredManufacture.created_at.desc()).all()
 
+    from sqlalchemy import func
+    counts = {}
+    if mfgs:
+        mfg_ids = [m.id for m in mfgs]
+        try:
+            count_rows = db.query(
+                MaterialRegistration.manufacture_id,
+                func.count(MaterialRegistration.id)
+            ).filter(
+                MaterialRegistration.manufacture_id.in_(mfg_ids)
+            ).group_by(MaterialRegistration.manufacture_id).all()
+            counts = {row[0]: row[1] for row in count_rows}
+        except Exception:
+            pass
+
     return {
         "manufactures": [
             {
                 "id": m.id,
                 "manufacture_name": m.manufacture_name,
                 "supply_type": m.supply_type,
-                "material_count": len(m.materials) if m.materials else 0,
+                "material_count": counts.get(m.id, 0),
                 "created_at": m.created_at.isoformat() if m.created_at else None,
             }
             for m in mfgs
@@ -381,38 +396,56 @@ async def get_draft(
     if not reg:
         return {"exists": False, "registration": None}
 
-    produces_data = []
-    for mat in reg.materials:
-        docs_data = {}
-        for d in mat.documents:
-            docs_data[d.document_type] = {
-                "id": d.id,
-                "original_filename": d.original_filename,
-                "file_size_bytes": d.file_size_bytes,
-                "sds_language": d.sds_language,
-                "sds_issue_date": d.sds_issue_date.isoformat() if d.sds_issue_date else None,
-                "sds_expiry_warning": d.sds_expiry_warning,
-                "tds_physical_state": d.tds_physical_state,
-                "coa_test_date": d.coa_test_date.isoformat() if d.coa_test_date else None,
-            }
-        materials_data.append({
-            "id": mat.id,
-            "manufacture_id": mat.manufacture_id,
-            "commercial_material_name": mat.commercial_material_name,
-            "internal_factory_material_code": mat.internal_factory_material_code,
-            "supplier_material_code": mat.supplier_material_code,
-            "supply_type": mat.supply_type,
-            "is_food_contact": mat.is_food_contact,
-            "documents": docs_data,
-        })
+    from sqlalchemy import func as sa_func
+    materials_data = []
+    try:
+        for mat in reg.materials:
+            docs_data = {}
+            for d in mat.documents:
+                docs_data[d.document_type] = {
+                    "id": d.id,
+                    "original_filename": d.original_filename,
+                    "file_size_bytes": d.file_size_bytes,
+                    "sds_language": d.sds_language,
+                    "sds_issue_date": d.sds_issue_date.isoformat() if d.sds_issue_date else None,
+                    "sds_expiry_warning": d.sds_expiry_warning,
+                    "tds_physical_state": d.tds_physical_state,
+                    "coa_test_date": d.coa_test_date.isoformat() if d.coa_test_date else None,
+                }
+            materials_data.append({
+                "id": mat.id,
+                "manufacture_id": getattr(mat, "manufacture_id", None),
+                "commercial_material_name": mat.commercial_material_name,
+                "internal_factory_material_code": mat.internal_factory_material_code,
+                "supplier_material_code": mat.supplier_material_code,
+                "supply_type": getattr(mat, "supply_type", "tier2"),
+                "is_food_contact": mat.is_food_contact,
+                "documents": docs_data,
+            })
+    except Exception:
+        pass
 
     manufactures_data = []
+    mfg_ids = [m.id for m in reg.manufactures]
+    mfg_counts = {}
+    if mfg_ids:
+        try:
+            count_rows = db.query(
+                MaterialRegistration.manufacture_id,
+                sa_func.count(MaterialRegistration.id)
+            ).filter(
+                MaterialRegistration.manufacture_id.in_(mfg_ids)
+            ).group_by(MaterialRegistration.manufacture_id).all()
+            mfg_counts = {row[0]: row[1] for row in count_rows}
+        except Exception:
+            pass
+
     for mfg in reg.manufactures:
         manufactures_data.append({
             "id": mfg.id,
             "manufacture_name": mfg.manufacture_name,
             "supply_type": mfg.supply_type,
-            "material_count": len(mfg.materials) if mfg.materials else 0,
+            "material_count": mfg_counts.get(mfg.id, 0),
         })
 
     return {
