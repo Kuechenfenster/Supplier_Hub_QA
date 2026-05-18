@@ -351,11 +351,12 @@
                                 <select id="uploadDocType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;"></select>
                                 <label style="font-weight:600;display:block;margin-bottom:4px;">Document Creation Date</label>
                                 <input type="date" id="uploadDocDate" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;">
-                                <div id="dropZone" onclick="document.getElementById('uploadFileInput').click()" ondrop="dropHandler(event)" ondragover="event.preventDefault(); event.currentTarget.style.borderColor='#667eea';" ondragleave="event.currentTarget.style.borderColor='#ccc';" style="border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
-                                    <p style="color:#888;margin:0;">Drag & drop file here or click to browse</p>
-                                    <p style="color:#aaa;font-size:11px;margin-top:4px;">Max 10 MB. PDF only.</p>
-                                    <input type="file" id="uploadFileInput" accept=".pdf" style="display:none;" onchange="document.getElementById('uploadFileName').textContent = this.files[0]?.name || ''; document.getElementById('uploadFileName').style.display = this.files[0] ? 'block' : 'none';">
-                                    <p id="uploadFileName" style="color:#667eea;font-weight:600;margin-top:8px;display:none;"></p>
+                                <div id="dropZone" ondrop="dropHandler(event)" ondragover="event.preventDefault(); event.currentTarget.style.borderColor='#667eea';" ondragleave="event.currentTarget.style.borderColor='#ccc';" style="position:relative;border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
+                                    <label for="uploadFileInput" style="display:block;cursor:pointer;position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;"></label>
+                                    <p style="color:#888;margin:0;position:relative;z-index:1;">Drag & drop file here or click to browse</p>
+                                    <p style="color:#aaa;font-size:11px;margin-top:4px;position:relative;z-index:1;">Max 10 MB. PDF only.</p>
+                                    <input type="file" id="uploadFileInput" accept=".pdf" style="position:absolute;opacity:0;width:0;height:0;overflow:hidden;" onchange="document.getElementById('uploadFileName').textContent = this.files[0]?.name || ''; document.getElementById('uploadFileName').style.display = this.files[0] ? 'block' : 'none';">
+                                    <p id="uploadFileName" style="color:#667eea;font-weight:600;margin-top:8px;display:none;position:relative;z-index:1;"></p>
                                 </div>
                                 <div style="display:flex;gap:10px;justify-content:flex-end;">
                                     <button class="btn-outline" onclick="closeUploadModal()">Cancel</button>
