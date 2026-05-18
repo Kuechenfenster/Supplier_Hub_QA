@@ -1049,6 +1049,18 @@ function showAddMaterialForm() {
             } catch(e) { alert('Network error.'); }
         }
 
+        async function viewDocument(docId) {
+            try {
+                const resp = await fetch(`/api/registration/document/${docId}/download`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to open document.'); return; }
+                const blob = await resp.blob();
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            } catch(e) { alert('Error opening document.'); }
+        }
+
         async function deleteDocument(docId, docType) {
             if (!confirm('Remove ' + DOC_TYPE_LABELS[docType] + '?')) return;
             try {
@@ -1085,7 +1097,7 @@ function showAddMaterialForm() {
                     else if (diffDays < 365) age = Math.floor(diffDays / 30) + ' mo';
                     else age = Math.floor(diffDays / 365) + ' yr';
                 }
-                const viewUrl = info.id ? `/api/registration/document/${info.id}/view` : '#';
+                const viewUrl = info.id ? `/api/registration/document/${info.id}/download` : '#';
                 return `<tr>
                     <td>${DOC_TYPE_LABELS[dt] || dt}</td>
                     <td>${escHtml(filename)}</td>
@@ -1093,7 +1105,7 @@ function showAddMaterialForm() {
                     <td>${age}</td>
                     <td>${uploadDate}</td>
                     <td style="display:flex;gap:4px;">
-                        <button class="btn-sm-outline" onclick="window.open('${viewUrl}', '_blank')">View</button>
+                        <button class="btn-sm-outline" onclick="viewDocument(${info.id})">View</button>
                         <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, '${dt}')">✕</button>
                     </td>
                 </tr>`;
