@@ -351,10 +351,10 @@
                                 <select id="uploadDocType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;"></select>
                                 <label style="font-weight:600;display:block;margin-bottom:4px;">Document Creation Date</label>
                                 <input type="date" id="uploadDocDate" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;">
-                                <div id="dropZone" style="border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
+                                <div id="dropZone" onclick="document.getElementById('uploadFileInput').click()" ondrop="dropHandler(event)" ondragover="event.preventDefault(); event.currentTarget.style.borderColor='#667eea';" ondragleave="event.currentTarget.style.borderColor='#ccc';" style="border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
                                     <p style="color:#888;margin:0;">Drag & drop file here or click to browse</p>
                                     <p style="color:#aaa;font-size:11px;margin-top:4px;">Max 10 MB. PDF only.</p>
-                                    <input type="file" id="uploadFileInput" accept=".pdf" style="display:none;">
+                                    <input type="file" id="uploadFileInput" accept=".pdf" style="display:none;" onchange="document.getElementById('uploadFileName').textContent = this.files[0]?.name || ''; document.getElementById('uploadFileName').style.display = this.files[0] ? 'block' : 'none';">
                                     <p id="uploadFileName" style="color:#667eea;font-weight:600;margin-top:8px;display:none;"></p>
                                 </div>
                                 <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -991,6 +991,16 @@ function showAddMaterialForm() {
 
         function closeUploadModal() {
             document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        function dropHandler(ev) {
+            ev.preventDefault();
+            ev.currentTarget.style.borderColor = '#ccc';
+            const file = ev.dataTransfer.files[0];
+            if (!file) return;
+            document.getElementById('uploadFileInput').files = ev.dataTransfer.files;
+            document.getElementById('uploadFileName').textContent = file.name;
+            document.getElementById('uploadFileName').style.display = 'block';
         }
 
         async function submitUpload() {
