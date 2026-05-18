@@ -148,6 +148,7 @@ class MaterialRegistration(Base):
     supplier_material_code = Column(String(100), nullable=False)
     supply_type = Column(String(30), nullable=False)  # tier2, raw_material, component_part, printer
     is_food_contact = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -227,6 +228,7 @@ def init_db():
             "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_email VARCHAR(200)",
             "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_phone VARCHAR(50)",
             "ALTER TABLE supplier_documents ADD COLUMN IF NOT EXISTS document_issue_date DATE",
+            "ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE",
         ]:
             try:
                 conn.execute(sa_text(stmt))

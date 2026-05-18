@@ -601,6 +601,9 @@ migrations = [
     # Supplier Documents - document_issue_date
     """ALTER TABLE supplier_documents ADD COLUMN IF NOT EXISTS document_issue_date DATE""",
     """ALTER TABLE supplier_documents ADD COLUMN document_issue_date DATE""",
+    # Material Registrations - is_active
+    """ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE""",
+    """ALTER TABLE material_registrations ADD COLUMN is_active BOOLEAN DEFAULT TRUE""",
 ]
 
 print("=" * 60)

@@ -423,7 +423,11 @@ async def get_draft(
     from sqlalchemy import func as sa_func
     materials_data = []
     try:
-        for mat in reg.materials:
+        active_materials = db.query(MaterialRegistration).filter(
+            MaterialRegistration.registration_id == reg.id,
+            MaterialRegistration.is_active != False,
+        ).all()
+        for mat in active_materials:
             docs_data = {}
             for d in mat.documents:
                 docs_data[d.document_type] = {
@@ -446,6 +450,7 @@ async def get_draft(
                 "supplier_material_code": mat.supplier_material_code,
                 "supply_type": getattr(mat, "supply_type", "tier2"),
                 "is_food_contact": mat.is_food_contact,
+                "is_active": mat.is_active if mat.is_active is not None else True,
                 "documents": docs_data,
             })
     except Exception:
@@ -1009,6 +1014,31 @@ async def delete_document(
     return {"message": "Document deleted."}
 
 
+@router.put("/material/{material_id}/deactivate")
+async def deactivate_material(
+    material_id: int,
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    mat = db.query(MaterialRegistration).filter(MaterialRegistration.id == material_id).first()
+    if not mat:
+        raise HTTPException(status_code=404, detail="Material not found")
+
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.id == mat.registration_id,
+        SupplierRegistration.supplier_id == supplier.id,
+    ).first()
+    if not reg:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    mat.is_active = False
+    mat.updated_at = datetime.utcnow()
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {"message": "Material deactivated."}
+
+
 @router.delete("/material/{material_id}")
 async def delete_material(
     material_id: int,
@@ -1026,14 +1056,13 @@ async def delete_material(
     if not reg:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    for doc in mat.documents:
-        try:
-            os.remove(doc.file_path)
-        except OSError:
-            pass
+    mat.is_active = False
+    mat.updated_at = datetime.utcnow()
 
-    db.delete(mat)
+    for doc in mat.documents:
+        doc.material_id = None
+
     reg.updated_at = datetime.utcnow()
     db.commit()
 
-    return {"message": "Material and associated documents deleted."}
+    return {"message": "Material deactivated. Final deletion requires admin approval."}

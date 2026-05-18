@@ -311,6 +311,7 @@
                             </div>
                         </div>
                         <div id="materialForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
+                            <h4 id="materialFormTitle" style="margin-bottom:12px;">Register Material</h4>
                             <input type="hidden" id="editMatId">
                             <label style="font-weight:600;display:block;margin-bottom:4px;">Linked Manufacture *</label>
                             <select id="matManufactureId" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
@@ -324,9 +325,10 @@
                             <input id="matSupplierCode" placeholder="Supplier catalog/reference code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
                             <label style="font-weight:600;display:block;margin-bottom:4px;">Factory Internal Material Code</label>
                             <input id="matInternalCode" placeholder="Your internal SKU/ERP code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
-                            <div style="display:flex;gap:10px;">
+                            <div style="display:flex;gap:10px;align-items:center;">
                                 <button class="btn-primary" onclick="saveMaterial()">Save Material</button>
                                 <button class="btn-outline" onclick="cancelMaterialForm()">Cancel</button>
+                                <button id="btnDeactivateMat" class="btn-sm-danger" style="display:none;margin-left:auto;" onclick="deactivateCurrentMaterial()">Deactivate</button>
                             </div>
                         </div>
                         <div id="materialDocsForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
@@ -855,13 +857,14 @@
                         <td>${escHtml(mat.internal_factory_material_code)}</td>
                         <td style="font-size:11px;">${docInfo}${missingInfo}</td>
                         <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>
                             <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
-                            <button class="btn-sm-danger" onclick="deleteMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Delete</button>
+                            <button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>
                         </td>
                     </tr>`;
                 }).join('');
 
-                container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:140px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+                container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:220px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
             } catch(e) { container.innerHTML = '<div class="empty-state">Error loading materials.</div>'; }
         }
 
@@ -888,6 +891,7 @@
 
 function showAddMaterialForm() {
             document.getElementById('materialForm').style.display = 'block';
+            document.getElementById('materialFormTitle').textContent = 'Register Material';
             document.getElementById('materialsList').style.display = 'none';
             document.getElementById('editMatId').value = '';
             document.getElementById('matCommercialName').value = '';
@@ -895,12 +899,57 @@ function showAddMaterialForm() {
             document.getElementById('matInternalCode').value = '';
             document.getElementById('matManufactureId').value = '';
             document.getElementById('matSupplyType').value = '';
+            document.getElementById('btnDeactivateMat').style.display = 'none';
             loadManufactureDropdown();
+        }
+
+        function editMaterial(id, name, mfgName, mfgId, supplyType, supplierCode, internalCode) {
+            document.getElementById('materialForm').style.display = 'block';
+            document.getElementById('materialFormTitle').textContent = 'Edit: ' + name;
+            document.getElementById('materialsList').style.display = 'none';
+            document.getElementById('editMatId').value = id;
+            document.getElementById('matCommercialName').value = name;
+            document.getElementById('matSupplierCode').value = supplierCode;
+            document.getElementById('matInternalCode').value = internalCode;
+            document.getElementById('btnDeactivateMat').style.display = 'inline-block';
+            loadManufactureDropdown();
+            setTimeout(() => {
+                document.getElementById('matManufactureId').value = mfgId;
+                const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
+                document.getElementById('matSupplyType').value = typeLabels[supplyType] || supplyType;
+            }, 300);
         }
 
         function cancelMaterialForm() {
             document.getElementById('materialForm').style.display = 'none';
+            document.getElementById('btnDeactivateMat').style.display = 'none';
             document.getElementById('materialsList').style.display = 'block';
+        }
+
+        async function deactivateCurrentMaterial() {
+            const id = document.getElementById('editMatId').value;
+            const name = document.getElementById('matCommercialName').value;
+            if (!id) return;
+            if (!confirm('Deactivate material "' + name + '"? This will hide it from active views.')) return;
+            try {
+                const resp = await fetch('/api/registration/material/' + id, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to deactivate.'); return; }
+                cancelMaterialForm();
+                loadMaterials();
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function deactivateMaterial(matId, matName) {
+            if (!confirm('Deactivate material "' + matName + '"? This will hide it from active views.')) return;
+            try {
+                const resp = await fetch('/api/registration/material/' + matId, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to deactivate.'); return; }
+                loadMaterials();
+            } catch(e) { alert('Network error.'); }
         }
 
         async function saveMaterial() {
