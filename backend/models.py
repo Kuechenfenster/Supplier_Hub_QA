@@ -112,24 +112,42 @@ class SupplierRegistration(Base):
     materials = relationship("MaterialRegistration", back_populates="registration", cascade="all, delete-orphan")
 
 
+class RegisteredManufacture(Base):
+    __tablename__ = "registered_manufactures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    registration_id = Column(Integer, ForeignKey("supplier_registrations.id"), nullable=False, index=True)
+    manufacture_name = Column(String(255), nullable=False)
+    supply_type = Column(String(30), nullable=False)  # tier2, raw_material, component_part, printer
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    registration = relationship("SupplierRegistration", backref="manufactures")
+    materials = relationship("MaterialRegistration", back_populates="manufacture", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_manufacture_name_reg", "registration_id", "manufacture_name", unique=True),
+    )
+
+
 class MaterialRegistration(Base):
     __tablename__ = "material_registrations"
 
     id = Column(Integer, primary_key=True, index=True)
     registration_id = Column(Integer, ForeignKey("supplier_registrations.id"), nullable=False, index=True)
+    manufacture_id = Column(Integer, ForeignKey("registered_manufactures.id"), nullable=False, index=True)
 
-    # Section B: Raw Material Identifiers
     commercial_material_name = Column(String(255), nullable=False)
-    internal_factory_material_code = Column(String(100), nullable=False)  # Our internal SKU/ERP tracking ID
-    supplier_material_code = Column(String(100), nullable=False)  # Supplier's internal catalog ID
-
-    # Section C: Food Contact Material toggle
+    internal_factory_material_code = Column(String(100), nullable=False)
+    supplier_material_code = Column(String(100), nullable=False)
+    supply_type = Column(String(30), nullable=False)  # tier2, raw_material, component_part, printer
     is_food_contact = Column(Boolean, default=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     registration = relationship("SupplierRegistration", back_populates="materials")
+    manufacture = relationship("RegisteredManufacture", back_populates="materials")
     documents = relationship("SupplierDocument", back_populates="material", cascade="all, delete-orphan")
 
     __table_args__ = (
@@ -145,7 +163,7 @@ class SupplierDocument(Base):
     material_id = Column(Integer, ForeignKey("material_registrations.id"), nullable=False, index=True)
 
     # Document type enumeration
-    # sds, tds, coa, reach_rohs, food_contact_doc
+    # sds, tds, coa, reach_rohs, food_contact_doc, technical_drawing, ifra_doc, fsc_cert, other_supporting
     document_type = Column(String(30), nullable=False)
 
     # File storage

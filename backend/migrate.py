@@ -514,16 +514,28 @@ migrations = [
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         submitted_at TIMESTAMP
     )""",
+    """CREATE TABLE IF NOT EXISTS registered_manufactures (
+        id SERIAL PRIMARY KEY,
+        registration_id INTEGER NOT NULL,
+        manufacture_name VARCHAR(255) NOT NULL,
+        supply_type VARCHAR(30) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id)
+    )""",
     """CREATE TABLE IF NOT EXISTS material_registrations (
         id SERIAL PRIMARY KEY,
         registration_id INTEGER NOT NULL,
         commercial_material_name VARCHAR(255) NOT NULL,
         internal_factory_material_code VARCHAR(100) NOT NULL,
         supplier_material_code VARCHAR(100) NOT NULL,
+        manufacture_id INTEGER DEFAULT 1,
+        supply_type VARCHAR(30) DEFAULT 'tier2',
         is_food_contact BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id)
+        FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id),
+        FOREIGN KEY (manufacture_id) REFERENCES registered_manufactures(id)
     )""",
     """CREATE TABLE IF NOT EXISTS supplier_documents (
         id SERIAL PRIMARY KEY,
@@ -560,6 +572,19 @@ migrations = [
     """CREATE INDEX IF NOT EXISTS idx_supplier_doc_registration ON supplier_documents(registration_id)""",
     """CREATE INDEX IF NOT EXISTS idx_supplier_doc_material ON supplier_documents(material_id)""",
     """CREATE INDEX IF NOT EXISTS idx_supplier_doc_type ON supplier_documents(document_type)""",
+    """CREATE INDEX IF NOT EXISTS idx_mfg_registration ON registered_manufactures(registration_id)""",
+    """CREATE INDEX IF NOT EXISTS idx_mfg_name_reg ON registered_manufactures(registration_id, manufacture_name)""",
+    """CREATE INDEX IF NOT EXISTS idx_material_reg_mfg ON material_registrations(manufacture_id)""",
+
+    # ==================================================================
+    # Registration Module Migration Fixes (Add/alter columns)
+    # ==================================================================
+    # PostgreSQL-style add column (skip on SQLite)
+    """ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS manufacture_id INTEGER DEFAULT 1""",
+    """ALTER TABLE material_registrations ADD COLUMN IF NOT EXISTS supply_type VARCHAR(30) DEFAULT 'tier2'""",
+    # SQLite-style add column (executed via try/except)
+    """ALTER TABLE material_registrations ADD COLUMN manufacture_id INTEGER DEFAULT 1""",
+    """ALTER TABLE material_registrations ADD COLUMN supply_type VARCHAR(30) DEFAULT 'tier2'""",
 ]
 
 print("=" * 60)
