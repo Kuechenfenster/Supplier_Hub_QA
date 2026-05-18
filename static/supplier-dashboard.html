@@ -278,6 +278,18 @@
                                 <option value="component_part">Component / Part Supplier (Pre-fabricated, Springs, Wheels, Stamping, Die Cast)</option>
                                 <option value="printer">Printer</option>
                             </select>
+                            <h4 style="margin-bottom:10px;color:#555;">Sales Contact</h4>
+                            <div style="display:flex;gap:10px;margin-bottom:12px;">
+                                <input id="mfgSalesName" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgSalesEmail" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgSalesPhone" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                            </div>
+                            <h4 style="margin-bottom:10px;color:#555;">Technical Support</h4>
+                            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                                <input id="mfgTechName" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgTechEmail" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgTechPhone" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                            </div>
                             <div style="display:flex;gap:10px;">
                                 <input type="hidden" id="editMfgId">
                                 <button class="btn-primary" onclick="saveManufacture()">Save</button>
@@ -655,16 +667,20 @@
                 }
                 const typeLabels = { tier2: 'Tier 2 Supplier', raw_material: 'Raw Material', component_part: 'Component / Part Supplier', printer: 'Printer' };
                 const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
-                let rows = manufacturesCache.map(m => `<tr>
+                let rows = manufacturesCache.map(m => {
+                    const sales = (m.sales_contact && m.sales_contact.name) ? m.sales_contact.name : '—';
+                    const tech = (m.tech_contact && m.tech_contact.name) ? m.tech_contact.name : '—';
+                    return `<tr>
                     <td><strong>${escHtml(m.manufacture_name)}</strong></td>
                     <td><span class="badge ${typeBadges[m.supply_type] || ''}">${typeLabels[m.supply_type] || m.supply_type}</span></td>
+                    <td style="font-size:12px;">${escHtml(sales)} / ${escHtml(tech)}</td>
                     <td>${m.material_count || 0}</td>
                     <td style="display:flex;gap:6px;">
                         <button class="btn-sm-outline" onclick="editManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}', '${m.supply_type}')">Edit</button>
                         <button class="btn-sm-danger" onclick="deleteManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}')">Delete</button>
                     </td>
-                </tr>`).join('');
-                container.innerHTML = `<table class="review-table"><thead><tr><th>Manufacture Name</th><th>Supply Type</th><th>Materials</th><th style="width:160px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+                </tr>`}).join('');
+                container.innerHTML = `<table class="review-table"><thead><tr><th>Manufacture Name</th><th>Supply Type</th><th>Contacts (Sales / Tech)</th><th>Materials</th><th style="width:160px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
             } catch(e) { container.innerHTML = '<div class="empty-state">Error loading manufactures.</div>'; }
         }
 
@@ -673,6 +689,12 @@
             document.getElementById('editMfgId').value = '';
             document.getElementById('mfgName').value = '';
             document.getElementById('mfgSupplyType').value = '';
+            document.getElementById('mfgSalesName').value = '';
+            document.getElementById('mfgSalesEmail').value = '';
+            document.getElementById('mfgSalesPhone').value = '';
+            document.getElementById('mfgTechName').value = '';
+            document.getElementById('mfgTechEmail').value = '';
+            document.getElementById('mfgTechPhone').value = '';
         }
 
         function editManufacture(id, name, type) {
@@ -680,6 +702,15 @@
             document.getElementById('editMfgId').value = id;
             document.getElementById('mfgName').value = name;
             document.getElementById('mfgSupplyType').value = type;
+            const mfg = manufacturesCache.find(m => m.id === id);
+            if (mfg) {
+                document.getElementById('mfgSalesName').value = (mfg.sales_contact && mfg.sales_contact.name) || '';
+                document.getElementById('mfgSalesEmail').value = (mfg.sales_contact && mfg.sales_contact.email) || '';
+                document.getElementById('mfgSalesPhone').value = (mfg.sales_contact && mfg.sales_contact.phone) || '';
+                document.getElementById('mfgTechName').value = (mfg.tech_contact && mfg.tech_contact.name) || '';
+                document.getElementById('mfgTechEmail').value = (mfg.tech_contact && mfg.tech_contact.email) || '';
+                document.getElementById('mfgTechPhone').value = (mfg.tech_contact && mfg.tech_contact.phone) || '';
+            }
         }
 
         function cancelManufactureForm() {
@@ -690,19 +721,35 @@
             const name = document.getElementById('mfgName').value.trim();
             const type = document.getElementById('mfgSupplyType').value;
             const editId = document.getElementById('editMfgId').value;
+            const salesName = document.getElementById('mfgSalesName').value.trim();
+            const salesEmail = document.getElementById('mfgSalesEmail').value.trim();
+            const salesPhone = document.getElementById('mfgSalesPhone').value.trim();
+            const techName = document.getElementById('mfgTechName').value.trim();
+            const techEmail = document.getElementById('mfgTechEmail').value.trim();
+            const techPhone = document.getElementById('mfgTechPhone').value.trim();
             if (!name) { alert('Manufacture name is required.'); return; }
             if (!type) { alert('Supply type is required.'); return; }
+            const body = {
+                manufacture_name: name,
+                supply_type: type,
+                sales_contact_name: salesName,
+                sales_contact_email: salesEmail,
+                sales_contact_phone: salesPhone,
+                tech_contact_name: techName,
+                tech_contact_email: techEmail,
+                tech_contact_phone: techPhone
+            };
             try {
                 let resp;
                 if (editId) {
                     resp = await fetch('/api/registration/manufactures/' + editId, {
                         method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ manufacture_name: name, supply_type: type })
+                        body: JSON.stringify(body)
                     });
                 } else {
                     resp = await fetch('/api/registration/manufactures', {
                         method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ manufacture_name: name, supply_type: type })
+                        body: JSON.stringify(body)
                     });
                 }
                 if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save.'); return; }
@@ -893,11 +940,12 @@
             document.getElementById('docMaterialName').textContent = matName;
 
             const expectedTypes = DOC_TYPES_BY_SUPPLY[supplyType] || [];
-            let fields = '';
+            let fields = '<p style="font-size:12px;color:#888;margin-bottom:12px;">Max 10 MB per file. Supported formats: PDF.</p>';
             expectedTypes.forEach(dt => {
                 fields += `<div class="doc-upload-row">
                     <label>${DOC_TYPE_LABELS[dt] || dt}:</label>
                     <input type="file" id="file_${dt}" accept=".pdf">
+                    <input type="date" id="date_${dt}" title="Document creation/issue date" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:140px;">
                 </div>`;
             });
             document.getElementById('docUploadFields').innerHTML = fields;
@@ -912,8 +960,7 @@
                 const found = mats.find(m => m.id === matId);
                 if (found && found.documents) {
                     Object.keys(found.documents).forEach(dt => {
-                        const info = found.documents[dt];
-                        const row = document.getElementById('file_' + dt);
+const info = found.documents[dt];
                         if (row) {
                             const parent = row.parentElement;
                             let label = parent.querySelector('.existing-doc');
@@ -923,7 +970,9 @@
                                 label.style.cssText = 'color:#28a745;display:block;margin-top:4px;';
                                 parent.appendChild(label);
                             }
-                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
+                            const uploadDate = info.created_at ? new Date(info.created_at).toLocaleDateString() : '—';
+                            const issueDate = info.document_issue_date ? new Date(info.document_issue_date + 'T00:00:00').toLocaleDateString() : '';
+                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} | Issue: ${issueDate || '—'} | Uploaded: ${uploadDate} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
                         }
                     });
                 }
@@ -942,6 +991,8 @@
             for (const dt of expectedTypes) {
                 const fileInput = document.getElementById('file_' + dt);
                 if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    const dateInput = document.getElementById('date_' + dt);
+                    const issueDate = dateInput ? dateInput.value : '';
                     const formData = new FormData();
                     formData.append('material_id', matId);
                     formData.append('document_type', dt);
@@ -950,9 +1001,12 @@
                         const lang = prompt('SDS Language (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
                         if (!lang) continue;
                         formData.append('sds_language', lang);
-                        const issue = prompt('SDS Issue Date (YYYY-MM-DD):', '');
+                        const issue = prompt('SDS Issue Date (YYYY-MM-DD):', issueDate || '');
                         if (!issue) continue;
                         formData.append('sds_issue_date', issue);
+                    }
+                    if (issueDate) {
+                        formData.append('document_issue_date', issueDate);
                     }
                     try {
                         const resp = await fetch('/api/registration/step3-documents/single', {

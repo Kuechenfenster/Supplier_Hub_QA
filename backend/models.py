@@ -188,6 +188,9 @@ class SupplierDocument(Base):
     # CoA-specific metadata
     coa_test_date = Column(Date, nullable=True)
 
+    # Generic document metadata
+    document_issue_date = Column(Date, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -223,6 +226,7 @@ def init_db():
             "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_name VARCHAR(100)",
             "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_email VARCHAR(200)",
             "ALTER TABLE registered_manufactures ADD COLUMN IF NOT EXISTS tech_contact_phone VARCHAR(50)",
+            "ALTER TABLE supplier_documents ADD COLUMN IF NOT EXISTS document_issue_date DATE",
         ]:
             try:
                 conn.execute(sa_text(stmt))

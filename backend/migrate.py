@@ -598,6 +598,9 @@ migrations = [
     """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_name VARCHAR(100)""",
     """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_email VARCHAR(200)""",
     """ALTER TABLE registered_manufactures ADD COLUMN tech_contact_phone VARCHAR(50)""",
+    # Supplier Documents - document_issue_date
+    """ALTER TABLE supplier_documents ADD COLUMN IF NOT EXISTS document_issue_date DATE""",
+    """ALTER TABLE supplier_documents ADD COLUMN document_issue_date DATE""",
 ]
 
 print("=" * 60)

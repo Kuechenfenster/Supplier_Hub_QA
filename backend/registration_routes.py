@@ -197,6 +197,12 @@ class MaterialIdentifierSchema(BaseModel):
 class ManufactureSchema(BaseModel):
     manufacture_name: str
     supply_type: str
+    sales_contact_name: str = ""
+    sales_contact_email: str = ""
+    sales_contact_phone: str = ""
+    tech_contact_name: str = ""
+    tech_contact_email: str = ""
+    tech_contact_phone: str = ""
 
     @validator("manufacture_name")
     def name_not_empty(cls, v):
@@ -268,6 +274,8 @@ async def list_manufactures(
                 "manufacture_name": m.manufacture_name,
                 "supply_type": m.supply_type,
                 "material_count": counts.get(m.id, 0),
+                "sales_contact": {"name": m.sales_contact_name, "email": m.sales_contact_email, "phone": m.sales_contact_phone},
+                "tech_contact": {"name": m.tech_contact_name, "email": m.tech_contact_email, "phone": m.tech_contact_phone},
                 "created_at": m.created_at.isoformat() if m.created_at else None,
             }
             for m in mfgs
@@ -298,6 +306,12 @@ async def create_manufacture(
         registration_id=reg.id,
         manufacture_name=payload.manufacture_name,
         supply_type=payload.supply_type,
+        sales_contact_name=payload.sales_contact_name or None,
+        sales_contact_email=payload.sales_contact_email or None,
+        sales_contact_phone=payload.sales_contact_phone or None,
+        tech_contact_name=payload.tech_contact_name or None,
+        tech_contact_email=payload.tech_contact_email or None,
+        tech_contact_phone=payload.tech_contact_phone or None,
     )
     db.add(mfg)
     reg.updated_at = datetime.utcnow()
@@ -307,6 +321,8 @@ async def create_manufacture(
         "id": mfg.id,
         "manufacture_name": mfg.manufacture_name,
         "supply_type": mfg.supply_type,
+        "sales_contact": {"name": mfg.sales_contact_name, "email": mfg.sales_contact_email, "phone": mfg.sales_contact_phone},
+        "tech_contact": {"name": mfg.tech_contact_name, "email": mfg.tech_contact_email, "phone": mfg.tech_contact_phone},
         "message": "Manufacture registered successfully.",
     }
 
@@ -341,6 +357,12 @@ async def update_manufacture(
 
     mfg.manufacture_name = payload.manufacture_name
     mfg.supply_type = payload.supply_type
+    mfg.sales_contact_name = payload.sales_contact_name or None
+    mfg.sales_contact_email = payload.sales_contact_email or None
+    mfg.sales_contact_phone = payload.sales_contact_phone or None
+    mfg.tech_contact_name = payload.tech_contact_name or None
+    mfg.tech_contact_email = payload.tech_contact_email or None
+    mfg.tech_contact_phone = payload.tech_contact_phone or None
     mfg.updated_at = datetime.utcnow()
     reg.updated_at = datetime.utcnow()
     db.commit()
@@ -349,6 +371,8 @@ async def update_manufacture(
         "id": mfg.id,
         "manufacture_name": mfg.manufacture_name,
         "supply_type": mfg.supply_type,
+        "sales_contact": {"name": mfg.sales_contact_name, "email": mfg.sales_contact_email, "phone": mfg.sales_contact_phone},
+        "tech_contact": {"name": mfg.tech_contact_name, "email": mfg.tech_contact_email, "phone": mfg.tech_contact_phone},
         "message": "Manufacture updated.",
     }
 
@@ -411,6 +435,8 @@ async def get_draft(
                     "sds_expiry_warning": d.sds_expiry_warning,
                     "tds_physical_state": d.tds_physical_state,
                     "coa_test_date": d.coa_test_date.isoformat() if d.coa_test_date else None,
+                    "document_issue_date": d.document_issue_date.isoformat() if d.document_issue_date else None,
+                    "created_at": d.created_at.isoformat() if d.created_at else None,
                 }
             materials_data.append({
                 "id": mat.id,
@@ -446,6 +472,8 @@ async def get_draft(
             "manufacture_name": mfg.manufacture_name,
             "supply_type": mfg.supply_type,
             "material_count": mfg_counts.get(mfg.id, 0),
+            "sales_contact": {"name": mfg.sales_contact_name, "email": mfg.sales_contact_email, "phone": mfg.sales_contact_phone},
+            "tech_contact": {"name": mfg.tech_contact_name, "email": mfg.tech_contact_email, "phone": mfg.tech_contact_phone},
         })
 
     return {
@@ -765,6 +793,7 @@ async def upload_single_document(
     tds_physical_state: Optional[str] = Form(None),
     coa_test_date: Optional[str] = Form(None),
     is_food_contact: bool = Form(False),
+    document_issue_date: Optional[str] = Form(None),
 
     file: UploadFile = File(...),
 
@@ -837,6 +866,12 @@ async def upload_single_document(
         except (ValueError, TypeError):
             raise HTTPException(status_code=400, detail="Invalid CoA test date format.")
 
+    if document_issue_date:
+        try:
+            doc.document_issue_date = date.fromisoformat(document_issue_date)
+        except (ValueError, TypeError):
+            pass
+
     material.is_food_contact = is_food_contact
     material.updated_at = datetime.utcnow()
 
@@ -848,6 +883,8 @@ async def upload_single_document(
         "id": doc.id,
         "document_type": document_type,
         "original_filename": doc.original_filename,
+        "document_issue_date": doc.document_issue_date.isoformat() if doc.document_issue_date else None,
+        "uploaded_at": doc.created_at.isoformat() if doc.created_at else None,
         "warnings": warnings,
         "message": f"{document_type.upper()} uploaded successfully.",
     }
