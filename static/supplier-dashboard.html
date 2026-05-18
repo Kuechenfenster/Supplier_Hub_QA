@@ -476,7 +476,7 @@
             if (page === 'materials') loadMaterials();
             if (page === 'substances') loadSubstances();
             if (page === 'bought-components') loadBoughtComponents();
-            if (page === 'products') loadProducts();
+            if (page === 'products') loadProductsPage();
             if (page === 'process-flow') loadProcessFlow();
             if (page === 'upcoming-audits') loadUpcomingAudits();
             if (page === 'corrective-action') loadCorrectiveAction();
@@ -1028,10 +1028,11 @@
         function refreshMaterials() { loadMaterials(); }
         function refreshSubstances() { loadSubstances(); }
         function refreshBoughtComponents() { loadBoughtComponents(); }
-        function refreshProducts() { loadProducts(); }
-        function refreshData() {
-            document.getElementById('activeProducts').innerHTML = '<div class="loading">Loading products...</div>';
-            loadProducts();
+        function refreshProducts() { loadProductsPage(); }
+        function refreshMaterials() { loadMaterials(); }
+        function refreshSubstances() { loadSubstances(); }
+        function refreshBoughtComponents() { loadBoughtComponents(); }
+        function refreshRawSuppliers() { loadManufactures(); }
         }
 
         async function loadSealSamples() {
