@@ -940,12 +940,13 @@
             document.getElementById('docMaterialName').textContent = matName;
 
             const expectedTypes = DOC_TYPES_BY_SUPPLY[supplyType] || [];
-            let fields = '<p style="font-size:12px;color:#888;margin-bottom:12px;">Max 10 MB per file. Supported formats: PDF.</p>';
+            let fields = '<p style="font-size:12px;color:#888;margin-bottom:14px;">Max 10 MB per file. Supported formats: PDF. A file date can be provided for each document.</p>';
             expectedTypes.forEach(dt => {
                 fields += `<div class="doc-upload-row">
                     <label>${DOC_TYPE_LABELS[dt] || dt}:</label>
                     <input type="file" id="file_${dt}" accept=".pdf">
-                    <input type="date" id="date_${dt}" title="Document creation/issue date" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:140px;">
+                    <span style="font-size:11px;color:#888;white-space:nowrap;">File Date:</span>
+                    <input type="date" id="date_${dt}" title="Document creation date" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;width:135px;">
                 </div>`;
             });
             document.getElementById('docUploadFields').innerHTML = fields;
@@ -960,7 +961,8 @@
                 const found = mats.find(m => m.id === matId);
                 if (found && found.documents) {
                     Object.keys(found.documents).forEach(dt => {
-const info = found.documents[dt];
+                        const info = found.documents[dt];
+                        const row = document.getElementById('file_' + dt);
                         if (row) {
                             const parent = row.parentElement;
                             let label = parent.querySelector('.existing-doc');
@@ -970,9 +972,9 @@ const info = found.documents[dt];
                                 label.style.cssText = 'color:#28a745;display:block;margin-top:4px;';
                                 parent.appendChild(label);
                             }
-                            const uploadDate = info.created_at ? new Date(info.created_at).toLocaleDateString() : '—';
-                            const issueDate = info.document_issue_date ? new Date(info.document_issue_date + 'T00:00:00').toLocaleDateString() : '';
-                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} | Issue: ${issueDate || '—'} | Uploaded: ${uploadDate} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
+                            const uploadDate = info.created_at ? new Date(info.created_at).toLocaleDateString() : new Date().toLocaleDateString();
+                            const fileDate = info.document_issue_date ? new Date(info.document_issue_date + 'T00:00:00').toLocaleDateString() : '—';
+                            label.innerHTML = `Existing: ${escHtml(info.original_filename)} | File Date: ${fileDate} | Uploaded: ${uploadDate} <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, ${matId}, '${dt}')" style="margin-left:8px;">✕</button>`;
                         }
                     });
                 }
