@@ -531,7 +531,6 @@ migrations = [
         supplier_material_code VARCHAR(100) NOT NULL,
         manufacture_id INTEGER DEFAULT 1,
         supply_type VARCHAR(30) DEFAULT 'tier2',
-        is_food_contact BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (registration_id) REFERENCES supplier_registrations(id),

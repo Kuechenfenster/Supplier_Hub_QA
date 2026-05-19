@@ -56,7 +56,7 @@ SDS_LANGUAGES = ["English", "German", "French", "Traditional Chinese", "Simplifi
 TDS_PHYSICAL_STATES = ["Liquid", "Powder", "Granules", "Pellets", "Solid"]
 SUPPLY_TYPES = ["tier2", "raw_material", "component_part", "printer"]
 
-ALLOWED_DOC_TYPES = ["sds", "tds", "coa", "reach_rohs", "food_contact_doc", "technical_drawing", "ifra_doc", "fsc_cert", "other_supporting"]
+ALLOWED_DOC_TYPES = ["sds", "tds", "coa", "reach_rohs", "technical_drawing", "ifra_doc", "fsc_cert", "other_supporting"]
 
 DOC_TYPES_BY_SUPPLY = {
     "tier2": ["sds", "tds", "coa", "reach_rohs", "other_supporting"],
@@ -167,7 +167,6 @@ class MaterialIdentifierSchema(BaseModel):
     internal_factory_material_code: str
     supplier_material_code: str
     supply_type: str
-    is_food_contact: bool = False
 
     @validator("supply_type")
     def valid_supply_type(cls, v):
@@ -448,7 +447,6 @@ async def get_draft(
                 "internal_factory_material_code": mat.internal_factory_material_code,
                 "supplier_material_code": mat.supplier_material_code,
                 "supply_type": getattr(mat, "supply_type", "tier2"),
-                "is_food_contact": mat.is_food_contact,
                 "is_active": mat.is_active if mat.is_active is not None else True,
                 "documents": docs_data,
             })
@@ -627,7 +625,6 @@ async def save_step2_materials(
             mat.commercial_material_name = mat_schema.commercial_material_name
             mat.internal_factory_material_code = mat_schema.internal_factory_material_code
             mat.supply_type = mat_schema.supply_type
-            mat.is_food_contact = mat_schema.is_food_contact
             mat.updated_at = datetime.utcnow()
         else:
             mat = MaterialRegistration(
@@ -637,7 +634,6 @@ async def save_step2_materials(
                 internal_factory_material_code=mat_schema.internal_factory_material_code,
                 supplier_material_code=mat_schema.supplier_material_code,
                 supply_type=mat_schema.supply_type,
-                is_food_contact=mat_schema.is_food_contact,
             )
             db.add(mat)
         db.flush()
@@ -658,7 +654,6 @@ async def save_step2_materials(
 @router.post("/step3-documents")
 async def save_step3_documents(
     material_id: int = Form(...),
-    is_food_contact: bool = Form(False),
 
     sds_file: Optional[UploadFile] = File(None),
     sds_language: Optional[str] = Form(None),
@@ -671,8 +666,6 @@ async def save_step3_documents(
     coa_test_date: Optional[str] = Form(None),
 
     reach_rohs_file: Optional[UploadFile] = File(None),
-
-    food_contact_doc_file: Optional[UploadFile] = File(None),
 
     technical_drawing_file: Optional[UploadFile] = File(None),
     ifra_doc_file: Optional[UploadFile] = File(None),
@@ -716,16 +709,11 @@ async def save_step3_documents(
 
     expiry_warning = check_sds_expiry(sds_date) if sds_date else False
 
-    if is_food_contact and not food_contact_doc_file:
-        raise HTTPException(status_code=400, detail="Food Contact DoC file is required when Food Contact Material is checked.")
-
     all_files = {}
     if sds_file: all_files["sds"] = sds_file
     if tds_file: all_files["tds"] = tds_file
     if coa_file: all_files["coa"] = coa_file
     if reach_rohs_file: all_files["reach_rohs"] = reach_rohs_file
-    if is_food_contact and food_contact_doc_file:
-        all_files["food_contact_doc"] = food_contact_doc_file
     if technical_drawing_file: all_files["technical_drawing"] = technical_drawing_file
     if ifra_doc_file: all_files["ifra_doc"] = ifra_doc_file
     if fsc_cert_file: all_files["fsc_cert"] = fsc_cert_file
@@ -734,7 +722,7 @@ async def save_step3_documents(
     for key, f in all_files.items():
         validate_file(f)
 
-    for key in ["sds", "tds", "coa", "reach_rohs", "food_contact_doc",
+    for key in ["sds", "tds", "coa", "reach_rohs",
                 "technical_drawing", "ifra_doc", "fsc_cert", "other_supporting"]:
         if key not in all_files:
             continue
@@ -768,7 +756,6 @@ async def save_step3_documents(
             doc.coa_test_date = coa_date
         db.add(doc)
 
-    material.is_food_contact = is_food_contact
     material.updated_at = datetime.utcnow()
     reg.updated_at = datetime.utcnow()
     db.commit()
@@ -796,7 +783,6 @@ async def upload_single_document(
     sds_issue_date: Optional[str] = Form(None),
     tds_physical_state: Optional[str] = Form(None),
     coa_test_date: Optional[str] = Form(None),
-    is_food_contact: bool = Form(False),
     document_issue_date: Optional[str] = Form(None),
 
     file: UploadFile = File(...),
@@ -876,7 +862,6 @@ async def upload_single_document(
         except (ValueError, TypeError):
             pass
 
-    material.is_food_contact = is_food_contact
     material.updated_at = datetime.utcnow()
 
     db.add(doc)
@@ -919,12 +904,6 @@ async def submit_registration(
     # Check materials
     if not reg.materials:
         required_checks.append("Step 2: At least one material is required.")
-
-    for mat in reg.materials:
-        if mat.is_food_contact:
-            docs_by_type = {d.document_type: d for d in mat.documents}
-            if "food_contact_doc" not in docs_by_type:
-                required_checks.append(f"Step 3: 'Food Contact DoC' missing for material '{mat.commercial_material_name}'.")
 
     if required_checks:
         return JSONResponse(

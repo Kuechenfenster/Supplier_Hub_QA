@@ -800,7 +800,6 @@
             tds: 'TDS (Technical Data Sheet)',
             coa: 'CoA (Certificate of Analysis)',
             reach_rohs: 'REACH SVHC / RoHS Compliance Statement',
-            food_contact_doc: 'Food Contact DoC',
             technical_drawing: 'Technical Drawing',
             ifra_doc: 'IFRA Documentation',
             fsc_cert: 'Factory FSC Certificate',
@@ -986,8 +985,7 @@ function showAddMaterialForm() {
                 commercial_material_name: commercialName,
                 supplier_material_code: supplierCode,
                 internal_factory_material_code: internalCode,
-                supply_type: supTypeReverse[supType] || supType,
-                is_food_contact: false
+                supply_type: supTypeReverse[supType] || supType
             };
 
             try {

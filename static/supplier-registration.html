@@ -197,8 +197,8 @@ let formState = {
     step1: { name_en: '', name_cn: '', material_origin: '', facility_address: '',
         sales_contact_name: '', sales_contact_email: '', sales_contact_phone: '',
         qm_contact_name: '', qm_contact_email: '', qm_contact_phone: '' },
-    step2: [],   // [{ commercial_material_name, internal_factory_material_code, supplier_material_code, is_food_contact }]
-    step3: {},   // { [supplierMaterialCode]: { is_food_contact, files: { sds:{}, tds:{}, coa:{}, reach_rohs:{}, food_contact_doc:{} } } }
+    step2: [],   // [{ commercial_material_name, internal_factory_material_code, supplier_material_code }]
+    step3: {},   // { [supplierMaterialCode]: { files: { sds:{}, tds:{}, coa:{}, reach_rohs:{} } } }
     step3docs: {} // Cache for rendered doc states: { [supplierMaterialCode]: { sds: {lang,date}, tds:{state}, coa:{date} } }
 };
 let materialIds = {};   // supplier_material_code -> db id
@@ -245,7 +245,6 @@ async function loadDraft() {
             commercial_material_name: m.commercial_material_name,
             internal_factory_material_code: m.internal_factory_material_code,
             supplier_material_code: m.supplier_material_code,
-            is_food_contact: m.is_food_contact || false,
         }));
 
         (registrationData.materials || []).forEach(m => {
@@ -263,7 +262,7 @@ async function loadDraft() {
                     } else if (docType === 'coa') {
                         formState.step3docs[m.supplier_material_code].coa = { date: d.coa_test_date || '' };
                     }
-                    formState.step3[m.supplier_material_code] = formState.step3[m.supplier_material_code] || { is_food_contact: m.is_food_contact, files: {} };
+                    formState.step3[m.supplier_material_code] = formState.step3[m.supplier_material_code] || { files: {} };
                     formState.step3[m.supplier_material_code].files[docType] = { name: d.original_filename, id: d.id };
                 });
             }
@@ -429,12 +428,6 @@ function renderMaterialRow(mat, idx) {
             <div class="form-group"><label>Supplier Material Code <span class="required">*</span></label>
                 <input type="text" id="mat_sup_${idx}" value="${esc(mat.supplier_material_code)}" placeholder="Supplier's catalog identifier" onchange="updateMatField(${idx}, 'supplier_material_code', this.value)">
             </div>
-            <div class="form-group" style="justify-content:flex-end;">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="mat_fc_${idx}" ${mat.is_food_contact ? 'checked' : ''} onchange="updateMatField(${idx}, 'is_food_contact', this.checked)">
-                    <label for="mat_fc_${idx}">Food Contact Material</label>
-                </div>
-            </div>
         </div>
     </div>`;
 }
@@ -446,7 +439,7 @@ function updateMatField(idx, key, val) {
 }
 
 function addMaterial() {
-    formState.step2.push({ commercial_material_name: '', internal_factory_material_code: '', supplier_material_code: '', is_food_contact: false });
+    formState.step2.push({ commercial_material_name: '', internal_factory_material_code: '', supplier_material_code: '' });
     renderStep2();
 }
 
@@ -466,7 +459,6 @@ async function saveStep2() {
         mat.commercial_material_name = document.getElementById(`mat_comm_${idx}`)?.value || mat.commercial_material_name;
         mat.internal_factory_material_code = document.getElementById(`mat_int_${idx}`)?.value || mat.internal_factory_material_code;
         mat.supplier_material_code = document.getElementById(`mat_sup_${idx}`)?.value || mat.supplier_material_code;
-        mat.is_food_contact = document.getElementById(`mat_fc_${idx}`)?.checked || false;
     });
 
     if (formState.step2.length === 0) { showToast('error', 'Add at least one material'); return; }
@@ -521,8 +513,6 @@ let icon = '';
     html += renderDocSection('tds', '2. Technical Data Sheet (TDS)', mat, docState, existingFiles);
     html += renderDocSection('coa', '3. Certificate of Analysis (CoA)', mat, docState, existingFiles);
     html += renderDocSection('reach_rohs', '4. REACH SVHC / RoHS Compliance Statement', mat, docState, existingFiles);
-
-    html += renderFoodContactSection(mat);
 
     document.getElementById('contentArea').innerHTML = html;
 
@@ -606,27 +596,6 @@ function renderDocSection(docType, title, mat, docState, existingFiles) {
     </div>`;
 }
 
-function renderFoodContactSection(mat) {
-    const existing = (formState.step3[mat.supplier_material_code] || {}).files || {};
-    return `<div class="doc-section" id="food_contact_section" style="${mat.is_food_contact ? '' : 'display:none;'}">
-        <h3>5. Food Contact Declaration of Compliance (DoC) <span class="required">*</span></h3>
-        <div class="checkbox-group">
-            <input type="checkbox" id="food_contact_toggle" ${mat.is_food_contact ? 'checked' : ''} onchange="toggleFoodContact('${esc(mat.supplier_material_code)}', this.checked)">
-            <label for="food_contact_toggle">This is a Food Contact Material</label>
-        </div>
-        <div id="food_contact_dropzone_area" style="${mat.is_food_contact ? '' : 'display:none;'}">
-            <div class="dropzone ${existing.food_contact_doc ? 'uploaded' : ''}" data-doc-type="food_contact_doc">
-                <div class="dz-icon">&#128196;</div>
-                <div class="dz-text">${existing.food_contact_doc ? `Uploaded: ${existing.food_contact_doc.name}` : 'Drag &amp; drop PDF here or click to browse'}</div>
-                <div class="dz-hint">${existing.food_contact_doc ? 'Drop or click to replace' : 'PDF only, max 10 MB'}</div>
-                <input type="file" accept=".pdf" style="display:none" onchange="handleFileSelect('food_contact_doc', this.files[0])">
-            </div>
-            ${existing.food_contact_doc ? `<div class="file-info"><span>&#128206; ${existing.food_contact_doc.name}</span><span class="remove-file" onclick="removeFile('${esc(mat.supplier_material_code)}', 'food_contact_doc')">Remove</span></div>` : ''}
-        </div>
-        <div id="uploadStatus_food_contact_doc" style="font-size:12px;margin-top:6px;"></div>
-    </div>`;
-}
-
 function onSdsDateChange(code, val) {
     saveDocMeta(code, 'sds', 'date', val);
     const warn = document.getElementById('sds_date_warn');
@@ -645,15 +614,6 @@ function onSdsDateChange(code, val) {
             clearWarnings();
         }
     }
-}
-
-function toggleFoodContact(code, checked) {
-    const mat = formState.step2.find(m => m.supplier_material_code === code);
-    if (mat) mat.is_food_contact = checked;
-    const section = document.getElementById('food_contact_section');
-    const area = document.getElementById('food_contact_dropzone_area');
-    if (section) section.style.display = checked ? '' : 'none';
-    if (area) area.style.display = checked ? '' : 'none';
 }
 
 function saveDocMeta(code, docType, key, val) {
@@ -680,7 +640,6 @@ async function handleFileSelect(docType, file) {
     fd.append('material_id', materialId);
     fd.append('document_type', docType);
     fd.append('file', file);
-    fd.append('is_food_contact', mat.is_food_contact);
 
     if (docType === 'sds') {
         const langSel = document.getElementById('sds_language');
@@ -704,7 +663,7 @@ async function handleFileSelect(docType, file) {
         document.getElementById(uploadKey).innerHTML = '<span style="color:#28a745;">Uploaded</span>';
 
         // Update state
-        formState.step3[code] = formState.step3[code] || { is_food_contact: mat.is_food_contact, files: {} };
+        formState.step3[code] = formState.step3[code] || { files: {} };
         formState.step3[code].files[docType] = { name: file.name, id: result.id };
         if (result.warnings && result.warnings.length > 0) {
             sdsWarnings[code] = true;
@@ -754,7 +713,6 @@ function renderStep4() {
             <tr><th>Commercial Name</th><td>${esc(mat.commercial_material_name)}</td></tr>
             <tr><th>Internal Code</th><td>${esc(mat.internal_factory_material_code)}</td></tr>
             <tr><th>Supplier Code</th><td>${esc(mat.supplier_material_code)}</td></tr>
-            <tr><th>Food Contact</th><td>${mat.is_food_contact ? 'Yes' : 'No'}</td></tr>
         </table>`;
     });
     html += `</div>`;
@@ -770,7 +728,6 @@ function renderStep4() {
             <tr class="${!files.tds ? '' : ''}"><th>TDS</th><td>${files.tds ? esc(files.tds.name) + ' | State: ' + (docState.tds?.state || '—') : '<span style="color:#888;">—</span>'}</td></tr>
             <tr class="${!files.coa ? '' : ''}"><th>CoA</th><td>${files.coa ? esc(files.coa.name) + ' | Date: ' + (docState.coa?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
             <tr class="${!files.reach_rohs ? '' : ''}"><th>REACH/RoHS</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span style="color:#888;">—</span>'}</td></tr>
-            ${mat.is_food_contact ? `<tr class="${!files.food_contact_doc ? '' : ''}"><th>Food Contact DoC</th><td>${files.food_contact_doc ? esc(files.food_contact_doc.name) : '<span style="color:#888;">—</span>'}</td></tr>` : ''}
         </table>`;
     });
     html += `</div>`;

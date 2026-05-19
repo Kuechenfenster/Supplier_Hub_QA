@@ -12,7 +12,7 @@ Build a standalone supplier self-registration portal where external factories re
 Key requirements:
 1. **Supplier & Commercial Profile** (Name, Country, Sales/QM Contacts, Facility Address)
 2. **Raw Material Identifiers** (Commercial name, internal SKU, supplier code)
-3. **Document Upload Vault** (SDS, TDS, CoA, REACH/RoHS, Food Contact DoC) with metadata and 3-year SDS expiry check
+3. **Document Upload Vault** (SDS, TDS, CoA, REACH/RoHS) with metadata and 3-year SDS expiry check
 4. **4-step wizard UX** ([1.Profile] → [2.Materials] → [3.Documents] → [4.Review & Submit])
 
 ---
@@ -46,12 +46,12 @@ Key requirements:
 - `commercial_material_name` VARCHAR(255) NOT NULL
 - `internal_factory_material_code` VARCHAR(100) NOT NULL (our SKU)
 - `supplier_material_code` VARCHAR(100) NOT NULL (vendor's catalog ID)
-- `is_food_contact` BOOLEAN DEFAULT FALSE
+- `is_active` BOOLEAN DEFAULT TRUE -- soft-delete/deactivate flag
 - UNIQUE INDEX on `(registration_id, supplier_material_code)`
 
 ### `supplier_documents`
 - `id` SERIAL PK, `registration_id` FK, `material_id` FK
-- `document_type` VARCHAR(30): sds / tds / coa / reach_rohs / food_contact_doc
+- `document_type` VARCHAR(30): sds / tds / coa / reach_rohs
 - `file_path`, `original_filename`, `file_size_bytes`
 - **Type-specific columns**: `sds_language`, `sds_issue_date`, `sds_expiry_warning`, `tds_physical_state`, `coa_test_date`
 
@@ -89,12 +89,11 @@ Key requirements:
 
 ### 3. Document Uploads → All Optional
 - All `File(...)` params changed to `File(None)`
-- Submit validation no longer requires SDS/TDS/CoA/REACH-RoHS documents
-- Only Food Contact DoC remains conditional (required when FCM checkbox is checked)
+- Submit validation no longer requires SDS/TDS/CoA/REACH-RoHS documents. All document uploads are optional.
 - Frontend: removed "MISSING" warnings, changed to `—` for absent docs
 
 ### 4. Dashboard Improvements
-- Changed from inline card view to **table view** with columns: Material Name, Internal Code, Supplier Code, Food Contact, Docs count
+- Changed from inline card view to **table view** with columns: Material Name, Internal Code, Supplier Code, Docs count
 - **Edit** button per material → opens registration wizard in new window
 - **Deactivate** button → confirms then calls `DELETE /api/registration/material/{id}`
 - **"Register New Supplier"** button → opens `/supplier-registration` in **new browser tab** (`window.open(..., '_blank')`)
@@ -117,7 +116,7 @@ Key requirements:
 1. **Production deployment requires the app to restart** for the `ALTER TABLE` statements in `main.py` startup to execute. If the column was already `VARCHAR(2)`, the migration widens it to `VARCHAR(100)`.
 2. **File storage is local filesystem** (`backend/data/registrations/`). No cloud storage (S3, etc.) configured.
 3. **Local dev uses SQLite by default**. Set `DATABASE_URL=postgresql://supplier:supplier123@localhost:5432/supplier_hub` to use the Docker PostgreSQL.
-4. **Food Contact DoC is the only document that blocks submission** when the FCM checkbox is checked. All other documents (SDS, TDS, CoA, REACH/RoHS) are advisory.
+4. **All documents are advisory** — no missing document blocks submission. Only SDS expiry > 3 years hard-blocks submission.
 
 ---
 

@@ -147,7 +147,6 @@ class MaterialRegistration(Base):
     internal_factory_material_code = Column(String(100), nullable=False)
     supplier_material_code = Column(String(100), nullable=False)
     supply_type = Column(String(30), nullable=False)  # tier2, raw_material, component_part, printer
-    is_food_contact = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -170,7 +169,7 @@ class SupplierDocument(Base):
     material_id = Column(Integer, ForeignKey("material_registrations.id"), nullable=False, index=True)
 
     # Document type enumeration
-    # sds, tds, coa, reach_rohs, food_contact_doc, technical_drawing, ifra_doc, fsc_cert, other_supporting
+    # sds, tds, coa, reach_rohs, technical_drawing, ifra_doc, fsc_cert, other_supporting
     document_type = Column(String(30), nullable=False)
 
     # File storage
