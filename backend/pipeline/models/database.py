@@ -49,7 +49,7 @@ class Manufacturer(Base):
 # 2. Suppliers — Our Material Suppliers (links to manufacturer)
 # ======================================================================
 class Supplier(Base):
-    __tablename__ = "suppliers"
+    __tablename__ = "pipeline_suppliers"
 
     supplier_id = Column(String(50), primary_key=True)
     supplier_name = Column(String(200), nullable=False)
@@ -77,7 +77,7 @@ class MaterialLibrary(Base):
     material_id = Column(String(50), primary_key=True)
     material_name = Column(String(200), nullable=False)
     component_name = Column(String(200), nullable=False)
-    supplier_id = Column(String(50), ForeignKey("suppliers.supplier_id"), nullable=False, index=True)
+    supplier_id = Column(String(50), ForeignKey("pipeline_suppliers.supplier_id"), nullable=False, index=True)
     material_type = Column(String(20), default="mixture")  # substance / mixture / article
     category = Column(String(50))               # pigment / resin / solvent / packaging / additive
     physical_state = Column(String(20))         # solid / liquid / gas / paste

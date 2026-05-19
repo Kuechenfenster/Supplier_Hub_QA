@@ -4,8 +4,8 @@ import os
 import time
 from sqlalchemy import create_engine, text, exc
 
-# Single Database URL - supports both SQLite and PostgreSQL
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/db/supplier_hub.db")
+# Single Database URL — PostgreSQL default for local dev
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://supplier:supplier123@localhost:5432/supplier_hub")
 
 # Connection retry settings
 max_retries = 30
@@ -114,7 +114,7 @@ migrations = [
     )""",
 
     # Pipeline Suppliers table (different from management suppliers)
-    """CREATE TABLE IF NOT EXISTS suppliers (
+    """CREATE TABLE IF NOT EXISTS pipeline_suppliers (
         supplier_id VARCHAR(50) PRIMARY KEY,
         supplier_name VARCHAR(200) NOT NULL,
         supplier_material_id VARCHAR(100),

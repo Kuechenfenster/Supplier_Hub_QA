@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-DB_URL="${DATABASE_URL:-sqlite:///backend/db/supplier_hub.db}"
+DB_URL="${DATABASE_URL:-postgresql://supplier:supplier123@db:5432/supplier_hub}"
 
 echo "==> Supplier Hub — Coolify Entrypoint"
 echo "==> DATABASE_URL: ${DB_URL//:*@/:***@}"

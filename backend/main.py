@@ -30,7 +30,7 @@ except Exception as e:
     print(f"⚠️ Pipeline database init skipped: {e}")
 
 # Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/db/supplier_hub.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://supplier:supplier123@localhost:5432/supplier_hub")
 INVITATION_EXPIRY_DAYS = 7
 
 # Base directory for static files - parent of backend directory

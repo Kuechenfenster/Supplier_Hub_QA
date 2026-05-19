@@ -681,6 +681,17 @@
             printer: ['fsc_cert', 'reach_rohs', 'other_supporting']
         };
 
+        const DOC_TYPE_LABELS = {
+            sds: 'SDS (Safety Data Sheet)',
+            tds: 'TDS (Technical Data Sheet)',
+            coa: 'CoA (Certificate of Analysis)',
+            reach_rohs: 'REACH SVHC / RoHS Compliance Statement',
+            technical_drawing: 'Technical Drawing',
+            ifra_doc: 'IFRA Documentation',
+            fsc_cert: 'Factory FSC Certificate',
+            other_supporting: 'Other Supporting Documents'
+        };
+
         function escHtml(str) {
             if (!str) return '';
             const div = document.createElement('div');
