@@ -310,6 +310,24 @@
                                 <button class="btn-outline" onclick="loadMaterials()">Refresh</button>
                             </div>
                         </div>
+                        <div id="materialFilterBar" style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <label style="font-size:13px;font-weight:600;color:#444;">Type:</label>
+                                <select id="matFilterType" style="padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onchange="applyMaterialFilters()">
+                                    <option value="">All</option>
+                                    <option value="tier2">Tier 2</option>
+                                    <option value="raw_material">Raw Material</option>
+                                    <option value="component_part">Components</option>
+                                    <option value="printer">Printer</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;flex:1;">
+                                <input id="matSearchInput" type="text" placeholder="Search material name, manufacture, supplier code, internal code..." style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onkeydown="if(event.key==='Enter'){applyMaterialFilters()}">
+                                <button class="btn-primary btn-sm" onclick="applyMaterialFilters()">Search</button>
+                                <button class="btn-outline btn-sm" onclick="clearMaterialFilters()">Clear</button>
+                            </div>
+                        </div>
+                        <div id="materialSearchResultCount" style="font-size:13px;color:#666;margin-bottom:12px;"></div>
                         <div id="materialForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
                             <h4 id="materialFormTitle" style="margin-bottom:12px;">Register Material</h4>
                             <input type="hidden" id="editMatId">
@@ -794,17 +812,9 @@
         }
 
 
-        // ============ Registered Materials CRUD ============
-        const DOC_TYPE_LABELS = {
-            sds: 'SDS (Safety Data Sheet)',
-            tds: 'TDS (Technical Data Sheet)',
-            coa: 'CoA (Certificate of Analysis)',
-            reach_rohs: 'REACH SVHC / RoHS Compliance Statement',
-            technical_drawing: 'Technical Drawing',
-            ifra_doc: 'IFRA Documentation',
-            fsc_cert: 'Factory FSC Certificate',
-            other_supporting: 'Other Supporting Documents'
-        };
+// ============ Registered Materials CRUD ============
+        let materialsCache = [];
+        let manufacturesCacheForMaterials = {};
 
         async function loadMaterials() {
             const container = document.getElementById('materialsList');
@@ -818,57 +828,104 @@
                 if (!data.exists || !data.registration) {
                     container.innerHTML = '<div class="empty-state"><p>No registration found. Register manufactures first.</p></div>';
                     document.getElementById('countMaterialsSide').textContent = '0';
+                    materialsCache = [];
+                    manufacturesCacheForMaterials = {};
                     return;
                 }
                 const reg = data.registration;
-                const mats = reg.materials || [];
+                materialsCache = reg.materials || [];
                 const mfgs = reg.manufactures || [];
-                const mfgMap = {};
-                mfgs.forEach(m => { mfgMap[m.id] = m.manufacture_name; });
+                manufacturesCacheForMaterials = {};
+                mfgs.forEach(m => { manufacturesCacheForMaterials[m.id] = m.manufacture_name; });
 
-                document.getElementById('countMaterialsSide').textContent = mats.length;
+                document.getElementById('countMaterialsSide').textContent = materialsCache.length;
 
-                if (mats.length === 0) {
+                if (materialsCache.length === 0) {
                     container.innerHTML = '<div class="empty-state"><p>No materials registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;">Register a manufacture first, then add materials.</p></div>';
                     return;
                 }
 
-                const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
-                const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
-                let rows = mats.map(mat => {
-                    const docs = mat.documents || {};
-                    const docKeys = Object.keys(docs);
-                    let docInfo = docKeys.map(k => {
-                        const hasFile = docs[k] && docs[k].original_filename;
-                        return `<span class="doc-file-name ${hasFile ? '' : 'missing'}">${DOC_TYPE_LABELS[k] || k}: ${hasFile ? '<span style="color:#28a745;">✓</span>' : '<span style="color:#dc3545;">✗</span>'}</span><br>`;
-                    }).join('');
+                renderMaterialsTable(materialsCache, manufacturesCacheForMaterials);
+                document.getElementById('materialSearchResultCount').textContent = `Showing ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
+            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading materials.</div>'; }
+        }
 
-                    // Show expected doc types that are missing
-                    const expectedTypes = (DOC_TYPES_BY_SUPPLY && DOC_TYPES_BY_SUPPLY[mat.supply_type]) || [];
-                    let missingTypes = expectedTypes.filter(t => !docKeys.includes(t));
-                    let missingInfo = missingTypes.map(k => `<span class="doc-file-name missing">${DOC_TYPE_LABELS[k] || k}: missing</span><br>`).join('');
+        function renderMaterialsTable(mats, mfgMap) {
+            const container = document.getElementById('materialsList');
+            if (mats.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No materials match the current filter.</p></div>';
+                return;
+            }
 
-                    const isDeactivated = mat.is_active === false || mat.is_active === 'false';
-                    const rowStyle = isDeactivated ? 'opacity:0.4;background:#f8f8f8;' : '';
-                    const deactivatedBadge = isDeactivated ? ' <span style="font-size:10px;color:#dc3545;font-weight:600;">(Deactivated)</span>' : '';
-
-                    return `<tr style="${rowStyle}">
-                        <td><strong>${escHtml(mat.commercial_material_name)}</strong>${deactivatedBadge}</td>
-                        <td>${escHtml(mfgMap[mat.manufacture_id] || 'Unknown')}</td>
-                        <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${typeLabels[mat.supply_type] || mat.supply_type}</span></td>
-                        <td>${escHtml(mat.supplier_material_code)}</td>
-                        <td>${escHtml(mat.internal_factory_material_code)}</td>
-                        <td style="font-size:11px;">${docInfo}${missingInfo}</td>
-                        <td style="display:flex;gap:4px;flex-wrap:wrap;">
-                            ${isDeactivated ? '' : `<button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>`}
-                            <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
-                            ${isDeactivated ? `<button class="btn-sm-outline" style="color:#28a745;border-color:#28a745;" onclick="reactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Reactivate</button>` : `<button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>`}
-                        </td>
-                    </tr>`;
+            const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
+            const typeBadges = { tier2: 'badge-tier2', raw_material: 'badge-raw', component_part: 'badge-comp', printer: 'badge-printer' };
+            let rows = mats.map(mat => {
+                const docs = mat.documents || {};
+                const docKeys = Object.keys(docs);
+                let docInfo = docKeys.map(k => {
+                    const hasFile = docs[k] && docs[k].original_filename;
+                    return `<span class="doc-file-name ${hasFile ? '' : 'missing'}">${DOC_TYPE_LABELS[k] || k}: ${hasFile ? '<span style="color:#28a745;">✓</span>' : '<span style="color:#dc3545;">✗</span>'}</span><br>`;
                 }).join('');
 
-                container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:220px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
-            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading materials.</div>'; }
+                const expectedTypes = (DOC_TYPES_BY_SUPPLY && DOC_TYPES_BY_SUPPLY[mat.supply_type]) || [];
+                let missingTypes = expectedTypes.filter(t => !docKeys.includes(t));
+                let missingInfo = missingTypes.map(k => `<span class="doc-file-name missing">${DOC_TYPE_LABELS[k] || k}: missing</span><br>`).join('');
+
+                const isDeactivated = mat.is_active === false || mat.is_active === 'false';
+                const rowStyle = isDeactivated ? 'opacity:0.4;background:#f8f8f8;' : '';
+                const deactivatedBadge = isDeactivated ? ' <span style="font-size:10px;color:#dc3545;font-weight:600;">(Deactivated)</span>' : '';
+
+                return `<tr style="${rowStyle}">
+                    <td><strong>${escHtml(mat.commercial_material_name)}</strong>${deactivatedBadge}</td>
+                    <td>${escHtml(mfgMap[mat.manufacture_id] || 'Unknown')}</td>
+                    <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${typeLabels[mat.supply_type] || mat.supply_type}</span></td>
+                    <td>${escHtml(mat.supplier_material_code)}</td>
+                    <td>${escHtml(mat.internal_factory_material_code)}</td>
+                    <td style="font-size:11px;">${docInfo}${missingInfo}</td>
+                    <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                        ${isDeactivated ? '' : `<button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>`}
+                        <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
+                        ${isDeactivated ? `<button class="btn-sm-outline" style="color:#28a745;border-color:#28a745;" onclick="reactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Reactivate</button>` : `<button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>`}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:220px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+        }
+
+        function applyMaterialFilters() {
+            const selectedType = document.getElementById('matFilterType').value;
+            const searchText = document.getElementById('matSearchInput').value.trim().toLowerCase();
+
+            let filtered = materialsCache;
+
+            if (selectedType) {
+                filtered = filtered.filter(m => m.supply_type === selectedType);
+            }
+
+            if (searchText) {
+                filtered = filtered.filter(m => {
+                    const mfgName = manufacturesCacheForMaterials[m.manufacture_id] || '';
+                    return (m.commercial_material_name || '').toLowerCase().includes(searchText) ||
+                           (mfgName || '').toLowerCase().includes(searchText) ||
+                           (m.supplier_material_code || '').toLowerCase().includes(searchText) ||
+                           (m.internal_factory_material_code || '').toLowerCase().includes(searchText);
+                });
+            }
+
+            renderMaterialsTable(filtered, manufacturesCacheForMaterials);
+
+            const countText = filtered.length === materialsCache.length
+                ? `Showing ${filtered.length} material${filtered.length !== 1 ? 's' : ''}`
+                : `Showing ${filtered.length} of ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
+            document.getElementById('materialSearchResultCount').textContent = countText;
+        }
+
+        function clearMaterialFilters() {
+            document.getElementById('matFilterType').value = '';
+            document.getElementById('matSearchInput').value = '';
+            renderMaterialsTable(materialsCache, manufacturesCacheForMaterials);
+            document.getElementById('materialSearchResultCount').textContent = `Showing ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
         }
 
         async function loadManufactureDropdown() {
