@@ -849,17 +849,21 @@
                     let missingTypes = expectedTypes.filter(t => !docKeys.includes(t));
                     let missingInfo = missingTypes.map(k => `<span class="doc-file-name missing">${DOC_TYPE_LABELS[k] || k}: missing</span><br>`).join('');
 
-                    return `<tr>
-                        <td><strong>${escHtml(mat.commercial_material_name)}</strong></td>
+                    const isDeactivated = mat.is_active === false || mat.is_active === 'false';
+                    const rowStyle = isDeactivated ? 'opacity:0.4;background:#f8f8f8;' : '';
+                    const deactivatedBadge = isDeactivated ? ' <span style="font-size:10px;color:#dc3545;font-weight:600;">(Deactivated)</span>' : '';
+
+                    return `<tr style="${rowStyle}">
+                        <td><strong>${escHtml(mat.commercial_material_name)}</strong>${deactivatedBadge}</td>
                         <td>${escHtml(mfgMap[mat.manufacture_id] || 'Unknown')}</td>
                         <td><span class="badge ${typeBadges[mat.supply_type] || ''}">${typeLabels[mat.supply_type] || mat.supply_type}</span></td>
                         <td>${escHtml(mat.supplier_material_code)}</td>
                         <td>${escHtml(mat.internal_factory_material_code)}</td>
                         <td style="font-size:11px;">${docInfo}${missingInfo}</td>
                         <td style="display:flex;gap:4px;flex-wrap:wrap;">
-                            <button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>
+                            ${isDeactivated ? '' : `<button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>`}
                             <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
-                            <button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>
+                            ${isDeactivated ? `<button class="btn-sm-outline" style="color:#28a745;border-color:#28a745;" onclick="reactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Reactivate</button>` : `<button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>`}
                         </td>
                     </tr>`;
                 }).join('');
@@ -937,6 +941,17 @@ function showAddMaterialForm() {
                 });
                 if (!resp.ok) { alert('Failed to deactivate.'); return; }
                 cancelMaterialForm();
+                loadMaterials();
+            } catch(e) { alert('Network error.'); }
+        }
+
+        async function reactivateMaterial(matId, matName) {
+            if (!confirm('Reactivate material "' + matName + '"?')) return;
+            try {
+                const resp = await fetch('/api/registration/material/' + matId + '/reactivate', {
+                    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { alert('Failed to reactivate.'); return; }
                 loadMaterials();
             } catch(e) { alert('Network error.'); }
         }

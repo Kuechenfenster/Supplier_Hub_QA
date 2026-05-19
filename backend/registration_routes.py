@@ -425,7 +425,6 @@ async def get_draft(
     try:
         active_materials = db.query(MaterialRegistration).filter(
             MaterialRegistration.registration_id == reg.id,
-            MaterialRegistration.is_active != False,
         ).all()
         for mat in active_materials:
             docs_data = {}
@@ -1037,6 +1036,31 @@ async def deactivate_material(
     db.commit()
 
     return {"message": "Material deactivated."}
+
+
+@router.put("/material/{material_id}/reactivate")
+async def reactivate_material(
+    material_id: int,
+    supplier: Supplier = Depends(get_current_supplier),
+    db: Session = Depends(get_db),
+):
+    mat = db.query(MaterialRegistration).filter(MaterialRegistration.id == material_id).first()
+    if not mat:
+        raise HTTPException(status_code=404, detail="Material not found")
+
+    reg = db.query(SupplierRegistration).filter(
+        SupplierRegistration.id == mat.registration_id,
+        SupplierRegistration.supplier_id == supplier.id,
+    ).first()
+    if not reg:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    mat.is_active = True
+    mat.updated_at = datetime.utcnow()
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {"message": "Material reactivated."}
 
 
 @router.delete("/material/{material_id}")
