@@ -131,7 +131,20 @@ def download_echa_file(key: str) -> Optional[str]:
 def _read_file(filepath: str) -> pd.DataFrame:
     ext = os.path.splitext(filepath)[1].lower()
     if ext in (".xlsx", ".xls"):
-        return pd.read_excel(filepath, engine="openpyxl")
+        # ECHA bulk files often have multi-row headers; try skiprows dynamically
+        df_raw = pd.read_excel(filepath, engine="openpyxl", header=None)
+        # Find the first row that contains 'Substance' or 'Chemical' or 'CAS'
+        header_row = None
+        for i in range(min(10, len(df_raw))):
+            row_vals = [str(v).lower() for v in df_raw.iloc[i] if pd.notna(v)]
+            if any(k in row_vals for k in ["substance", "chemical", "cas", "ec number"]):
+                header_row = i
+                break
+        if header_row is not None:
+            df = pd.read_excel(filepath, engine="openpyxl", header=header_row)
+        else:
+            df = pd.read_excel(filepath, engine="openpyxl")
+        return df
     elif ext == ".csv":
         return pd.read_csv(filepath)
     else:
@@ -182,13 +195,15 @@ def _parse_candidate_list(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        name = str(row.get("Substance")).strip() if "Substance" in row else None
-        ec = _normalise_ec(row.get("EC Number")) if "EC Number" in row else None
-        cas = _normalise_cas(row.get("CAS Number")) if "CAS Number" in row else None
-        reason = str(row.get("Reason")).strip() if "Reason" in row else None
-        date_inc = str(row.get("Date of inclusion"))[:10] if "Date of inclusion" in row else None
+        row = {str(k).strip().lower().replace(" ", "_"): v for k, v in row.items()}
+        # ECHA Candidate List has "Chemical Name", "EC Number", "CAS Number", "Inclusion Date"
+        name = str(row.get("chemical_name", "")).strip() if pd.notna(row.get("chemical_name")) else None
+        ec = _normalise_ec(row.get("ec_number")) if "ec_number" in row else None
+        cas = _normalise_cas(row.get("cas_number")) if "cas_number" in row else None
+        reason = str(row.get("reason_for_inclusion", "")).strip() if pd.notna(row.get("reason_for_inclusion")) else None
+        date_inc = str(row.get("inclusion_date", ""))[:10] if pd.notna(row.get("inclusion_date")) else None
 
-        if not name and not ec and not cas:
+        if not name or (not ec and not cas):
             skipped += 1
             continue
 
