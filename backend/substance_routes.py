@@ -4,11 +4,14 @@ Substance Library API Routes — CRUD + search for 5 libraries and symbol refere
 import os
 import json
 import shutil
+import logging
 from datetime import datetime
 from typing import Optional, List, Union
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query, Form
 from pydantic import BaseModel
 from sqlalchemy import or_, text
+
+logger = logging.getLogger(__name__)
 
 try:
     import pandas as pd

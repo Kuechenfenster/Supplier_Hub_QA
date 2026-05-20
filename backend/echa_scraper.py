@@ -35,8 +35,9 @@ logger = logging.getLogger(__name__)
 ECHA_DOWNLOADS = {
     "candidate_list": {
         "name": "SVHC Candidate List",
-        "format": "xlsx",
-        "url": "https://www.chemsafetypro.com/Topics/EU/REACH_SVHC_List_Excel_Table.xlsx",
+        "format": "csv",
+        "method": "post",
+        "url": "https://echa.europa.eu/candidate-list-table",
         "source_url": "https://echa.europa.eu/candidate-list-table",
         "fallback_url": None,
         "table": "svhc",
@@ -44,26 +45,29 @@ ECHA_DOWNLOADS = {
     },
     "authorisation_list": {
         "name": "Authorisation List (Annex XIV)",
-        "format": "xlsx",
-        "url": None,  # No official bulk XLSX; we scrape from reference
+        "format": "csv",
+        "method": "post",
+        "url": "https://echa.europa.eu/authorisation-list",
         "source_url": "https://echa.europa.eu/authorisation-list",
-        "fallback_url": "http://www.chemsafetypro.com/Topics/EU/REACH_annex_xiv_REACH_authorization_list.xlsx",
+        "fallback_url": None,
         "table": "echa",
         "parse_func": "_parse_authorisation_list"
     },
     "restriction_list": {
         "name": "Restriction List (Annex XVII)",
-        "format": "xlsx",
-        "url": None,
+        "format": "xls",
+        "method": "post",
+        "url": "https://echa.europa.eu/substances-restricted-under-reach",
         "source_url": "https://echa.europa.eu/substances-restricted-under-reach",
-        "fallback_url": "https://www.chemsafetypro.com/Topics/EU/REACH_Restricted_Substances_List_REACH_Annex_XVII.xls",
+        "fallback_url": None,
         "table": "echa",
         "parse_func": "_parse_restriction_list"
     },
     "corap": {
-        "name": "CoRAP — Community Rolling Action Plan",
-        "format": "xlsx",
-        "url": "https://echa.europa.eu/download/corap",
+        "name": "CoRAP \u2014 Community Rolling Action Plan",
+        "format": "csv",
+        "method": "post",
+        "url": "https://echa.europa.eu/information-on-chemicals/evaluation/community-rolling-action-plan/corap-table",
         "source_url": "https://echa.europa.eu/information-on-chemicals/evaluation/community-rolling-action-plan/corap-table",
         "fallback_url": None,
         "table": "echa",
@@ -71,8 +75,9 @@ ECHA_DOWNLOADS = {
     },
     "pbt": {
         "name": "PBT/vPvB Assessment List",
-        "format": "xlsx",
-        "url": None,
+        "format": "csv",
+        "method": "post",
+        "url": "https://echa.europa.eu/pbt",
         "source_url": "https://echa.europa.eu/pbt",
         "fallback_url": None,
         "table": "cmr",
@@ -88,6 +93,86 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 # Downloader
 # ======================================================================
 
+def _download_echa_table_export(page_url: str, export_type: str = "csv") -> Optional[bytes]:
+    """
+    Download ECHA table export via Liferay POST endpoint.
+    Steps:
+        1. GET the page to obtain session cookies + hidden form fields
+        2. POST to the export endpoint with all form fields
+    Returns the raw file bytes, or None on failure.
+    """
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Referer": page_url
+    })
+
+    # 1. Load page to get session + tokens
+    page_resp = session.get(page_url, timeout=60)
+    if page_resp.status_code != 200:
+        logger.warning(f"Could not load ECHA page {page_url}: HTTP {page_resp.status_code}")
+        return None
+
+    text = page_resp.text
+
+    # Extract p_auth token
+    auth_match = re.search(r'p_auth=(\w+)', text)
+    if not auth_match:
+        logger.warning("No p_auth token found in ECHA page")
+        return None
+    p_auth = auth_match.group(1)
+
+    # Extract hidden form inputs from export form
+    form_match = re.search(r'<form[^>]*id="_disslists_WAR_disslistsportlet_exportForm".*?</form>', text, re.DOTALL)
+    if not form_match:
+        logger.warning("No export form found in ECHA page")
+        return None
+
+    form_html = form_match.group(0)
+    # Parse input name/value pairs
+    inputs = re.findall(r'<input[^>]*name="([^"]+)"[^>]*value="([^"]*)"[^>]*/?>', form_html)
+    payload = {k: v for k, v in inputs}
+    payload["_disslists_WAR_disslistsportlet_exportType"] = export_type
+
+    # Build POST URL
+    post_url = (
+        f"{page_url}?p_p_id=disslists_WAR_disslistsportlet"
+        f"&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view"
+        f"&p_p_resource_id=exportResults&p_p_cacheability=cacheLevelPage&p_auth={p_auth}"
+    )
+
+    post_resp = session.post(
+        post_url,
+        data=payload,
+        timeout=120,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://echa.europa.eu"
+        }
+    )
+
+    if post_resp.status_code != 200:
+        logger.warning(f"Export POST failed: HTTP {post_resp.status_code}")
+        return None
+    if len(post_resp.content) < 1000:
+        logger.warning(f"Export returned {len(post_resp.content)} bytes — likely empty")
+        return None
+
+    return post_resp.content
+
+
 def download_echa_file(key: str) -> Optional[str]:
     """Download official ECHA file by key. Returns local file path."""
     cfg = ECHA_DOWNLOADS.get(key)
@@ -95,6 +180,7 @@ def download_echa_file(key: str) -> Optional[str]:
         logger.error(f"Unknown ECHA dataset key: {key}")
         return None
 
+    method = cfg.get("method", "get")
     urls_to_try = [u for u in [cfg.get("url"), cfg.get("fallback_url")] if u]
     if not urls_to_try:
         logger.error(f"No download URL configured for {key}")
@@ -102,19 +188,32 @@ def download_echa_file(key: str) -> Optional[str]:
 
     for url in urls_to_try:
         try:
-            logger.info(f"Downloading {cfg['name']} from {url}")
-            resp = requests.get(url, timeout=60, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-            })
-            if resp.status_code != 200:
-                logger.warning(f"HTTP {resp.status_code} for {url}")
-                continue
+            logger.info(f"Downloading {cfg['name']} from {url} (method={method})")
 
-            ext = cfg.get("format", "xlsx")
+            if method == "post":
+                export_type = cfg.get("format", "csv")
+                file_bytes = _download_echa_table_export(url, export_type)
+                if file_bytes is None:
+                    continue
+                resp_content = file_bytes
+                logger.info(f"POST export received {len(resp_content)} bytes")
+            else:
+                resp = requests.get(url, timeout=60, headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                })
+                if resp.status_code != 200:
+                    logger.warning(f"HTTP {resp.status_code} for {url}")
+                    continue
+                resp_content = resp.content
+
+            ext = cfg.get("format", "csv")
+            # ECHA sometimes returns XLSX regardless of requested format
+            if isinstance(resp_content, bytes) and resp_content[:2] == b"PK":
+                ext = "xlsx"
             local_path = os.path.join(DOWNLOAD_DIR, f"{key}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}")
             with open(local_path, "wb") as f:
-                f.write(resp.content)
-            logger.info(f"Saved {cfg['name']} ({len(resp.content)} bytes) to {local_path}")
+                f.write(resp_content)
+            logger.info(f"Saved {cfg['name']} ({len(resp_content)} bytes) to {local_path}")
             return local_path
         except Exception as e:
             logger.warning(f"Download failed for {url}: {e}")
@@ -128,25 +227,59 @@ def download_echa_file(key: str) -> Optional[str]:
 # Parsers
 # ======================================================================
 
+def _read_csv_with_header(raw_bytes: bytes, encoding: str = "utf-8") -> pd.DataFrame:
+    """Read ECHA-style CSV that has title/filter rows before the actual header."""
+    text = raw_bytes.decode(encoding, errors="replace")
+    lines = text.splitlines()
+    header_idx = None
+    header_keywords = ["substance name", "chemical name", "name", "ec no", "cas no"]
+    for i, line in enumerate(lines):
+        lower = line.lower()
+        if any(kw in lower for kw in header_keywords):
+            # Must look like a real header row (has tabs/commas separating fields)
+            if '\t' in line or ',' in line:
+                header_idx = i
+                break
+    if header_idx is None:
+        header_idx = 0
+    clean_text = "\n".join(lines[header_idx:])
+    # Detect delimiter
+    delimiter = "\t" if "\t" in lines[header_idx] else ","
+    return pd.read_csv(io.StringIO(clean_text), sep=delimiter, engine="python")
+
+
 def _read_file(filepath: str) -> pd.DataFrame:
     ext = os.path.splitext(filepath)[1].lower()
+    if ext == ".xlsx":
+        engine = "openpyxl"
+    elif ext == ".xls":
+        engine = "xlrd"
+    else:
+        engine = None
+
     if ext in (".xlsx", ".xls"):
         # ECHA bulk files often have multi-row headers; try skiprows dynamically
-        df_raw = pd.read_excel(filepath, engine="openpyxl", header=None)
+        df_raw = pd.read_excel(filepath, engine=engine, header=None)
         # Find the first row that contains 'Substance' or 'Chemical' or 'CAS'
         header_row = None
-        for i in range(min(10, len(df_raw))):
-            row_vals = [str(v).lower() for v in df_raw.iloc[i] if pd.notna(v)]
-            if any(k in row_vals for k in ["substance", "chemical", "cas", "ec number"]):
+        keywords = ["substance", "chemical", "chemical_name", "cas", "ec number", "ec no", "entry no", "inclusion", "reason", "name"]
+        for i in range(min(15, len(df_raw))):
+            row_text = " ".join([str(v).lower() for v in df_raw.iloc[i] if pd.notna(v)])
+            matches = sum(1 for k in keywords if k in row_text)
+            if matches >= 2:
                 header_row = i
                 break
         if header_row is not None:
-            df = pd.read_excel(filepath, engine="openpyxl", header=header_row)
+            df = pd.read_excel(filepath, engine=engine, header=header_row)
+            logger.debug(f"Detected header at row {header_row}, columns: {list(df.columns)}")
         else:
-            df = pd.read_excel(filepath, engine="openpyxl")
+            df = pd.read_excel(filepath, engine=engine)
+            logger.warning(f"No header row detected, using default. Columns: {list(df.columns)}")
         return df
     elif ext == ".csv":
-        return pd.read_csv(filepath)
+        with open(filepath, "rb") as f:
+            raw = f.read()
+        return _read_csv_with_header(raw)
     else:
         raise ValueError(f"Unsupported file type: {ext}")
 
@@ -165,6 +298,8 @@ def _normalise_cas(cas_val) -> Optional[str]:
     if pd.isna(cas_val) or not str(cas_val):
         return None
     cas = str(cas_val).strip()
+    if cas in ("-", "—", "", "nan", "none"):
+        return None
     m = re.match(r"(\d{1,7})\s*[-–]\s*(\d{2})\s*[-–]\s*(\d)", cas)
     if m:
         return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
@@ -172,6 +307,7 @@ def _normalise_cas(cas_val) -> Optional[str]:
 
 
 def _get_or_create_substance(db, name: str, cas: str, ec: str) -> SubstanceLibrary:
+    name = (name or "Unknown")[:200]  # Truncate to VARCHAR(200)
     substance = db.query(SubstanceLibrary).filter(SubstanceLibrary.cas_number == cas).first() if cas else None
     if not substance and ec:
         substance = db.query(SubstanceLibrary).filter(SubstanceLibrary.ec_number == ec).first()
@@ -180,7 +316,7 @@ def _get_or_create_substance(db, name: str, cas: str, ec: str) -> SubstanceLibra
 
     if not substance:
         substance = SubstanceLibrary(
-            name=name or "Unknown",
+            name=name,
             cas_number=cas,
             ec_number=ec,
             source_url="https://echa.europa.eu",
@@ -191,21 +327,40 @@ def _get_or_create_substance(db, name: str, cas: str, ec: str) -> SubstanceLibra
     return substance
 
 
+def _fuzzy_get(row: pd.Series, *keys: str) -> Any:
+    """Fetch value from row with fuzzy column matching."""
+    row_keys = {str(k).strip().lower().replace(" ", "_"): v for k, v in row.items()}
+    for k in keys:
+        k_norm = k.strip().lower().replace(" ", "_")
+        if k_norm in row_keys and pd.notna(row_keys[k_norm]):
+            return row_keys[k_norm]
+        # Also try direct match on original keys
+        for orig_k in row.index:
+            if k.lower() in str(orig_k).lower():
+                v = row[orig_k]
+                if pd.notna(v):
+                    return v
+    return None
+
+
 def _parse_candidate_list(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
+    logger.info(f"Candidate List columns: {list(df.columns)}")
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        row = {str(k).strip().lower().replace(" ", "_"): v for k, v in row.items()}
         # ECHA Candidate List has "Chemical Name", "EC Number", "CAS Number", "Inclusion Date"
-        name = str(row.get("chemical_name", "")).strip() if pd.notna(row.get("chemical_name")) else None
-        ec = _normalise_ec(row.get("ec_number")) if "ec_number" in row else None
-        cas = _normalise_cas(row.get("cas_number")) if "cas_number" in row else None
-        reason = str(row.get("reason_for_inclusion", "")).strip() if pd.notna(row.get("reason_for_inclusion")) else None
-        date_inc = str(row.get("inclusion_date", ""))[:10] if pd.notna(row.get("inclusion_date")) else None
+        name = _fuzzy_get(row, "Chemical Name", "Substance", "Name")
+        name = str(name).strip() if pd.notna(name) else None
+        ec = _normalise_ec(_fuzzy_get(row, "EC Number", "EC", "EC/List"))
+        cas = _normalise_cas(_fuzzy_get(row, "CAS Number", "CAS No", "CAS"))
+        reason = _fuzzy_get(row, "Reason for inclusion", "Reason", "Substance of very high concern")
+        reason = str(reason).strip() if pd.notna(reason) else None
 
         if not name or (not ec and not cas):
             skipped += 1
             continue
+
+        name = name[:200]  # Truncate to fit VARCHAR(200)
 
         sub = _get_or_create_substance(db, name, cas, ec)
 
@@ -257,15 +412,18 @@ def _parse_authorisation_list(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        name = str(row.get("Substance")).strip() if "Substance" in row else None
-        ec = _normalise_ec(row.get("EC Number")) if "EC Number" in row else None
-        cas = _normalise_cas(row.get("CAS Number")) if "CAS Number" in row else None
-        sunset = str(row.get("Sunset Date")).strip() if "Sunset Date" in row else None
+        name = _fuzzy_get(row, "Substance", "Chemical Name", "Name")
+        name = str(name).strip() if pd.notna(name) else None
+        ec = _normalise_ec(_fuzzy_get(row, "EC Number", "EC", "EC No"))
+        cas = _normalise_cas(_fuzzy_get(row, "CAS Number", "CAS", "CAS No"))
+        sunset = _fuzzy_get(row, "Sunset Date", "Latest date")
+        sunset = str(sunset).strip() if pd.notna(sunset) else None
 
-        if not name and not ec and not cas:
+        if not name or (not ec and not cas):
             skipped += 1
             continue
 
+        name = name[:200]
         sub = _get_or_create_substance(db, name, cas, ec)
         existing = db.query(ECHASubstance).filter(
             ECHASubstance.cas_number == cas,
@@ -273,7 +431,7 @@ def _parse_authorisation_list(filepath: str, db) -> Dict[str, Any]:
         ).first() if cas and ec else None
 
         if existing:
-            existing.reach_status = "restricted"
+            existing.reach_status = "authorisation"
             existing.notes = sunset or existing.notes
             updated += 1
         else:
@@ -282,7 +440,7 @@ def _parse_authorisation_list(filepath: str, db) -> Dict[str, Any]:
                 cas_number=cas,
                 ec_number=ec,
                 name=name or sub.name,
-                reach_status="restricted",
+                reach_status="authorisation",
                 notes=sunset,
                 source_url="https://echa.europa.eu/authorisation-list",
             ))
@@ -295,15 +453,23 @@ def _parse_restriction_list(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        name = str(row.get("Substance")).strip() if "Substance" in row else None
-        ec = _normalise_ec(row.get("EC Number")) if "EC Number" in row else None
-        cas = _normalise_cas(row.get("CAS Number")) if "CAS Number" in row else None
-        entry_no = str(row.get("Entry No")).strip() if "Entry No" in row else None
+        name = _fuzzy_get(row, "Substance", "Chemical Name", "Name")
+        name = str(name).strip() if pd.notna(name) else None
+        if not name and len(row) > 0:
+            # Some files have unnamed first column containing the substance name
+            first = row.iloc[0]
+            if pd.notna(first):
+                name = str(first).strip()
+        ec = _normalise_ec(_fuzzy_get(row, "EC Number", "EC", "EC no"))
+        cas = _normalise_cas(_fuzzy_get(row, "CAS Number", "CAS", "CAS no"))
+        entry_no = _fuzzy_get(row, "Entry No", "Entry")
+        entry_no = str(entry_no).strip() if pd.notna(entry_no) else None
 
-        if not name and not ec and not cas:
+        if not name or (not ec and not cas):
             skipped += 1
             continue
 
+        name = name[:200]
         sub = _get_or_create_substance(db, name, cas, ec)
         existing = db.query(ECHASubstance).filter(
             ECHASubstance.cas_number == cas,
@@ -333,17 +499,22 @@ def _parse_corap(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        name = str(row.get("Substance")).strip() if "Substance" in row else None
-        ec = _normalise_ec(row.get("EC/List")) if "EC/List" in row else None
-        cas = _normalise_cas(row.get("CAS")) if "CAS" in row else None
-        member_state = str(row.get("Member State")).strip() if "Member State" in row else None
-        status = str(row.get("Status")).strip() if "Status" in row else None
+        name = _fuzzy_get(row, "Substance name", "Name")
+        name = str(name).strip() if pd.notna(name) else None
+        ec = _normalise_ec(_fuzzy_get(row, "EC / List no", "EC Number", "EC"))
+        cas = _normalise_cas(_fuzzy_get(row, "CAS no", "CAS Number", "CAS"))
+        member_state = _fuzzy_get(row, "Evaluating Member State", "Member State")
+        member_state = str(member_state).strip() if pd.notna(member_state) else None
+        status = _fuzzy_get(row, "Status of evaluation", "Status")
+        status = str(status).strip() if pd.notna(status) else None
 
-        if not name and not ec and not cas:
+        if not name or (not ec and not cas):
             skipped += 1
             continue
 
+        name = name[:200]
         sub = _get_or_create_substance(db, name, cas, ec)
+
         existing = db.query(ECHASubstance).filter(
             ECHASubstance.cas_number == cas,
             ECHASubstance.ec_number == ec
@@ -351,6 +522,8 @@ def _parse_corap(filepath: str, db) -> Dict[str, Any]:
 
         if existing:
             existing.reach_status = status or existing.reach_status
+            existing.clp_notes = member_state or existing.clp_notes
+            existing.updated_at = utcnow()
             updated += 1
         else:
             db.add(ECHASubstance(
@@ -358,7 +531,8 @@ def _parse_corap(filepath: str, db) -> Dict[str, Any]:
                 cas_number=cas,
                 ec_number=ec,
                 name=name or sub.name,
-                reach_status=status,
+                reach_status=status or "evaluating",
+                clp_notes=member_state,
                 source_url="https://echa.europa.eu/corap",
             ))
             imported += 1
@@ -370,15 +544,18 @@ def _parse_pbt(filepath: str, db) -> Dict[str, Any]:
     df = _read_file(filepath)
     imported = updated = skipped = 0
     for _, row in df.iterrows():
-        name = str(row.get("Substance")).strip() if "Substance" in row else None
-        ec = _normalise_ec(row.get("EC Number")) if "EC Number" in row else None
-        cas = _normalise_cas(row.get("CAS Number")) if "CAS Number" in row else None
-        outcome = str(row.get("Outcome")).strip() if "Outcome" in row else None
+        name = _fuzzy_get(row, "Substance", "Chemical Name", "Name")
+        name = str(name).strip() if pd.notna(name) else None
+        ec = _normalise_ec(_fuzzy_get(row, "EC Number", "EC"))
+        cas = _normalise_cas(_fuzzy_get(row, "CAS Number", "CAS"))
+        outcome = _fuzzy_get(row, "Outcome", "Conclusion")
+        outcome = str(outcome).strip() if pd.notna(outcome) else None
 
-        if not name and not ec and not cas:
+        if not name or (not ec and not cas):
             skipped += 1
             continue
 
+        name = name[:200]
         sub = _get_or_create_substance(db, name, cas, ec)
         existing = db.query(CMRSubstance).filter(
             CMRSubstance.cas_number == cas,
