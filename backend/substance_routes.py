@@ -1149,10 +1149,13 @@ async def export_library(
 # Scraper / Auto-Sync Endpoints
 # ======================================================================
 
+class SyncRequest(BaseModel):
+    datasets: Optional[List[str]] = None
+    dry_run: bool = False
+
 @router.post("/sync")
 async def sync_echa_data(
-    datasets: Optional[List[str]] = None,
-    dry_run: bool = False,
+    body: SyncRequest,
     current_user: InternalUser = Depends(get_current_user)
 ):
     """Manually trigger ECHA data sync. Admin only."""
@@ -1165,16 +1168,16 @@ async def sync_echa_data(
         from backend.echa_scraper import run_scraper, ECHA_DOWNLOADS
 
     valid_keys = list(ECHA_DOWNLOADS.keys())
-    if datasets:
-        invalid = [d for d in datasets if d not in valid_keys]
+    if body.datasets:
+        invalid = [d for d in body.datasets if d not in valid_keys]
         if invalid:
             raise HTTPException(status_code=400, detail=f"Invalid datasets: {invalid}. Valid: {valid_keys}")
 
     try:
-        results = run_scraper(datasets=datasets or valid_keys, dry_run=dry_run)
+        results = run_scraper(datasets=body.datasets or valid_keys, dry_run=body.dry_run)
         return {
             "message": "ECHA sync completed",
-            "dry_run": dry_run,
+            "dry_run": body.dry_run,
             "results": results
         }
     except Exception as e:
