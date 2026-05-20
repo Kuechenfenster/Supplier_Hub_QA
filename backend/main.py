@@ -29,6 +29,13 @@ try:
 except Exception as e:
     print(f"⚠️ Pipeline database init skipped: {e}")
 
+# Start ECHA scraper scheduler (weekly sync)
+try:
+    from scheduler import start_scheduler, scheduler
+    start_scheduler()
+except Exception as e:
+    print(f"⚠️ Scheduler init skipped: {e}")
+
 # Configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://supplier:supplier123@localhost:5432/supplier_hub")
 INVITATION_EXPIRY_DAYS = 7

@@ -641,8 +641,13 @@
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openSubLibraryModal()">➕ Add Substance</button>
                                 <button class="btn btn-primary btn-sm" onclick="document.getElementById('subLibraryFile').click()">📥 Upload File</button>
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="downloadLibrary('substance')">📤 Export CSV</button>
+                                <button class="btn btn-primary btn-sm" style="background:#28a745;" onclick="triggerSync('candidate_list')">🔄 Auto-Sync ECHA</button>
                                 <input type="file" id="subLibraryFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'substance')">
                             </div>
+
+
+                <!-- Sync Status / Spinner -->
+                <div id="echaSyncStatus" class="alert" style="display:none;"></div>
                         </div>
                         <div id="subLibraryAlert" class="alert" style="display:none;"></div>
                         <div id="subLibraryUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
@@ -2892,6 +2897,48 @@
                 document.body.removeChild(a);
             } catch(e) {
                 alert('Export error: ' + e.message);
+            }
+        }
+
+        /* ===== Auto-Sync ECHA ===== */
+        async function triggerSync(datasets) {
+            const token = localStorage.getItem('token');
+            if (!token) { logout(); return; }
+            const alertEl = document.getElementById('echaSyncStatus');
+            alertEl.className = 'alert';
+            alertEl.textContent = 'Syncing with ECHA... this may take a minute.';
+            alertEl.style.display = 'block';
+            try {
+                const payload = datasets ? { datasets: Array.isArray(datasets) ? datasets : [datasets] } : {};
+                const response = await fetch(API + '/api/substances/sync', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify(payload)
+                });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) {
+                    let summary = [];
+                    for (const [k, v] of Object.entries(data.results || {})) {
+                        if (v.error) summary.push(`${k}: ${v.error}`);
+                        else summary.push(`${k}: +${v.imported || 0} new, ~${v.updated || 0} updated`);
+                    }
+                    alertEl.className = 'alert alert-success';
+                    alertEl.textContent = '✅ ECHA sync complete! ' + summary.join(' | ');
+                    // Refresh visible tables
+                    setTimeout(() => {
+                        if (document.getElementById('echaSubLibraryDatabase').style.display !== 'none') loadLibrary('substance');
+                        if (document.getElementById('echaCmrDatabase').style.display !== 'none') loadLibrary('cmr');
+                        if (document.getElementById('echaClpDatabase').style.display !== 'none') loadLibrary('clp');
+                        if (document.getElementById('echaGhsDatabase').style.display !== 'none') loadLibrary('ghs');
+                    }, 500);
+                } else {
+                    alertEl.className = 'alert alert-error';
+                    alertEl.textContent = '❌ ' + (data.detail || 'Sync failed');
+                }
+            } catch(e) {
+                alertEl.className = 'alert alert-error';
+                alertEl.textContent = '❌ Sync error: ' + e.message;
             }
         }
 

@@ -1143,3 +1143,64 @@ async def export_library(
         )
     finally:
         db.close()
+
+
+# ======================================================================
+# Scraper / Auto-Sync Endpoints
+# ======================================================================
+
+@router.post("/sync")
+async def sync_echa_data(
+    datasets: Optional[List[str]] = None,
+    dry_run: bool = False,
+    current_user: InternalUser = Depends(get_current_user)
+):
+    """Manually trigger ECHA data sync. Admin only."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can trigger ECHA sync")
+
+    try:
+        from echa_scraper import run_scraper, ECHA_DOWNLOADS
+    except ImportError:
+        from backend.echa_scraper import run_scraper, ECHA_DOWNLOADS
+
+    valid_keys = list(ECHA_DOWNLOADS.keys())
+    if datasets:
+        invalid = [d for d in datasets if d not in valid_keys]
+        if invalid:
+            raise HTTPException(status_code=400, detail=f"Invalid datasets: {invalid}. Valid: {valid_keys}")
+
+    try:
+        results = run_scraper(datasets=datasets or valid_keys, dry_run=dry_run)
+        return {
+            "message": "ECHA sync completed",
+            "dry_run": dry_run,
+            "results": results
+        }
+    except Exception as e:
+        logger.error(f"ECHA sync failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+
+@router.get("/sync/status")
+async def sync_status(current_user: InternalUser = Depends(get_current_user)):
+    """Get available datasets and scraper status."""
+    try:
+        from echa_scraper import ECHA_DOWNLOADS
+    except ImportError:
+        from backend.echa_scraper import ECHA_DOWNLOADS
+
+    return {
+        "datasets": [
+            {
+                "key": k,
+                "name": v["name"],
+                "format": v.get("format", "unknown"),
+                "has_url": v.get("url") is not None or v.get("fallback_url") is not None,
+                "source_url": v.get("source_url"),
+            }
+            for k, v in ECHA_DOWNLOADS.items()
+        ],
+        "scheduler_running": False,  # Will be updated by main.py
+        "next_run": "Sundays 02:00 UTC"
+    }
