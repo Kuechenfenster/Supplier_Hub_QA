@@ -1,0 +1,133 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "🏢 Management Portal" [level=1] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Loading...
+        - generic [ref=e7]: Loading...
+      - button "Logout" [ref=e8] [cursor=pointer]
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12] [cursor=pointer]: 📊 📊 Overview
+        - button "🏠 🏠 Dashboard" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 🏠
+          - generic [ref=e16]: 🏠 Dashboard
+      - generic [ref=e17]:
+        - generic [ref=e18] [cursor=pointer]: 📦 Product
+        - generic [ref=e19]:
+          - button "🧪 🧪 Materials" [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: 🧪
+            - generic [ref=e22]: 🧪 Materials
+          - button "🧪 🧪 Formulations" [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: 🧪
+            - generic [ref=e25]: 🧪 Formulations
+          - button "📋 📋 Bill of Materials" [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: 📋
+            - generic [ref=e28]: 📋 Bill of Materials
+          - button "🏷️ 🏷️ Seal Sample" [ref=e29] [cursor=pointer]:
+            - generic [ref=e30]: 🏷️
+            - generic [ref=e31]: 🏷️ Seal Sample
+      - generic [ref=e32]:
+        - generic [ref=e33] [cursor=pointer]: ✅ ✅ Corrective Action
+        - generic [ref=e34]:
+          - button "📣 📣 Customer Claims" [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: 📣
+            - generic [ref=e37]: 📣 Customer Claims
+          - button "❌ ❌ QC Issues" [ref=e38] [cursor=pointer]:
+            - generic [ref=e39]: ❌
+            - generic [ref=e40]: ❌ QC Issues
+          - button "🏆 🏆 Centre of Excellence" [ref=e41] [cursor=pointer]:
+            - generic [ref=e42]: 🏆
+            - generic [ref=e43]: 🏆 Centre of Excellence
+          - button "📝 📝 Audit CAPs" [ref=e44] [cursor=pointer]:
+            - generic [ref=e45]: 📝
+            - generic [ref=e46]: 📝 Audit CAPs
+      - generic [ref=e47]:
+        - generic [ref=e48] [cursor=pointer]: 💾 💾 Database
+        - generic [ref=e49]:
+          - button "📄 📄 SDS/MSDS/IFRA" [ref=e50] [cursor=pointer]:
+            - generic [ref=e51]: 📄
+            - generic [ref=e52]: 📄 SDS/MSDS/IFRA
+          - button "⚖️ ⚖️ Legal Requirements" [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: ⚖️
+            - generic [ref=e55]: ⚖️ Legal Requirements
+          - button "📋 📋 Customer Requirements" [ref=e56] [cursor=pointer]:
+            - generic [ref=e57]: 📋
+            - generic [ref=e58]: 📋 Customer Requirements
+          - button "🧪 🧪 ECHA" [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]: 🧪
+            - generic [ref=e61]: 🧪 ECHA
+      - generic [ref=e62]:
+        - generic [ref=e63] [cursor=pointer]: 👥 👥 Users
+        - generic [ref=e64]:
+          - button "🏛️ 🏛️ Departments" [ref=e65] [cursor=pointer]:
+            - generic [ref=e66]: 🏛️
+            - generic [ref=e67]: 🏛️ Departments
+          - button "👤 👤 User Management" [ref=e68] [cursor=pointer]:
+            - generic [ref=e69]: 👤
+            - generic [ref=e70]: 👤 User Management
+          - button "🏭 🏭 Supplier Management" [ref=e71] [cursor=pointer]:
+            - generic [ref=e72]: 🏭
+            - generic [ref=e73]: 🏭 Supplier Management
+    - generic [ref=e75]:
+      - heading "Dashboard Overview" [level=2] [ref=e76]
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]: "2"
+          - generic [ref=e80]: Total Suppliers
+        - generic [ref=e81]:
+          - generic [ref=e82]: "2"
+          - generic [ref=e83]: Active Suppliers
+        - generic [ref=e84]:
+          - generic [ref=e85]: "0"
+          - generic [ref=e86]: Seal Sample
+        - generic [ref=e87]:
+          - generic [ref=e88]: "0"
+          - generic [ref=e89]: VCM CAP
+        - generic [ref=e90]:
+          - generic [ref=e91]: "0"
+          - generic [ref=e92]: QC CAP
+      - generic [ref=e93]:
+        - heading "Recent Activity" [level=3] [ref=e94]
+        - generic [ref=e95]:
+          - generic [ref=e96]:
+            - strong [ref=e97]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 5:54:26 PM
+          - generic [ref=e98]:
+            - strong [ref=e99]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 5:47:52 PM
+          - generic [ref=e100]:
+            - strong [ref=e101]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 5:44:26 PM
+          - generic [ref=e102]:
+            - strong [ref=e103]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:26:28 PM
+          - generic [ref=e104]:
+            - strong [ref=e105]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:25:16 PM
+          - generic [ref=e106]:
+            - strong [ref=e107]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:20:27 PM
+          - generic [ref=e108]:
+            - strong [ref=e109]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:18:12 PM
+          - generic [ref=e110]:
+            - strong [ref=e111]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:17:12 PM
+          - generic [ref=e112]:
+            - strong [ref=e113]: login
+            - text: "on user by User #1"
+            - text: 5/20/2026, 4:15:17 PM
+          - generic [ref=e114]:
+            - strong [ref=e115]: delete
+            - text: "on substance_library by User #1"
+            - text: 5/20/2026, 3:06:43 PM
