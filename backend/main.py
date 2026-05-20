@@ -58,6 +58,7 @@ app.add_middleware(
 
 # Mount static files - use absolute path for Docker compatibility
 app.mount("/assets", StaticFiles(directory=os.path.join(BASE_DIR, "static", "assets")), name="assets")
+app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "static", "js")), name="js")
 
 # Register BOM router
 app.include_router(bom_router)
