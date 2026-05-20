@@ -1,0 +1,20 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - img "HTI Logo" [ref=e4]
+    - heading "Management Portal" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Sign in to your admin account
+  - generic [ref=e8]:
+    - text: "Language:"
+    - combobox "Language:" [ref=e9] [cursor=pointer]:
+      - option "English" [selected]
+      - option "中文 (Chinese)"
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: Username
+      - textbox "Enter username" [ref=e13]
+    - generic [ref=e14]:
+      - generic [ref=e15]: Password
+      - textbox "Enter password" [ref=e16]
+    - button "Sign In" [ref=e17] [cursor=pointer]
+  - link "← Back to Supplier Portal" [ref=e19] [cursor=pointer]:
+    - /url: /
