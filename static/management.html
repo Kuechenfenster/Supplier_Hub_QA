@@ -494,7 +494,7 @@
                         <div style="display:flex;gap:10px;">
                             <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openAddECHAModal()">➕ Add Substance</button>
                             <button class="btn btn-primary btn-sm" onclick="document.getElementById('echaFile').click()">📥 Upload File</button>
-                            <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export feature coming soon')">📤 Export</button>
+                            <button class="btn btn-primary btn-sm" onclick="downloadLibrary('substance')">📤 Export CSV</button>
                             <input type="file" id="echaFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleECHAFileSelect(event)">
                         </div>
                     </div>
@@ -582,7 +582,7 @@
                             <div style="display:flex;gap:10px;">
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openCLPModal()">➕ Add CLP Entry</button>
                                 <button class="btn btn-primary btn-sm" onclick="document.getElementById('clpFile').click()">📥 Upload File</button>
-                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export coming soon')">📤 Export</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="downloadLibrary('clp')">📤 Export CSV</button>
                                 <input type="file" id="clpFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'clp')">
                             </div>
                         </div>
@@ -640,6 +640,7 @@
                             <div style="display:flex;gap:10px;">
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openSubLibraryModal()">➕ Add Substance</button>
                                 <button class="btn btn-primary btn-sm" onclick="document.getElementById('subLibraryFile').click()">📥 Upload File</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="downloadLibrary('substance')">📤 Export CSV</button>
                                 <input type="file" id="subLibraryFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'substance')">
                             </div>
                         </div>
@@ -683,6 +684,7 @@
                             <div style="display:flex;gap:10px;">
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openCMRModal()">➕ Add CMR Entry</button>
                                 <button class="btn btn-primary btn-sm" onclick="document.getElementById('cmrFile').click()">📥 Upload File</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="downloadLibrary('cmr')">📤 Export CSV</button>
                                 <input type="file" id="cmrFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'cmr')">
                             </div>
                         </div>
@@ -726,6 +728,7 @@
                             <div style="display:flex;gap:10px;">
                                 <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openGHSModal()">➕ Add GHS Entry</button>
                                 <button class="btn btn-primary btn-sm" onclick="document.getElementById('ghsFile').click()">📥 Upload File</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="downloadLibrary('ghs')">📤 Export CSV</button>
                                 <input type="file" id="ghsFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'ghs')">
                             </div>
                         </div>
@@ -2860,6 +2863,35 @@
                 `).join('');
             } catch(e) {
                 document.getElementById('symbolsGrid').innerHTML = '<div class="empty" style="grid-column:1/-1;">Error loading symbols.</div>';
+            }
+        }
+
+        /* ===== Download / Export ===== */
+        async function downloadLibrary(library) {
+            const token = localStorage.getItem('token');
+            if (!token) { logout(); return; }
+            try {
+                const response = await fetch(API + '/api/substances/export/' + library + '?format=csv', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.status === 401) { logout(); return; }
+                if (!response.ok) {
+                    const data = await response.json();
+                    alert('Export failed: ' + (data.detail || response.statusText));
+                    return;
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = library + '_export.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch(e) {
+                alert('Export error: ' + e.message);
             }
         }
 

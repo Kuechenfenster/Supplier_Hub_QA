@@ -1066,3 +1066,80 @@ def _find_value(row, columns):
         if col in row and row[col]:
             return row[col]
     return None
+
+
+# ======================================================================
+# Export / Download — CSV/Excel for each library
+# ======================================================================
+
+EXPORT_COLUMNS = {
+    "substance": ["id", "name", "cas_number", "ec_number", "iupac_name", "molecular_formula", "registration_status", "source_url", "notes"],
+    "cmr": ["id", "substance_id", "cas_number", "ec_number", "name", "cmr_type", "cmr_category", "hazard_class", "hazard_statements", "clp_notes", "atp_reference", "source_url"],
+    "echa": ["id", "substance_id", "cas_number", "ec_number", "name", "reach_status", "tonnage_band", "registration_type", "index_number", "clp_notes", "atp_reference", "source_url"],
+    "clp": ["id", "substance_id", "cas_number", "ec_number", "name", "hazard_class", "hazard_category", "hazard_statement_code", "hazard_statement", "p_statements", "signal_word", "pictograms", "concentration_limit", "m_factor"],
+    "ghs": ["id", "substance_id", "cas_number", "ec_number", "name", "ghs_hazard_class", "ghs_category", "pictogram_codes", "signal_word", "hazard_statements", "precautionary_statements"],
+}
+
+
+@router.get("/export/{library}")
+async def export_library(
+    library: str,
+    format: str = Query("csv"),
+    current_user: InternalUser = Depends(get_current_user)
+):
+    if library not in EXPORT_COLUMNS:
+        raise HTTPException(status_code=400, detail="Library must be one of: substance, cmr, echa, clp, ghs")
+
+    if pd is None:
+        raise HTTPException(status_code=500, detail="pandas not installed")
+
+    from fastapi.responses import StreamingResponse
+    import io
+
+    db = pipeline_get_db()
+    try:
+        model_map = {
+            "substance": SubstanceLibrary,
+            "cmr": CMRSubstance,
+            "echa": ECHASubstance,
+            "clp": CLPClassification,
+            "ghs": GHSClassification,
+        }
+        Model = model_map[library]
+        items = db.query(Model).all()
+
+        columns = EXPORT_COLUMNS[library]
+        data = []
+        for item in items:
+            row = {}
+            for col in columns:
+                val = getattr(item, col, None)
+                if val is None:
+                    row[col] = ""
+                elif isinstance(val, datetime):
+                    row[col] = val.isoformat()
+                else:
+                    row[col] = str(val)
+            data.append(row)
+
+        df = pd.DataFrame(data, columns=columns)
+        buffer = io.BytesIO()
+
+        if format.lower() == "xlsx":
+            df.to_excel(buffer, index=False, engine="openpyxl")
+            media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            filename = f"{library}_export.xlsx"
+        else:
+            df.to_csv(buffer, index=False)
+            media_type = "text/csv"
+            filename = f"{library}_export.csv"
+
+        buffer.seek(0)
+        from fastapi.responses import StreamingResponse
+        return StreamingResponse(
+            buffer,
+            media_type=media_type,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    finally:
+        db.close()
