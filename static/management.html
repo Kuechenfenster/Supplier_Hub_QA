@@ -476,9 +476,13 @@
                 <div class="card" style="margin-bottom:20px;">
                     <div style="display:flex;gap:15px;flex-wrap:wrap;">
                         <button class="btn btn-primary" id="databaseSubstanceBtn" onclick="showECHASubdatabase('substance')" style="flex:1 minwidth:150px;">Substance Database</button>
+                        <button class="btn btn-secondary" id="databaseSubLibraryBtn" onclick="showECHASubdatabase('sublibrary')" style="flex:1 minwidth:150px;">Substance Library</button>
+                        <button class="btn btn-secondary" id="databaseCmrBtn" onclick="showECHASubdatabase('cmr')" style="flex:1 minwidth:150px;">CMR</button>
                         <button class="btn btn-secondary" id="databaseReachBtn" onclick="showECHASubdatabase('reach')" style="flex:1 minwidth:150px;">REACh</button>
                         <button class="btn btn-secondary" id="databaseClpBtn" onclick="showECHASubdatabase('clp')" style="flex:1 minwidth:150px;">CLP</button>
+                        <button class="btn btn-secondary" id="databaseGhsBtn" onclick="showECHASubdatabase('ghs')" style="flex:1 minwidth:150px;">GHS</button>
                         <button class="btn btn-secondary" id="databaseSvhcBtn" onclick="showECHASubdatabase('svhc')" style="flex:1 minwidth:150px;">SVHC</button>
+                        <button class="btn btn-secondary" id="databaseSymbolsBtn" onclick="showECHASubdatabase('symbols')" style="flex:1 minwidth:150px;">Symbol References</button>
                     </div>
                 </div>
 
@@ -573,30 +577,205 @@
                 <!-- CLP Database Section -->
                 <div id="echaClpDatabase" class="echa-database-section" style="display:none;">
                     <div class="card">
-                        <h3>CLP Classification Database</h3>
-                        <p style="color:#666;margin-bottom:15px;">View and manage CLP (Classification, Labeling and Packaging) hazard classifications.</p>
-                        <div style="background:#e7f3ff;padding:15px;border-radius:6px;font-size:13px;color:#004080;">
-                            <strong>CLP Database</strong><br>
-                            Full CLP classification data with GHS hazard codes, safety statements, and labeling requirements.
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h3 style="font-size:16px;color:#333;">CLP Classification Database</h3>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openCLPModal()">➕ Add CLP Entry</button>
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('clpFile').click()">📥 Upload File</button>
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export coming soon')">📤 Export</button>
+                                <input type="file" id="clpFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'clp')">
+                            </div>
                         </div>
+                        <div id="clpAlert" class="alert" style="display:none;"></div>
+                        <div id="clpUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload CLP Data</h4>
+                            <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;margin-bottom:10px;">
+                                <strong>Expected columns:</strong> name, cas_number, ec_number, hazard_class, hazard_category, hazard_statement_code, hazard_statement, p_statements, signal_word, pictograms, concentration_limit, m_factor
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="processLibraryFile('clp')">Upload & Process</button>
+                                <button class="btn btn-secondary btn-sm" onclick="closeLibraryUpload('clp')">Cancel</button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <button class="btn btn-danger btn-sm" id="deleteSelectedClpBtn" onclick="deleteSelectedLibrary('clp')" disabled style="display:none;">Delete Selected</button>
+                                <span style="font-size:12px;color:#666;margin-left:10px;" id="clpSelectionInfo">Select entries to delete</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-sm" id="editClpBtn" onclick="editSelectedLibrary('clp')" disabled>Edit Selected</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="selectAllClp" onclick="toggleSelectAllLibrary(this,'clp')"></th>
+                                    <th>Name</th>
+                                    <th>CAS</th>
+                                    <th>EC</th>
+                                    <th>Hazard Class</th>
+                                    <th>Category</th>
+                                    <th>H-Code</th>
+                                    <th>Signal Word</th>
+                                    <th>Pictograms</th>
+                                    <th>M-Factor</th>
+                                    <th style="width:80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clpTable"><tr><td colspan="11" class="empty">No CLP data loaded.</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
 
                 <!-- SVHC Database Section -->
                 <div id="echaSvhcDatabase" class="echa-database-section" style="display:none;">
+                    <!-- existing SVHC -->
+                </div>
+
+                <!-- Substance Library Section -->
+                <div id="echaSubLibraryDatabase" class="echa-database-section" style="display:none;">
                     <div class="card">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-                            <div>
-                                <h3>SVHC (Substances of Very High Concern) Database</h3>
-                                <p style="color:#666;margin-bottom:15px;">View and manage SVHC candidates and authorization list substances.</p>
-                            </div>
+                            <h3 style="font-size:16px;color:#333;">Substance Library (Master Registry)</h3>
                             <div style="display:flex;gap:10px;">
-                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('svhcFile').click()">📥 Upload CSV/XLS/XML</button>
-                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="alert('Export feature coming soon')">📤 Export</button>
-                                <input type="file" id="svhcFile" accept=".xlsx,.xls,.csv,.xml" style="display:none" onchange="handleSVHCFileSelect(event)">
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openSubLibraryModal()">➕ Add Substance</button>
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('subLibraryFile').click()">📥 Upload File</button>
+                                <input type="file" id="subLibraryFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'substance')">
                             </div>
                         </div>
-                        <div id="svhcAlert" class="alert" style="display:none;"></div>
+                        <div id="subLibraryAlert" class="alert" style="display:none;"></div>
+                        <div id="subLibraryUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload Substances</h4>
+                            <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;margin-bottom:10px;">
+                                <strong>Expected columns:</strong> name, cas_number, ec_number, iupac_name, molecular_formula, registration_status, source_url
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="processLibraryFile('substance')">Upload & Process</button>
+                                <button class="btn btn-secondary btn-sm" onclick="closeLibraryUpload('substance')">Cancel</button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <button class="btn btn-danger btn-sm" id="deleteSelectedSubLibraryBtn" onclick="deleteSelectedLibrary('substance')" disabled style="display:none;">Delete Selected</button>
+                                <span style="font-size:12px;color:#666;margin-left:10px;" id="subLibrarySelectionInfo">Select substances to delete</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-sm" id="editSubLibraryBtn" onclick="editSelectedLibrary('substance')" disabled>Edit Selected</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="selectAllSubLibrary" onclick="toggleSelectAllLibrary(this,'substance')"></th>
+                                    <th>Name</th><th>CAS</th><th>EC</th><th>IUPAC</th><th>Formula</th><th>Status</th><th style="width:80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subLibraryTable"><tr><td colspan="8" class="empty">No substances in library.</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CMR Section -->
+                <div id="echaCmrDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h3 style="font-size:16px;color:#333;">CMR Substances</h3>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openCMRModal()">➕ Add CMR Entry</button>
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('cmrFile').click()">📥 Upload File</button>
+                                <input type="file" id="cmrFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'cmr')">
+                            </div>
+                        </div>
+                        <div id="cmrAlert" class="alert" style="display:none;"></div>
+                        <div id="cmrUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload CMR Data</h4>
+                            <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;margin-bottom:10px;">
+                                <strong>Expected columns:</strong> name, cas_number, ec_number, cmr_type, cmr_category, hazard_class, hazard_statements, clp_notes, atp_reference
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="processLibraryFile('cmr')">Upload & Process</button>
+                                <button class="btn btn-secondary btn-sm" onclick="closeLibraryUpload('cmr')">Cancel</button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <button class="btn btn-danger btn-sm" id="deleteSelectedCmrBtn" onclick="deleteSelectedLibrary('cmr')" disabled style="display:none;">Delete Selected</button>
+                                <span style="font-size:12px;color:#666;margin-left:10px;" id="cmrSelectionInfo">Select entries to delete</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-sm" id="editCmrBtn" onclick="editSelectedLibrary('cmr')" disabled>Edit Selected</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="selectAllCmr" onclick="toggleSelectAllLibrary(this,'cmr')"></th>
+                                    <th>Name</th><th>CAS</th><th>EC</th><th>CMR Type</th><th>Category</th><th>Hazard Class</th><th>H-Statements</th><th style="width:80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cmrTable"><tr><td colspan="9" class="empty">No CMR data loaded.</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GHS Section -->
+                <div id="echaGhsDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h3 style="font-size:16px;color:#333;">GHS Classifications</h3>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="openGHSModal()">➕ Add GHS Entry</button>
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('ghsFile').click()">📥 Upload File</button>
+                                <input type="file" id="ghsFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleLibraryFileSelect(event,'ghs')">
+                            </div>
+                        </div>
+                        <div id="ghsAlert" class="alert" style="display:none;"></div>
+                        <div id="ghsUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+                            <h4 style="font-size:14px;color:#1a1a2e;margin-bottom:15px;">Upload GHS Data</h4>
+                            <div style="background:#fff3cd;padding:10px;border-radius:6px;font-size:13px;color:#856404;margin-bottom:10px;">
+                                <strong>Expected columns:</strong> name, cas_number, ec_number, ghs_hazard_class, ghs_category, pictogram_codes, signal_word, hazard_statements, precautionary_statements
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" onclick="processLibraryFile('ghs')">Upload & Process</button>
+                                <button class="btn btn-secondary btn-sm" onclick="closeLibraryUpload('ghs')">Cancel</button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <button class="btn btn-danger btn-sm" id="deleteSelectedGhsBtn" onclick="deleteSelectedLibrary('ghs')" disabled style="display:none;">Delete Selected</button>
+                                <span style="font-size:12px;color:#666;margin-left:10px;" id="ghsSelectionInfo">Select entries to delete</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary btn-sm" id="editGhsBtn" onclick="editSelectedLibrary('ghs')" disabled>Edit Selected</button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="selectAllGhs" onclick="toggleSelectAllLibrary(this,'ghs')"></th>
+                                    <th>Name</th><th>CAS</th><th>EC</th><th>GHS Class</th><th>Category</th><th>Pictograms</th><th>Signal Word</th><th style="width:80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ghsTable"><tr><td colspan="9" class="empty">No GHS data loaded.</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Symbol References Section -->
+                <div id="echaSymbolsDatabase" class="echa-database-section" style="display:none;">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h3 style="font-size:16px;color:#333;">Symbol References</h3>
+                            <div style="display:flex;gap:10px;">
+                                <button class="btn btn-primary btn-sm" style="background:#667eea;" onclick="loadSymbolReferences()">🔄 Refresh</button>
+                            </div>
+                        </div>
+                        <div id="symbolsAlert" class="alert" style="display:none;"></div>
+                        <div id="symbolsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px;">
+                            <div class="empty" style="grid-column:1/-1;">No symbols loaded.</div>
+                        </div>
+                    </div>
+                </div>
 
                         <!-- Upload Options -->
                         <div id="svhcUploadOptions" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
@@ -1976,31 +2155,56 @@
         function showECHASubdatabase(section) {
             // Update active button styling
             document.getElementById('databaseSubstanceBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseSubLibraryBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseCmrBtn').className = 'btn btn-secondary';
             document.getElementById('databaseReachBtn').className = 'btn btn-secondary';
             document.getElementById('databaseClpBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseGhsBtn').className = 'btn btn-secondary';
             document.getElementById('databaseSvhcBtn').className = 'btn btn-secondary';
+            document.getElementById('databaseSymbolsBtn').className = 'btn btn-secondary';
 
             // Hide all sections
             document.getElementById('echaSubstanceDatabase').style.display = 'none';
+            document.getElementById('echaSubLibraryDatabase').style.display = 'none';
+            document.getElementById('echaCmrDatabase').style.display = 'none';
             document.getElementById('echaReachDatabase').style.display = 'none';
             document.getElementById('echaClpDatabase').style.display = 'none';
+            document.getElementById('echaGhsDatabase').style.display = 'none';
             document.getElementById('echaSvhcDatabase').style.display = 'none';
+            document.getElementById('echaSymbolsDatabase').style.display = 'none';
 
             // Show selected section
             if (section === 'substance') {
                 document.getElementById('databaseSubstanceBtn').className = 'btn btn-primary';
                 document.getElementById('echaSubstanceDatabase').style.display = 'block';
-                loadECHAReach(); // Load substances for default view
+                loadECHAReach();
+            } else if (section === 'sublibrary') {
+                document.getElementById('databaseSubLibraryBtn').className = 'btn btn-primary';
+                document.getElementById('echaSubLibraryDatabase').style.display = 'block';
+                loadLibrary('substance');
+            } else if (section === 'cmr') {
+                document.getElementById('databaseCmrBtn').className = 'btn btn-primary';
+                document.getElementById('echaCmrDatabase').style.display = 'block';
+                loadLibrary('cmr');
             } else if (section === 'reach') {
                 document.getElementById('databaseReachBtn').className = 'btn btn-primary';
                 document.getElementById('echaReachDatabase').style.display = 'block';
             } else if (section === 'clp') {
                 document.getElementById('databaseClpBtn').className = 'btn btn-primary';
                 document.getElementById('echaClpDatabase').style.display = 'block';
+                loadLibrary('clp');
+            } else if (section === 'ghs') {
+                document.getElementById('databaseGhsBtn').className = 'btn btn-primary';
+                document.getElementById('echaGhsDatabase').style.display = 'block';
+                loadLibrary('ghs');
             } else if (section === 'svhc') {
                 document.getElementById('databaseSvhcBtn').className = 'btn btn-primary';
                 document.getElementById('echaSvhcDatabase').style.display = 'block';
-                loadSVHCData(); // Load SVHC data
+                loadSVHCData();
+            } else if (section === 'symbols') {
+                document.getElementById('databaseSymbolsBtn').className = 'btn btn-primary';
+                document.getElementById('echaSymbolsDatabase').style.display = 'block';
+                loadSymbolReferences();
             }
         }
 
@@ -2356,6 +2560,307 @@
         function showSVHCModal(id) {
             // Placeholder - implement actual modal for SVHC
             showSVHCAlert('SVHC edit modal would open here', 'info');
+        }
+
+        /* ================================================================
+           Substance Library JS (Generic for all 5 libraries + symbols)
+           ================================================================ */
+        const librarySelections = {
+            substance: [],
+            cmr: [],
+            echa: [],
+            clp: [],
+            ghs: []
+        };
+
+        const libraryConfig = {
+            substance: { apiPath: '', tableId: 'subLibraryTable', alertId: 'subLibraryAlert', checkboxClass: 'sublibrary-checkbox', selectionKey: 'substance', deleteBtnId: 'deleteSelectedSubLibraryBtn', editBtnId: 'editSubLibraryBtn', selectionInfoId: 'subLibrarySelectionInfo', listField: 'data' },
+            cmr:       { apiPath: '/cmr', tableId: 'cmrTable', alertId: 'cmrAlert', checkboxClass: 'cmr-checkbox', selectionKey: 'cmr', deleteBtnId: 'deleteSelectedCmrBtn', editBtnId: 'editCmrBtn', selectionInfoId: 'cmrSelectionInfo', listField: 'data' },
+            echa:      { apiPath: '/echa', tableId: 'echaLibTable', alertId: 'echaLibAlert', checkboxClass: 'echa-checkbox2', selectionKey: 'echa', deleteBtnId: 'deleteSelectedEchaLibBtn', editBtnId: 'editEchaLibBtn', selectionInfoId: 'echaLibSelectionInfo', listField: 'data' },
+            clp:       { apiPath: '/clp', tableId: 'clpTable', alertId: 'clpAlert', checkboxClass: 'clp-checkbox', selectionKey: 'clp', deleteBtnId: 'deleteSelectedClpBtn', editBtnId: 'editClpBtn', selectionInfoId: 'clpSelectionInfo', listField: 'data' },
+            ghs:       { apiPath: '/ghs', tableId: 'ghsTable', alertId: 'ghsAlert', checkboxClass: 'ghs-checkbox', selectionKey: 'ghs', deleteBtnId: 'deleteSelectedGhsBtn', editBtnId: 'editGhsBtn', selectionInfoId: 'ghsSelectionInfo', listField: 'data' }
+        };
+
+        async function loadLibrary(library) {
+            const cfg = libraryConfig[library];
+            if (!cfg) return;
+            try {
+                const response = await fetch(API + '/api/substances' + cfg.apiPath, { headers: getHeaders() });
+                if (response.status === 401) { logout(); return; }
+                const result = await response.json();
+                const items = result[cfg.listField] || [];
+                const tbody = document.getElementById(cfg.tableId);
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="20" class="empty">No data loaded.</td></tr>';
+                    return;
+                }
+                if (library === 'substance') {
+                    tbody.innerHTML = items.map(s => `<tr data-id="${s.id}"><td><input type="checkbox" class="${cfg.checkboxClass}" data-id="${s.id}"></td><td>${s.name||'-'}</td><td>${s.cas_number||'-'}</td><td>${s.ec_number||'-'}</td><td>${s.iupac_name||'-'}</td><td>${s.molecular_formula||'-'}</td><td>${s.registration_status||'-'}</td><td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="openSubLibraryModal(${s.id})">Edit</button></td></tr>`).join('');
+                } else if (library === 'cmr') {
+                    tbody.innerHTML = items.map(s => `<tr data-id="${s.id}"><td><input type="checkbox" class="${cfg.checkboxClass}" data-id="${s.id}"></td><td>${s.name||'-'}</td><td>${s.cas_number||'-'}</td><td>${s.ec_number||'-'}</td><td>${s.cmr_type||'-'}</td><td>${s.cmr_category||'-'}</td><td>${s.hazard_class||'-'}</td><td>${s.hazard_statements||'-'}</td><td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="openCMRModal(${s.id})">Edit</button></td></tr>`).join('');
+                } else if (library === 'clp') {
+                    tbody.innerHTML = items.map(s => `<tr data-id="${s.id}"><td><input type="checkbox" class="${cfg.checkboxClass}" data-id="${s.id}"></td><td>${s.name||'-'}</td><td>${s.cas_number||'-'}</td><td>${s.ec_number||'-'}</td><td>${s.hazard_class||'-'}</td><td>${s.hazard_category||'-'}</td><td>${s.hazard_statement_code||'-'}</td><td>${s.signal_word||'-'}</td><td>${s.pictograms||'-'}</td><td>${s.m_factor||'-'}</td><td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="openCLPModal(${s.id})">Edit</button></td></tr>`).join('');
+                } else if (library === 'ghs') {
+                    tbody.innerHTML = items.map(s => `<tr data-id="${s.id}"><td><input type="checkbox" class="${cfg.checkboxClass}" data-id="${s.id}"></td><td>${s.name||'-'}</td><td>${s.cas_number||'-'}</td><td>${s.ec_number||'-'}</td><td>${s.ghs_hazard_class||'-'}</td><td>${s.ghs_category||'-'}</td><td>${s.pictogram_codes||'-'}</td><td>${s.signal_word||'-'}</td><td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="openGHSModal(${s.id})">Edit</button></td></tr>`).join('');
+                } else {
+                    tbody.innerHTML = items.map(s => `<tr data-id="${s.id}"><td><input type="checkbox" class="${cfg.checkboxClass}" data-id="${s.id}"></td><td>${s.name||'-'}</td><td>${s.cas_number||'-'}</td><td>${s.ec_number||'-'}</td><td>${s.reach_status||'-'}</td><td>${s.tonnage_band||'-'}</td><td>${s.registration_type||'-'}</td><td><button class="btn btn-sm btn-primary" style="padding:4px 8px;" onclick="openECHALibModal(${s.id})">Edit</button></td></tr>`).join('');
+                }
+                document.querySelectorAll('.' + cfg.checkboxClass).forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const id = parseInt(this.dataset.id);
+                        const arr = librarySelections[cfg.selectionKey];
+                        if (this.checked) { if (!arr.includes(id)) arr.push(id); }
+                        else { librarySelections[cfg.selectionKey] = arr.filter(x => x !== id); }
+                        updateLibraryDeleteButtonState(cfg.selectionKey);
+                        updateLibraryEditButtonState(cfg.selectionKey);
+                    });
+                });
+            } catch(e) {
+                console.error('Load ' + library + ' error:', e);
+                document.getElementById(cfg.tableId).innerHTML = '<tr><td colspan="20" class="empty">Error loading data: ' + e.message + '</td></tr>';
+            }
+        }
+
+        function updateLibraryDeleteButtonState(key) {
+            const cfg = libraryConfig[key];
+            const btn = document.getElementById(cfg.deleteBtnId);
+            const info = document.getElementById(cfg.selectionInfoId);
+            const arr = librarySelections[key];
+            if (!btn) return;
+            if (arr.length === 0) { btn.style.display = 'none'; if (info) { info.style.display = 'block'; info.textContent = 'Select entries to delete'; } }
+            else { btn.style.display = 'inline-block'; if (info) info.style.display = 'none'; btn.textContent = `Delete Selected (${arr.length})`; }
+            btn.disabled = arr.length === 0;
+        }
+        function updateLibraryEditButtonState(key) {
+            const cfg = libraryConfig[key];
+            const btn = document.getElementById(cfg.editBtnId);
+            const arr = librarySelections[key];
+            if (btn) btn.disabled = arr.length !== 1;
+        }
+        function toggleSelectAllLibrary(checkbox, key) {
+            const cfg = libraryConfig[key];
+            document.querySelectorAll('.' + cfg.checkboxClass).forEach(cb => {
+                cb.checked = checkbox.checked;
+                const id = parseInt(cb.dataset.id);
+                const arr = librarySelections[key];
+                if (checkbox.checked) { if (!arr.includes(id)) arr.push(id); }
+                else { librarySelections[key] = arr.filter(x => x !== id); }
+            });
+            updateLibraryDeleteButtonState(key);
+            updateLibraryEditButtonState(key);
+        }
+
+        function handleLibraryFileSelect(event, library) {
+            const file = event.target.files[0];
+            if (file) {
+                const alertId = libraryConfig[library].alertId;
+                document.getElementById(alertId).style.display = 'none';
+                document.getElementById(library + 'UploadOptions').style.display = 'block';
+                document.getElementById(library + 'UploadOptions').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        function closeLibraryUpload(library) {
+            document.getElementById(library + 'UploadOptions').style.display = 'none';
+            const fileInput = document.getElementById(library + 'File');
+            if (fileInput) fileInput.value = '';
+            const alertId = libraryConfig[library].alertId;
+            document.getElementById(alertId).style.display = 'none';
+        }
+        async function processLibraryFile(library) {
+            const fileInput = document.getElementById(library + 'File');
+            const file = fileInput ? fileInput.files[0] : null;
+            const alertId = libraryConfig[library].alertId;
+            if (!file) { showAlert(alertId, 'Please select a file first', 'error'); return; }
+            const btn = event.target;
+            btn.disabled = true; btn.textContent = 'Uploading...';
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                const response = await fetch(API + '/api/substances/import/' + library, { method: 'POST', headers: getHeaders(), body: formData });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert(alertId, `Success! ${data.imported||0} records imported.`, 'success');
+                    setTimeout(() => { loadLibrary(library); closeLibraryUpload(library); }, 1500);
+                } else {
+                    showAlert(alertId, data.detail || 'Import failed', 'error');
+                }
+            } catch(e) {
+                showAlert(alertId, 'Error: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Upload & Process';
+            }
+        }
+
+        function editSelectedLibrary(key) {
+            const arr = librarySelections[key];
+            if (arr.length !== 1) { showAlert(libraryConfig[key].alertId, 'Select exactly one entry to edit', 'error'); return; }
+            const id = arr[0];
+            if (key === 'substance') openSubLibraryModal(id);
+            else if (key === 'cmr') openCMRModal(id);
+            else if (key === 'clp') openCLPModal(id);
+            else if (key === 'ghs') openGHSModal(id);
+            else if (key === 'echa') openECHALibModal(id);
+        }
+
+        async function deleteSelectedLibrary(key) {
+            const arr = librarySelections[key];
+            const cfg = libraryConfig[key];
+            if (arr.length === 0) { showAlert(cfg.alertId, 'Please select entries to delete', 'error'); return; }
+            const password = prompt('Enter admin password to confirm deletion:', '');
+            if (!password) return;
+            const btn = document.getElementById(cfg.deleteBtnId);
+            btn.disabled = true; btn.textContent = 'Deleting...';
+            try {
+                const response = await fetch(API + '/api/substances' + cfg.apiPath + '/batch', {
+                    method: 'POST',
+                    headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ ids: arr, password: password })
+                });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert(cfg.alertId, `Deleted ${data.deleted} entries.`, 'success');
+                    librarySelections[key] = [];
+                    updateLibraryDeleteButtonState(key);
+                    setTimeout(() => loadLibrary(key), 1500);
+                } else {
+                    showAlert(cfg.alertId, data.detail || 'Delete failed', 'error');
+                }
+            } catch(e) {
+                showAlert(cfg.alertId, 'Error: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = `Delete Selected (${arr.length})`;
+            }
+        }
+
+        function showAlert(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.textContent = message;
+            el.className = type === 'error' ? 'alert alert-error' : 'alert alert-success';
+            el.style.display = 'block';
+        }
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/management/login';
+        }
+
+        /* ========== Modals (create / edit) ========== */
+        let currentEditId = null;
+
+        async function openSubLibraryModal(id) {
+            currentEditId = id || null;
+            const title = id ? 'Edit Substance' : 'Add Substance';
+            // Simple prompt-based edit for now to keep file size manageable
+            const name = prompt(title + '\nSubstance Name:');
+            if (!name) return;
+            const cas = prompt('CAS Number:');
+            const ec = prompt('EC Number:');
+            const iupac = prompt('IUPAC Name:');
+            const formula = prompt('Molecular Formula:');
+            const status = prompt('Registration Status (registered/pre-registered/exempt/restricted/svhc):');
+            const payload = { name, cas_number: cas||null, ec_number: ec||null, iupac_name: iupac||null, molecular_formula: formula||null, registration_status: status||null };
+            try {
+                const url = id ? (API + '/api/substances/' + id) : (API + '/api/substances');
+                const method = id ? 'PUT' : 'POST';
+                const response = await fetch(url, { method, headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) { showAlert('subLibraryAlert', id ? 'Substance updated.' : 'Substance added.', 'success'); loadLibrary('substance'); }
+                else { showAlert('subLibraryAlert', data.detail || 'Failed', 'error'); }
+            } catch(e) { showAlert('subLibraryAlert', 'Error: ' + e.message, 'error'); }
+        }
+
+        async function openCMRModal(id) {
+            currentEditId = id || null;
+            const name = prompt((id?'Edit':'Add') + ' CMR Entry\nSubstance Name:');
+            if (!name) return;
+            const cas = prompt('CAS Number:');
+            const ec = prompt('EC Number:');
+            const type = prompt('CMR Type (carcinogen/mutagen/reprotoxic):');
+            const cat = prompt('CMR Category (1A/1B/2):');
+            const haz = prompt('Hazard Class:');
+            const hs = prompt('Hazard Statements:');
+            const payload = { name, cas_number: cas||null, ec_number: ec||null, cmr_type: type||null, cmr_category: cat||null, hazard_class: haz||null, hazard_statements: hs||null };
+            try {
+                const url = id ? (API + '/api/substances/cmr/' + id) : (API + '/api/substances/cmr');
+                const method = id ? 'PUT' : 'POST';
+                const response = await fetch(url, { method, headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) { showAlert('cmrAlert', id ? 'CMR updated.' : 'CMR added.', 'success'); loadLibrary('cmr'); }
+                else { showAlert('cmrAlert', data.detail || 'Failed', 'error'); }
+            } catch(e) { showAlert('cmrAlert', 'Error: ' + e.message, 'error'); }
+        }
+
+        async function openCLPModal(id) {
+            currentEditId = id || null;
+            const name = prompt((id?'Edit':'Add') + ' CLP Entry\nSubstance Name:');
+            if (!name) return;
+            const cas = prompt('CAS Number:');
+            const ec = prompt('EC Number:');
+            const hclass = prompt('Hazard Class:');
+            const hcat = prompt('Hazard Category:');
+            const hcode = prompt('H-Statement Code:');
+            const hw = prompt('Signal Word (Danger/Warning):');
+            const pict = prompt('Pictograms (comma-separated codes):');
+            const payload = { name, cas_number: cas||null, ec_number: ec||null, hazard_class: hclass||null, hazard_category: hcat||null, hazard_statement_code: hcode||null, signal_word: hw||null, pictograms: pict||null };
+            try {
+                const url = id ? (API + '/api/substances/clp/' + id) : (API + '/api/substances/clp');
+                const method = id ? 'PUT' : 'POST';
+                const response = await fetch(url, { method, headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) { showAlert('clpAlert', id ? 'CLP updated.' : 'CLP added.', 'success'); loadLibrary('clp'); }
+                else { showAlert('clpAlert', data.detail || 'Failed', 'error'); }
+            } catch(e) { showAlert('clpAlert', 'Error: ' + e.message, 'error'); }
+        }
+
+        async function openGHSModal(id) {
+            currentEditId = id || null;
+            const name = prompt((id?'Edit':'Add') + ' GHS Entry\nSubstance Name:');
+            if (!name) return;
+            const cas = prompt('CAS Number:');
+            const ec = prompt('EC Number:');
+            const gclass = prompt('GHS Hazard Class:');
+            const gcat = prompt('GHS Category:');
+            const pict = prompt('Pictogram Codes (comma-separated):');
+            const sig = prompt('Signal Word:');
+            const hs = prompt('Hazard Statements:');
+            const payload = { name, cas_number: cas||null, ec_number: ec||null, ghs_hazard_class: gclass||null, ghs_category: gcat||null, pictogram_codes: pict||null, signal_word: sig||null, hazard_statements: hs||null };
+            try {
+                const url = id ? (API + '/api/substances/ghs/' + id) : (API + '/api/substances/ghs');
+                const method = id ? 'PUT' : 'POST';
+                const response = await fetch(url, { method, headers: Object.assign({}, getHeaders(), { 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+                if (response.status === 401) { logout(); return; }
+                const data = await response.json();
+                if (response.ok) { showAlert('ghsAlert', id ? 'GHS updated.' : 'GHS added.', 'success'); loadLibrary('ghs'); }
+                else { showAlert('ghsAlert', data.detail || 'Failed', 'error'); }
+            } catch(e) { showAlert('ghsAlert', 'Error: ' + e.message, 'error'); }
+        }
+
+        async function loadSymbolReferences() {
+            try {
+                const response = await fetch(API + '/api/substances/symbols', { headers: getHeaders() });
+                if (response.status === 401) { logout(); return; }
+                const result = await response.json();
+                const items = result.data || [];
+                const grid = document.getElementById('symbolsGrid');
+                if (!items.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No symbols loaded.</div>'; return; }
+                grid.innerHTML = items.map(s => `
+                    <div style="background:#fff;padding:15px;border-radius:10px;border:1px solid #e0e0e0;text-align:center;">
+                        <div style="font-size:48px;margin-bottom:8px;">${s.emoji||'🔷'}</div>
+                        <div style="font-weight:600;color:#1a1a2e;font-size:14px;">${s.symbol_code}</div>
+                        <div style="font-size:13px;color:#555;margin-top:4px;">${s.name}</div>
+                        <div style="font-size:11px;color:#888;margin-top:6px;">${s.description||''}</div>
+                        <div style="font-size:10px;color:#aaa;margin-top:4px;text-transform:uppercase;">${s.regulation_source||''}</div>
+                    </div>
+                `).join('');
+            } catch(e) {
+                document.getElementById('symbolsGrid').innerHTML = '<div class="empty" style="grid-column:1/-1;">Error loading symbols.</div>';
+            }
         }
 
         checkAuth();

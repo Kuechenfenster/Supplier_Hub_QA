@@ -20,7 +20,7 @@ from auth_helpers import (
 
 from bom_routes import router as bom_router
 from registration_routes import router as registration_router
-from registration_routes import router as registration_router
+from substance_routes import router as substance_router
 
 try:
     from pipeline.models.database import init_db as pipeline_init_db
@@ -58,8 +58,8 @@ app.include_router(bom_router)
 # Register Supplier Registration router
 app.include_router(registration_router)
 
-# Register Supplier Registration router
-app.include_router(registration_router)
+# Register Substance Library router
+app.include_router(substance_router)
 
 # ─── Database Init & Migration Fixes — runs once on startup ───
 init_db()

@@ -503,6 +503,150 @@ class SVHCComplianceCheck(Base):
 
 
 # ======================================================================
+# 18. Substance Library — Master chemical registry
+# ======================================================================
+class SubstanceLibrary(Base):
+    __tablename__ = "substance_library"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(200), nullable=False, index=True)
+    cas_number = Column(String(50), nullable=True, index=True)
+    ec_number = Column(String(50), nullable=True, index=True)
+    iupac_name = Column(String(500))
+    molecular_formula = Column(String(100))
+    registration_status = Column(String(50))  # registered / pre-registered / exempt / restricted / svhc
+    source_url = Column(String(500))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
+
+    # Relationships
+    cmr_entries = relationship("CMRSubstance", back_populates="substance", cascade="all, delete-orphan")
+    echa_entries = relationship("ECHASubstance", back_populates="substance", cascade="all, delete-orphan")
+    clp_entries = relationship("CLPClassification", back_populates="substance", cascade="all, delete-orphan")
+    ghs_entries = relationship("GHSClassification", back_populates="substance", cascade="all, delete-orphan")
+
+
+# ======================================================================
+# 19. CMR Substances — Carcinogenic, Mutagenic, Reprotoxic
+# ======================================================================
+class CMRSubstance(Base):
+    __tablename__ = "cmr_substances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    substance_id = Column(Integer, ForeignKey("substance_library.id"), nullable=True, index=True)
+    cas_number = Column(String(50), nullable=True, index=True)
+    ec_number = Column(String(50), nullable=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    cmr_type = Column(String(50))  # carcinogen / mutagen / reprotoxic
+    cmr_category = Column(String(20))  # 1A / 1B / 2
+    hazard_class = Column(String(100))
+    hazard_statements = Column(Text)  # e.g. H350, H340
+    clp_notes = Column(Text)
+    atp_reference = Column(String(100))
+    source_url = Column(String(500))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
+
+    substance = relationship("SubstanceLibrary", back_populates="cmr_entries")
+
+
+# ======================================================================
+# 20. ECHA Substances — REACH registration details
+# ======================================================================
+class ECHASubstance(Base):
+    __tablename__ = "echa_substances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    substance_id = Column(Integer, ForeignKey("substance_library.id"), nullable=True, index=True)
+    cas_number = Column(String(50), nullable=True, index=True)
+    ec_number = Column(String(50), nullable=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    reach_status = Column(String(50))  # registered / pre-registered / exempt / restricted
+    tonnage_band = Column(String(50))  # 1-10 / 10-100 / 100-1000 / >1000 tpa
+    registration_type = Column(String(50))  # full / intermediate / article
+    index_number = Column(String(50))
+    clp_notes = Column(Text)
+    atp_reference = Column(String(100))
+    source_url = Column(String(500))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
+
+    substance = relationship("SubstanceLibrary", back_populates="echa_entries")
+
+
+# ======================================================================
+# 21. CLP Classifications — Classification, Labelling & Packaging
+# ======================================================================
+class CLPClassification(Base):
+    __tablename__ = "clp_classifications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    substance_id = Column(Integer, ForeignKey("substance_library.id"), nullable=True, index=True)
+    cas_number = Column(String(50), nullable=True, index=True)
+    ec_number = Column(String(50), nullable=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    hazard_class = Column(String(100))
+    hazard_category = Column(String(100))
+    hazard_statement_code = Column(String(50))
+    hazard_statement = Column(Text)
+    p_statements = Column(Text)  # precautionary statements
+    signal_word = Column(String(20))  # Danger / Warning
+    pictograms = Column(String(200))  # comma-separated symbol codes
+    concentration_limit = Column(String(50))
+    m_factor = Column(String(20))
+    source_url = Column(String(500))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
+
+    substance = relationship("SubstanceLibrary", back_populates="clp_entries")
+
+
+# ======================================================================
+# 22. GHS Classifications — Globally Harmonized System
+# ======================================================================
+class GHSClassification(Base):
+    __tablename__ = "ghs_classifications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    substance_id = Column(Integer, ForeignKey("substance_library.id"), nullable=True, index=True)
+    cas_number = Column(String(50), nullable=True, index=True)
+    ec_number = Column(String(50), nullable=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    ghs_hazard_class = Column(String(100))
+    ghs_category = Column(String(100))
+    pictogram_codes = Column(String(200))  # comma-separated GHS codes (GHS01, GHS02, ...)
+    signal_word = Column(String(20))  # Danger / Warning
+    hazard_statements = Column(Text)
+    precautionary_statements = Column(Text)
+    source_url = Column(String(500))
+    notes = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
+
+    substance = relationship("SubstanceLibrary", back_populates="ghs_entries")
+
+
+# ======================================================================
+# 23. Symbol References — Hazard pictogram reference table
+# ======================================================================
+class SymbolReference(Base):
+    __tablename__ = "symbol_references"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    symbol_code = Column(String(20), nullable=False, index=True)  # GHS01, GHS02, etc.
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    emoji = Column(String(20))  # Unicode emoji approximation
+    regulation_source = Column(String(50))  # GHS / CLP
+    image_url = Column(String(500))  # Future: actual pictogram PNG
+    created_at = Column(DateTime, default=utcnow)
+
+
+# ======================================================================
 # Database Engine & Session Management
 # ======================================================================
 engine = None
