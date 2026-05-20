@@ -96,61 +96,62 @@
 </head>
 <body>
     <div class="header">
-        <h1>🏢 Management Portal</h1>
+        <h1 data-i18n="management.portalTitle">🏢 Management Portal</h1>
         <div class="header-info">
+            <div id="langSelector"></div>
             <div class="user-info">
-                <div class="name" id="currentUserName">Loading...</div>
-                <div class="role" id="currentUserRole">Loading...</div>
+                <div class="name" id="currentUserName" data-i18n="management.loading">Loading...</div>
+                <div class="role" id="currentUserRole" data-i18n="management.loading">Loading...</div>
             </div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+            <button class="logout-btn" onclick="logout()" data-i18n="management.logout">Logout</button>
         </div>
     </div>
     
     <div class="main">
         <div class="sidebar">
             <div class="sidebar-group">
-                <div class="sidebar-group-header" onclick="toggleSidebarGroup('overviewGroup')"><span class="icon">📊</span> Overview</div>
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('overviewGroup')"><span class="icon">📊</span> <span data-i18n="management.overview">Overview</span></div>
                 <div class="sidebar-group-content" id="overviewGroup">
-                    <button class="active" onclick="showTab('dashboard')"><span class="icon">🏠</span> Dashboard</button>
+                    <button class="active" onclick="showTab('dashboard')"><span class="icon">🏠</span> <span data-i18n="management.dashboard">Dashboard</span></button>
                 </div>
             </div>
 
             <div class="sidebar-group">
-                <div class="sidebar-group-header" onclick="toggleSidebarGroup('productGroup')"><span class="icon">📦</span> Product</div>
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('productGroup')"><span class="icon">📦</span> <span data-i18n="management.product">Product</span></div>
                 <div class="sidebar-group-content" id="productGroup">
-                    <button onclick="showTab('materials')"><span class="icon">🧪</span> Materials</button>
-                    <button onclick="showTab('formulations')"><span class="icon">🧪</span> Formulations</button>
-                    <button onclick="showTab('bom')"><span class="icon">📋</span> Bill of Materials</button>
-                    <button onclick="showTab('sealSample')"><span class="icon">🏷️</span> Seal Sample</button>
+                    <button onclick="showTab('materials')"><span class="icon">🧪</span> <span data-i18n="management.materials">Materials</span></button>
+                    <button onclick="showTab('formulations')"><span class="icon">🧪</span> <span data-i18n="management.formulations">Formulations</span></button>
+                    <button onclick="showTab('bom')"><span class="icon">📋</span> <span data-i18n="management.bom">Bill of Materials</span></button>
+                    <button onclick="showTab('sealSample')"><span class="icon">🏷️</span> <span data-i18n="management.sealSample">Seal Sample</span></button>
                 </div>
             </div>
 
             <div class="sidebar-group">
-                <div class="sidebar-group-header" onclick="toggleSidebarGroup('correctiveActionGroup')"><span class="icon">✅</span> Corrective Action</div>
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('correctiveActionGroup')"><span class="icon">✅</span> <span data-i18n="management.correctiveAction">Corrective Action</span></div>
                 <div class="sidebar-group-content" id="correctiveActionGroup">
-                    <button onclick="showTab('customerClaims')"><span class="icon">📣</span> Customer Claims</button>
-                    <button onclick="showTab('qcIssues')"><span class="icon">❌</span> QC Issues</button>
-                    <button onclick="showTab('centerExcellence')"><span class="icon">🏆</span> Centre of Excellence</button>
-                    <button onclick="showTab('auditCAPs')"><span class="icon">📝</span> Audit CAPs</button>
+                    <button onclick="showTab('customerClaims')"><span class="icon">📣</span> <span data-i18n="management.customerClaims">Customer Claims</span></button>
+                    <button onclick="showTab('qcIssues')"><span class="icon">❌</span> <span data-i18n="management.qcIssues">QC Issues</span></button>
+                    <button onclick="showTab('centerExcellence')"><span class="icon">🏆</span> <span data-i18n="management.centerExcellence">Centre of Excellence</span></button>
+                    <button onclick="showTab('auditCAPs')"><span class="icon">📝</span> <span data-i18n="management.auditCAPs">Audit CAPs</span></button>
                 </div>
             </div>
 
             <div class="sidebar-group">
-                <div class="sidebar-group-header" onclick="toggleSidebarGroup('databaseGroup')"><span class="icon">💾</span> Database</div>
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('databaseGroup')"><span class="icon">💾</span> <span data-i18n="management.database">Database</span></div>
                 <div class="sidebar-group-content" id="databaseGroup">
-                    <button onclick="showTab('sdsM SDS')"><span class="icon">📄</span> SDS/MSDS/IFRA</button>
-                    <button onclick="showTab('legalRequirements')"><span class="icon">⚖️</span> Legal Requirements</button>
-                    <button onclick="showTab('customerRequirements')"><span class="icon">📋</span> Customer Requirements</button>
-                    <button onclick="showTab('echa')"><span class="icon">🧪</span> ECHA</button>
+                    <button onclick="showTab('sdsM SDS')"><span class="icon">📄</span> <span data-i18n="management.sdsMsds">SDS/MSDS/IFRA</span></button>
+                    <button onclick="showTab('legalRequirements')"><span class="icon">⚖️</span> <span data-i18n="management.legalRequirements">Legal Requirements</span></button>
+                    <button onclick="showTab('customerRequirements')"><span class="icon">📋</span> <span data-i18n="management.customerRequirements">Customer Requirements</span></button>
+                    <button onclick="showTab('echa')"><span class="icon">🧪</span> <span data-i18n="management.echa">ECHA</span></button>
                 </div>
             </div>
 
             <div class="sidebar-group">
-                <div class="sidebar-group-header" onclick="toggleSidebarGroup('usersGroup')"><span class="icon">👥</span> Users</div>
+                <div class="sidebar-group-header" onclick="toggleSidebarGroup('usersGroup')"><span class="icon">👥</span> <span data-i18n="management.users">Users</span></div>
                 <div class="sidebar-group-content" id="usersGroup">
-                    <button onclick="showTab('departments')"><span class="icon">🏛️</span> Departments</button>
-                    <button onclick="showTab('users')"><span class="icon">👤</span> User Management</button>
-                    <button onclick="showTab('suppliers')"><span class="icon">🏭</span> Supplier Management</button>
+                    <button onclick="showTab('departments')"><span class="icon">🏛️</span> <span data-i18n="management.departments">Departments</span></button>
+                    <button onclick="showTab('users')"><span class="icon">👤</span> <span data-i18n="management.userManagement">User Management</span></button>
+                    <button onclick="showTab('suppliers')"><span class="icon">🏭</span> <span data-i18n="management.supplierManagement">Supplier Management</span></button>
                 </div>
             </div>
         </div>
@@ -857,6 +858,7 @@
         </div>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script>
         const API = '';
         let currentUser = null;

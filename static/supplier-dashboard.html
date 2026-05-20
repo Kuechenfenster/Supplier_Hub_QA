@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supplier Portal - Dashboard</title>
+    <title data-i18n="dashboard.title">Supplier Portal - Dashboard</title>
     <style>
         /* Language selector styles */
         .lang-selector {
@@ -126,81 +126,75 @@
 </head>
 <body>
     <nav class="navbar">
-        <h1>Supplier Portal</h1>
+        <h1 data-i18n="dashboard.title">Supplier Portal</h1>
         <div class="user-info">
-            <div class="lang-selector">
-                <label for="languageSelect" style="color: white; font-size: 13px;"> Language:</label>
-                <select id="languageSelect" onchange="changeLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="zh">中文 (Chinese)</option>
-                </select>
-            </div>
+            <div id="langSelector"></div>
             <span id="supplierName">Supplier</span>
-            <button class="btn-logout" onclick="logout()">Logout</button>
+            <button class="btn-logout" onclick="logout()" data-i18n="common.logout">Logout</button>
         </div>
     </nav>
 
     <div class="layout">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="sidebar-header">Navigation</div>
+            <div class="sidebar-header" data-i18n="dashboard.navigation">Navigation</div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Overview</div>
+                <div class="nav-group-title" data-i18n="dashboard.overview">Overview</div>
                 <a href="#" class="nav-item active" data-page="dashboard">
-                    <span>Dashboard</span>
+                    <span data-i18n="dashboard.dashboard">Dashboard</span>
                 </a>
             </div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Suppliers & Materials</div>
+                <div class="nav-group-title" data-i18n="dashboard.suppliersMaterials">Suppliers & Materials</div>
                 <a href="#" class="nav-item" data-page="raw-suppliers">
-                    <span>Manufactures</span>
+                    <span data-i18n="dashboard.manufactures">Manufactures</span>
                     <span class="count" id="countRawSuppliers">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="materials">
-                    <span>Registered Materials</span>
+                    <span data-i18n="dashboard.registeredMaterialsNav">Registered Materials</span>
                     <span class="count" id="countMaterialsSide">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="substances">
-                    <span>Substances & Mixtures</span>
+                    <span data-i18n="dashboard.substancesMixtures">Substances & Mixtures</span>
                     <span class="count" id="countSubstancesSide">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="sourced-components">
-                    <span>Sourced Components</span>
+                    <span data-i18n="dashboard.sourcedComponents">Sourced Components</span>
                     <span class="count" id="countSourcedComponents">0</span>
                 </a>
             </div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Products & Components</div>
+                <div class="nav-group-title" data-i18n="dashboard.productsComponents">Products & Components</div>
                 <a href="#" class="nav-item" data-page="bought-components">
-                    <span>Bought Components</span>
+                    <span data-i18n="dashboard.boughtComponents">Bought Components</span>
                     <span class="count" id="countBoughtComponents">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="products">
-                    <span>Products</span>
+                    <span data-i18n="dashboard.products">Products</span>
                     <span class="count" id="countProducts">0</span>
                 </a>
                 <a href="#" class="nav-item" data-page="seal-samples">
-                    <span>Seal Samples</span>
+                    <span data-i18n="dashboard.sealSamples">Seal Samples</span>
                 </a>
             </div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Process</div>
+                <div class="nav-group-title" data-i18n="dashboard.process">Process</div>
                 <a href="#" class="nav-item" data-page="process-flow">
-                    <span>Process Flow</span>
+                    <span data-i18n="dashboard.processFlow">Process Flow</span>
                 </a>
             </div>
 
             <div class="nav-group">
-                <div class="nav-group-title">Vendor Compliance</div>
+                <div class="nav-group-title" data-i18n="dashboard.vendorCompliance">Vendor Compliance</div>
                 <a href="#" class="nav-item" data-page="upcoming-audits">
-                    <span>Upcoming Audits</span>
+                    <span data-i18n="dashboard.upcomingAudits">Upcoming Audits</span>
                 </a>
                 <a href="#" class="nav-item" data-page="corrective-action">
-                    <span>Corrective Action Plan</span>
+                    <span data-i18n="dashboard.correctiveAction">Corrective Action Plan</span>
                 </a>
             </div>
         </aside>
@@ -209,8 +203,8 @@
         <main class="main-content">
             <div class="container">
                 <div class="page-header">
-                    <h2 id="page-title">Supplier Dashboard</h2>
-                    <p id="page-description">Overview of your materials, products, and compliance status.</p>
+                    <h2 id="page-title" data-i18n="dashboard.pageTitle">Supplier Dashboard</h2>
+                    <p id="page-description" data-i18n="dashboard.pageDesc">Overview of your materials, products, and compliance status.</p>
                 </div>
 
                 <div id="page-content">
@@ -218,103 +212,103 @@
                     <div id="dashboard-content" class="content-area" style="display: block;">
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <h3>Active Products</h3>
+                                <h3 data-i18n="dashboard.activeProducts">Active Products</h3>
                                 <div class="value" id="countActive">0</div>
-                                <div class="label">Live on market</div>
+                                <div class="label" data-i18n="dashboard.activeProductsLabel">Live on market</div>
                             </div>
                             <div class="stat-card">
-                                <h3>Registered Suppliers</h3>
+                                <h3 data-i18n="dashboard.registeredSuppliers">Registered Suppliers</h3>
                                 <div class="value" id="countSuppliers">0</div>
-                                <div class="label">Factory partners</div>
+                                <div class="label" data-i18n="dashboard.registeredSuppliersLabel">Factory partners</div>
                             </div>
                             <div class="stat-card">
-                                <h3>Registered Materials</h3>
+                                <h3 data-i18n="dashboard.registeredMaterials">Registered Materials</h3>
                                 <div class="value" id="countMaterials">0</div>
-                                <div class="label">Total products</div>
+                                <div class="label" data-i18n="dashboard.registeredMaterialsLabel">Total products</div>
                             </div>
                             <div class="stat-card">
-                                <h3>Registered Substances</h3>
+                                <h3 data-i18n="dashboard.registeredSubstances">Registered Substances</h3>
                                 <div class="value" id="countSubstances">0</div>
-                                <div class="label">CAS substances</div>
+                                <div class="label" data-i18n="dashboard.registeredSubstancesLabel">CAS substances</div>
                             </div>
                             <div class="stat-card">
-                                <h3>Missing Seal Sample</h3>
+                                <h3 data-i18n="dashboard.missingSealSample">Missing Seal Sample</h3>
                                 <div class="value" id="countMissingSealSample">0</div>
-                                <div class="label">Products without sample</div>
+                                <div class="label" data-i18n="dashboard.missingSealSampleLabel">Products without sample</div>
                             </div>
                         </div>
 
                         <!-- Tab Navigation -->
                         <div class="tabs">
-                            <button class="tab active" onclick="switchTab('active', this)">All Products <span class="tab-count" id="tabCountActive">0</span></button>
+                            <button class="tab active" onclick="switchTab('active', this)"><span data-i18n="dashboard.allProducts">All Products</span> <span class="tab-count" id="tabCountActive">0</span></button>
                         </div>
 
                         <!-- Tab Content -->
                         <div id="tab-content-active" class="tab-content active">
                             <div class="section">
                                 <div class="section-header">
-                                    <h3>Product Portfolio</h3>
-                                    <button class="btn-primary" onclick="refreshData()">Refresh</button>
+                                    <h3 data-i18n="dashboard.productPortfolio">Product Portfolio</h3>
+                                    <button class="btn-primary" onclick="refreshData()" data-i18n="common.refresh">Refresh</button>
                                 </div>
                                 <div id="activeProducts" class="product-grid"></div>
                             </div>
                         </div>
                     </div>
 
-<!-- Raw Suppliers / Manufactures Content -->
+                    <!-- Raw Suppliers / Manufactures Content -->
                     <div id="raw-suppliers-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Manufactures</h3>
-                            <button class="btn-primary" onclick="showAddManufactureForm()">+ Register Manufacture</button>
+                            <h3 data-i18n="dashboard.manufacturesTitle">Manufactures</h3>
+                            <button class="btn-primary" onclick="showAddManufactureForm()" data-i18n="dashboard.registerManufacture">+ Register Manufacture</button>
                         </div>
                         <div id="manufactureForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Manufacture Name *</label>
-                            <input id="mfgName" placeholder="e.g. ABC Plastics Ltd." style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supply Type *</label>
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.manufactureName">Manufacture Name *</label>
+                            <input id="mfgName" data-i18n-attr="placeholder" data-i18n="dashboard.manufactureNamePlaceholder" placeholder="e.g. ABC Plastics Ltd." style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.supplyType">Supply Type *</label>
                             <select id="mfgSupplyType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
-                                <option value="">-- Select Type --</option>
-                                <option value="tier2">Tier 2 Supplier (Plastic, Metal, Fabric, Electrical, Batteries, Packaging)</option>
-                                <option value="raw_material">Raw Material (Substances/Mixtures, Pigments, Paint, Ink, Glue, Fragrances)</option>
-                                <option value="component_part">Component / Part Supplier (Pre-fabricated, Springs, Wheels, Stamping, Die Cast)</option>
-                                <option value="printer">Printer</option>
+                                <option value="" data-i18n="dashboard.selectType">-- Select Type --</option>
+                                <option value="tier2" data-i18n="dashboard.tier2Option">Tier 2 Supplier (Plastic, Metal, Fabric, Electrical, Batteries, Packaging)</option>
+                                <option value="raw_material" data-i18n="dashboard.rawMaterialOption">Raw Material (Substances/Mixtures, Pigments, Paint, Ink, Glue, Fragrances)</option>
+                                <option value="component_part" data-i18n="dashboard.componentOption">Component / Part Supplier (Pre-fabricated, Springs, Wheels, Stamping, Die Cast)</option>
+                                <option value="printer" data-i18n="dashboard.printerOption">Printer</option>
                             </select>
-                            <h4 style="margin-bottom:10px;color:#555;">Sales Contact</h4>
+                            <h4 style="margin-bottom:10px;color:#555;" data-i18n="dashboard.salesContact">Sales Contact</h4>
                             <div style="display:flex;gap:10px;margin-bottom:12px;">
-                                <input id="mfgSalesName" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
-                                <input id="mfgSalesEmail" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
-                                <input id="mfgSalesPhone" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgSalesName" data-i18n-attr="placeholder" data-i18n="dashboard.fullNamePlaceholder" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgSalesEmail" data-i18n-attr="placeholder" data-i18n="dashboard.emailPlaceholder" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgSalesPhone" data-i18n-attr="placeholder" data-i18n="dashboard.phonePlaceholder" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
                             </div>
-                            <h4 style="margin-bottom:10px;color:#555;">Technical Support</h4>
+                            <h4 style="margin-bottom:10px;color:#555;" data-i18n="dashboard.techSupport">Technical Support</h4>
                             <div style="display:flex;gap:10px;margin-bottom:16px;">
-                                <input id="mfgTechName" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
-                                <input id="mfgTechEmail" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
-                                <input id="mfgTechPhone" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgTechName" data-i18n-attr="placeholder" data-i18n="dashboard.fullNamePlaceholder" placeholder="Full Name" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgTechEmail" data-i18n-attr="placeholder" data-i18n="dashboard.emailPlaceholder" placeholder="Email" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
+                                <input id="mfgTechPhone" data-i18n-attr="placeholder" data-i18n="dashboard.phonePlaceholder" placeholder="Phone" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;">
                             </div>
                             <div style="display:flex;gap:10px;">
                                 <input type="hidden" id="editMfgId">
-                                <button class="btn-primary" onclick="saveManufacture()">Save</button>
-                                <button class="btn-outline" onclick="cancelManufactureForm()">Cancel</button>
+                                <button class="btn-primary" onclick="saveManufacture()" data-i18n="dashboard.saveManufacture">Save</button>
+                                <button class="btn-outline" onclick="cancelManufactureForm()" data-i18n="dashboard.cancelManufacture">Cancel</button>
                             </div>
                         </div>
                         <div id="manufacturesList">
-                            <div class="loading">Loading manufactures...</div>
+                            <div class="loading" data-i18n="common.loading">Loading...</div>
                         </div>
                     </div>
 
                     <!-- Materials Content -->
                     <div id="materials-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Registered Materials</h3>
+                            <h3 data-i18n="dashboard.materialsTitle">Registered Materials</h3>
                             <div style="display:flex;gap:10px;">
-                                <button class="btn-primary" onclick="showAddMaterialForm()">+ Register Material</button>
-                                <button class="btn-outline" onclick="loadMaterials()">Refresh</button>
+                                <button class="btn-primary" onclick="showAddMaterialForm()" data-i18n="dashboard.registerMaterial">+ Register Material</button>
+                                <button class="btn-outline" onclick="loadMaterials()" data-i18n="common.refresh">Refresh</button>
                             </div>
                         </div>
                         <div id="materialFilterBar" style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
                             <div style="display:flex;align-items:center;gap:6px;">
-                                <label style="font-size:13px;font-weight:600;color:#444;">Type:</label>
+                                <label style="font-size:13px;font-weight:600;color:#444;" data-i18n="dashboard.typeFilter">Type:</label>
                                 <select id="matFilterType" style="padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onchange="applyMaterialFilters()">
-                                    <option value="">All</option>
+                                    <option value="" data-i18n="common.all">All</option>
                                     <option value="tier2">Tier 2</option>
                                     <option value="raw_material">Raw Material</option>
                                     <option value="component_part">Components</option>
@@ -322,65 +316,65 @@
                                 </select>
                             </div>
                             <div style="display:flex;align-items:center;gap:6px;flex:1;">
-                                <input id="matSearchInput" type="text" placeholder="Search material name, manufacture, supplier code, internal code..." style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onkeydown="if(event.key==='Enter'){applyMaterialFilters()}">
-                                <button class="btn-primary btn-sm" onclick="applyMaterialFilters()">Search</button>
-                                <button class="btn-outline btn-sm" onclick="clearMaterialFilters()">Clear</button>
+                                <input id="matSearchInput" type="text" data-i18n-attr="placeholder" data-i18n="dashboard.searchPlaceholder" placeholder="Search material name, manufacture, supplier code, internal code..." style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" onkeydown="if(event.key==='Enter'){applyMaterialFilters()}">
+                                <button class="btn-primary btn-sm" onclick="applyMaterialFilters()" data-i18n="dashboard.searchBtn">Search</button>
+                                <button class="btn-outline btn-sm" onclick="clearMaterialFilters()" data-i18n="dashboard.clearBtn">Clear</button>
                             </div>
                         </div>
                         <div id="materialSearchResultCount" style="font-size:13px;color:#666;margin-bottom:12px;"></div>
                         <div id="materialForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
-                            <h4 id="materialFormTitle" style="margin-bottom:12px;">Register Material</h4>
+                            <h4 id="materialFormTitle" style="margin-bottom:12px;" data-i18n="dashboard.registerMaterial">Register Material</h4>
                             <input type="hidden" id="editMatId">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Linked Manufacture *</label>
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.linkedManufacture">Linked Manufacture *</label>
                             <select id="matManufactureId" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
-                                <option value="">-- Select Manufacture --</option>
+                                <option value="" data-i18n="dashboard.selectManufacture">-- Select Manufacture --</option>
                             </select>
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Supply Type</label>
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.supplyTypeLabel">Supply Type</label>
                             <input id="matSupplyType" disabled style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;background:#e9ecef;">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Manufacture Commercial Name *</label>
-                            <input id="matCommercialName" placeholder="e.g. ABS Resin PA-757" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Manufacture Material Code</label>
-                            <input id="matSupplierCode" placeholder="Supplier catalog/reference code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
-                            <label style="font-weight:600;display:block;margin-bottom:4px;">Factory Internal Material Code</label>
-                            <input id="matInternalCode" placeholder="Your internal SKU/ERP code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.manufactureCommercialName">Manufacture Commercial Name *</label>
+                            <input id="matCommercialName" data-i18n-attr="placeholder" data-i18n="dashboard.commercialNamePlaceholder" placeholder="e.g. ABS Resin PA-757" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.manufactureMaterialCode">Manufacture Material Code</label>
+                            <input id="matSupplierCode" data-i18n-attr="placeholder" data-i18n="dashboard.supplierCodePlaceholder" placeholder="Supplier catalog/reference code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;">
+                            <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.factoryInternalCode">Factory Internal Material Code</label>
+                            <input id="matInternalCode" data-i18n-attr="placeholder" data-i18n="dashboard.internalCodePlaceholder" placeholder="Your internal SKU/ERP code" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-bottom:16px;">
                             <div style="display:flex;gap:10px;align-items:center;">
-                                <button class="btn-primary" onclick="saveMaterial()">Save Material</button>
-                                <button class="btn-outline" onclick="cancelMaterialForm()">Cancel</button>
-                                <button id="btnDeactivateMat" class="btn-sm-danger" style="display:none;margin-left:auto;" onclick="deactivateCurrentMaterial()">Deactivate</button>
+                                <button class="btn-primary" onclick="saveMaterial()" data-i18n="dashboard.saveMaterial">Save Material</button>
+                                <button class="btn-outline" onclick="cancelMaterialForm()" data-i18n="dashboard.cancelMaterial">Cancel</button>
+                                <button id="btnDeactivateMat" class="btn-sm-danger" style="display:none;margin-left:auto;" onclick="deactivateCurrentMaterial()" data-i18n="dashboard.deactivate">Deactivate</button>
                             </div>
                         </div>
                         <div id="materialDocsForm" style="display:none;background:#f0f2ff;padding:20px;border-radius:8px;margin-bottom:20px;">
-                            <h4 style="margin-bottom:12px;">Documents for: <span id="docMaterialName"></span></h4>
+                            <h4 style="margin-bottom:12px;"><span data-i18n="dashboard.documentsFor">Documents for:</span> <span id="docMaterialName"></span></h4>
                             <input type="hidden" id="docMaterialId">
                             <input type="hidden" id="docSupplyType">
                             <div id="docUploadFields"></div>
                             <div style="margin-top:16px;display:flex;gap:10px;">
-                                <button class="btn-primary" onclick="showUploadModal()">+ Upload Document</button>
-                                <button class="btn-outline" onclick="cancelDocForm()">Close</button>
+                                <button class="btn-primary" onclick="showUploadModal()" data-i18n="dashboard.uploadDocument">+ Upload Document</button>
+                                <button class="btn-outline" onclick="cancelDocForm()" data-i18n="dashboard.closeDocs">Close</button>
                             </div>
                             <div id="docHistoryTable" style="margin-top:20px;"></div>
                         </div>
                         <div id="materialsList">
-                            <div class="loading">Loading materials...</div>
+                            <div class="loading" data-i18n="common.loading">Loading...</div>
                         </div>
                         <!-- Upload Modal -->
                         <div id="uploadModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
                             <div style="background:#fff;border-radius:12px;padding:30px;width:500px;max-width:90vw;max-height:90vh;overflow-y:auto;">
-                                <h3 style="margin-bottom:20px;">Upload Document</h3>
-                                <label style="font-weight:600;display:block;margin-bottom:4px;">Document Type *</label>
+                                <h3 style="margin-bottom:20px;" data-i18n="dashboard.uploadModalTitle">Upload Document</h3>
+                                <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.docType">Document Type *</label>
                                 <select id="uploadDocType" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;"></select>
-                                <label style="font-weight:600;display:block;margin-bottom:4px;">Document Creation Date</label>
+                                <label style="font-weight:600;display:block;margin-bottom:4px;" data-i18n="dashboard.docCreationDate">Document Creation Date</label>
                                 <input type="date" id="uploadDocDate" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-bottom:16px;">
                                 <div id="dropZone" ondrop="dropHandler(event)" ondragover="event.preventDefault(); event.currentTarget.style.borderColor='#667eea';" ondragleave="event.currentTarget.style.borderColor='#ccc';" style="position:relative;border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;transition:all 0.2s;">
                                     <label for="uploadFileInput" style="display:block;cursor:pointer;position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;"></label>
-                                    <p style="color:#888;margin:0;position:relative;z-index:1;">Drag & drop file here or click to browse</p>
-                                    <p style="color:#aaa;font-size:11px;margin-top:4px;position:relative;z-index:1;">Max 10 MB. PDF only.</p>
+                                    <p style="color:#888;margin:0;position:relative;z-index:1;" data-i18n="dashboard.dropzoneHint">Drag & drop file here or click to browse</p>
+                                    <p style="color:#aaa;font-size:11px;margin-top:4px;position:relative;z-index:1;" data-i18n="dashboard.max10MB">Max 10 MB. PDF only.</p>
                                     <input type="file" id="uploadFileInput" accept=".pdf" style="position:absolute;opacity:0;width:0;height:0;overflow:hidden;" onchange="document.getElementById('uploadFileName').textContent = this.files[0]?.name || ''; document.getElementById('uploadFileName').style.display = this.files[0] ? 'block' : 'none';">
                                     <p id="uploadFileName" style="color:#667eea;font-weight:600;margin-top:8px;display:none;position:relative;z-index:1;"></p>
                                 </div>
                                 <div style="display:flex;gap:10px;justify-content:flex-end;">
-                                    <button class="btn-outline" onclick="closeUploadModal()">Cancel</button>
-                                    <button class="btn-primary" onclick="submitUpload()">Upload</button>
+                                    <button class="btn-outline" onclick="closeUploadModal()" data-i18n="dashboard.cancelUpload">Cancel</button>
+                                    <button class="btn-primary" onclick="submitUpload()" data-i18n="dashboard.uploadBtn">Upload</button>
                                 </div>
                             </div>
                         </div>
@@ -389,75 +383,76 @@
                     <!-- Substances Content -->
                     <div id="substances-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Substances & Mixtures</h3>
-                            <button class="btn-primary" onclick="refreshSubstances()">Refresh</button>
+                            <h3 data-i18n="dashboard.substancesTitle">Substances & Mixtures</h3>
+                            <button class="btn-primary" onclick="refreshSubstances()" data-i18n="common.refresh">Refresh</button>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Substances & Mixtures page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.substancesTitle">Substances & Mixtures</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Sourced Components Content -->
                     <div id="sourced-components-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Sourced Components</h3>
-                            <button class="btn-primary" onclick="refreshSourcedComponents()">Refresh</button>
+                            <h3 data-i18n="dashboard.sourcedComponentsTitle">Sourced Components</h3>
+                            <button class="btn-primary" onclick="refreshSourcedComponents()" data-i18n="common.refresh">Refresh</button>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Sourced Components page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.sourcedComponentsTitle">Sourced Components</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Bought Components Content -->
                     <div id="bought-components-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Bought Components</h3>
-                            <button class="btn-primary" onclick="refreshBoughtComponents()">Refresh</button>
+                            <h3 data-i18n="dashboard.boughtComponentsTitle">Bought Components</h3>
+                            <button class="btn-primary" onclick="refreshBoughtComponents()" data-i18n="common.refresh">Refresh</button>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Bought Components page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.boughtComponentsTitle">Bought Components</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Products Content -->
                     <div id="products-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Products</h3>
-                            <button class="btn-primary" onclick="refreshProducts()">Refresh</button>
+                            <h3 data-i18n="dashboard.productsTitle">Products</h3>
+                            <button class="btn-primary" onclick="refreshProducts()" data-i18n="common.refresh">Refresh</button>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Products page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.productsTitle">Products</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Seal Samples Content -->
                     <div id="seal-samples-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Seal Samples</h3>
+                            <h3 data-i18n="dashboard.sealSamplesTitle">Seal Samples</h3>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Seal Samples page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.sealSamplesTitle">Seal Samples</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Process Flow Content -->
                     <div id="process-flow-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Process Flow</h3>
+                            <h3 data-i18n="dashboard.processFlowTitle">Process Flow</h3>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Process Flow page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.processFlowTitle">Process Flow</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Upcoming Audits Content -->
                     <div id="upcoming-audits-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Upcoming Audits</h3>
+                            <h3 data-i18n="dashboard.upcomingAuditsTitle">Upcoming Audits</h3>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Upcoming Audits page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.upcomingAuditsTitle">Upcoming Audits</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
 
                     <!-- Corrective Action Plan Content -->
                     <div id="corrective-action-content" class="content-area" style="display: none;">
                         <div class="section-header">
-                            <h3>Corrective Action Plan</h3>
+                            <h3 data-i18n="dashboard.correctiveActionTitle">Corrective Action Plan</h3>
                         </div>
-                        <p class="empty-state" style="padding: 30px;">Corrective Action Plan page coming soon...</p>
+                        <p class="empty-state" style="padding: 30px;"><span data-i18n="dashboard.correctiveActionTitle">Corrective Action Plan</span> <span data-i18n="dashboard.comingSoon">page coming soon...</span></p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script>
         let token = localStorage.getItem('supplier_token') || '';
         let supplierName = localStorage.getItem('supplier_name') || '';
@@ -470,6 +465,7 @@
         }
 
         document.getElementById('supplierName').textContent = supplierName;
+        document.getElementById('langSelector').innerHTML = I18N.selectorHtml();
 
         // Sidebar navigation
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -481,43 +477,39 @@
         });
 
         function switchPage(page, navItem) {
-            // Update sidebar active state
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             if (navItem) {
                 navItem.classList.add('active');
             }
 
-            // Update page content visibility
             document.querySelectorAll('.content-area').forEach(content => content.style.display = 'none');
             document.getElementById(page + '-content').style.display = 'block';
 
-            // Update page title and description using translations
-            const t = translations[currentLang];
             const titles = {
-                'dashboard': t.dashboard.title,
-                'raw-suppliers': t.pages.rawSuppliersTitle,
-                'materials': t.pages.materialTitle,
-                'substances': t.pages.substancesTitle,
-                'bought-components': t.pages.boughtComponentsTitle,
-                'products': t.pages.productsTitle,
-                'process-flow': t.pages.processFlowTitle,
-                'upcoming-audits': t.pages.upcomingAuditsTitle,
-                'corrective-action': t.pages.correctiveActionTitle,
-                'seal-samples': t.pages.sealSamplesTitle,
-                'sourced-components': t.pages.sourcedComponentsTitle
+                'dashboard': I18N.t('dashboard.pageTitle'),
+                'raw-suppliers': I18N.t('dashboard.manufacturesTitle'),
+                'materials': I18N.t('dashboard.materialsTitle'),
+                'substances': I18N.t('dashboard.substancesTitle'),
+                'bought-components': I18N.t('dashboard.boughtComponentsTitle'),
+                'products': I18N.t('dashboard.productsTitle'),
+                'process-flow': I18N.t('dashboard.processFlowTitle'),
+                'upcoming-audits': I18N.t('dashboard.upcomingAuditsTitle'),
+                'corrective-action': I18N.t('dashboard.correctiveActionTitle'),
+                'seal-samples': I18N.t('dashboard.sealSamplesTitle'),
+                'sourced-components': I18N.t('dashboard.sourcedComponentsTitle')
             };
             const descriptions = {
-                'dashboard': t.dashboard.description,
-                'raw-suppliers': t.pages.rawSuppliersDesc,
-                'materials': t.pages.materialDesc,
-                'substances': t.pages.substancesDesc,
-                'bought-components': t.pages.boughtComponentsDesc,
-                'products': t.pages.productsDesc,
-                'process-flow': t.pages.processFlowDesc,
-                'upcoming-audits': t.pages.upcomingAuditsDesc,
-                'corrective-action': t.pages.correctiveActionDesc,
-                'seal-samples': t.pages.sealSamplesDesc,
-                'sourced-components': t.pages.sourcedComponentsDesc
+                'dashboard': I18N.t('dashboard.pageDesc'),
+                'raw-suppliers': I18N.t('dashboard.manufacturesDesc'),
+                'materials': I18N.t('dashboard.materialsDesc'),
+                'substances': I18N.t('dashboard.substancesDesc'),
+                'bought-components': I18N.t('dashboard.boughtComponentsDesc'),
+                'products': I18N.t('dashboard.productsDesc'),
+                'process-flow': I18N.t('dashboard.processFlowDesc'),
+                'upcoming-audits': I18N.t('dashboard.upcomingAuditsDesc'),
+                'corrective-action': I18N.t('dashboard.correctiveActionDesc'),
+                'seal-samples': I18N.t('dashboard.sealSamplesDesc'),
+                'sourced-components': I18N.t('dashboard.sourcedComponentsDesc')
             };
 
             document.getElementById('page-title').textContent = titles[page];
@@ -525,7 +517,6 @@
 
             currentSection = page;
 
-            // Load data for the page if available
             if (page === 'raw-suppliers') loadManufactures();
             if (page === 'materials') loadMaterials();
             if (page === 'substances') loadSubstances();
@@ -580,11 +571,8 @@
                 document.getElementById('countMaterials').textContent = data.registered_materials || 0;
                 document.getElementById('countSubstances').textContent = data.registered_substances || 0;
 
-                // Calculate missing seal samples (products without documents)
-                // This is a placeholder - in reality you'd check for document presence
                 let missingSealSample = 0;
                 document.getElementById('countMissingSealSample').textContent = missingSealSample;
-                // Make it red if more than 0
                 if (missingSealSample > 0) {
                     document.getElementById('countMissingSealSample').style.color = '#dc3545';
                 } else {
@@ -609,23 +597,20 @@
                 const data = await response.json();
                 allProducts = data.materials || [];
 
-                // Update tab counts based on current tab
                 document.getElementById('tabCountActive').textContent = allProducts.length;
-
-                // Render products in active tab
                 renderProducts(allProducts, 'activeProducts');
 
             } catch (error) {
                 console.error('Error loading products:', error);
                 document.getElementById('activeProducts').innerHTML =
-                    '<div class="empty-state"><h3>Connection Error</h3><p>' + error.message + '</p><button class="btn-primary" onclick="refreshData()">Retry</button></div>';
+                    '<div class="empty-state"><h3 data-i18n="dashboard.connectionError">Connection Error</h3><p>' + error.message + '</p><button class="btn-primary" onclick="refreshData()" data-i18n="dashboard.retry">Retry</button></div>';
             }
         }
 
         function renderProducts(products, containerId) {
             const container = document.getElementById(containerId);
             if (products.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>No products in this category</p></div>';
+                container.innerHTML = '<div class="empty-state"><p data-i18n="dashboard.noProductsCategory">No products in this category</p></div>';
                 return;
             }
 
@@ -636,31 +621,30 @@
                             <div class="product-id">${p.material_id || 'N/A'}</div>
                             <div class="product-title">${p.material_name || 'Unknown'}</div>
                         </div>
-                        <span class="status-badge ${getStatusClass(p.internal_status)}">${p.internal_status || 'Active'}</span>
+                        <span class="status-badge ${getStatusClass(p.internal_status)}">${p.internal_status || I18N.t('common.active')}</span>
                     </div>
                     <div class="product-subtitle">
-                        <div><strong>Category:</strong> ${p.category || 'General'}</div>
-                        <div><strong>Material Type:</strong> ${p.material_type || 'Mixture'}</div>
-                        <div><strong>Component:</strong> ${p.part_spec_name || 'N/A'}</div>
-                        <div><strong>REACh:</strong> ${p.reach_regulation || 'Not specified'}</div>
-                        <div><strong>Toy Directive:</strong> ${p.toy_directive_compliant !== null ? (p.toy_directive_compliant ? 'Compliant' : 'Not Compliant') : 'N/A'}</div>
+                        <div><strong data-i18n="dashboard.category">Category:</strong> ${p.category || 'General'}</div>
+                        <div><strong data-i18n="dashboard.materialType">Material Type:</strong> ${p.material_type || 'Mixture'}</div>
+                        <div><strong data-i18n="dashboard.component">Component:</strong> ${p.part_spec_name || 'N/A'}</div>
+                        <div><strong data-i18n="dashboard.reach">REACh:</strong> ${p.reach_regulation || I18N.t('dashboard.notSpecified')}</div>
+                        <div><strong data-i18n="dashboard.toyDirective">Toy Directive:</strong> ${p.toy_directive_compliant !== null ? (p.toy_directive_compliant ? I18N.t('dashboard.compliant') : I18N.t('dashboard.notCompliant')) : 'N/A'}</div>
                     </div>
                     <div class="product-actions">
-                        <button class="btn-sm btn-outline" onclick="viewDetails('${p.material_id}')">View Details</button>
-                        <button class="btn-sm btn-outline" onclick="viewDocuments('${p.material_id}')">Documents</button>
+                        <button class="btn-sm btn-outline" onclick="viewDetails('${p.material_id}')" data-i18n="dashboard.viewDetails">View Details</button>
+                        <button class="btn-sm btn-outline" onclick="viewDocuments('${p.material_id}')" data-i18n="dashboard.viewDocuments">Documents</button>
                     </div>
                 </div>
             `).join('');
         }
 
         async function refreshData() {
-            document.getElementById('activeProducts').innerHTML = '<div class="loading">Loading products...</div>';
+            document.getElementById('activeProducts').innerHTML = '<div class="loading" data-i18n="dashboard.loadingProducts">Loading products...</div>';
             await loadProducts();
         }
 
         function viewDetails(materialId) {
             console.log('View details for:', materialId);
-            // Open a modal or navigate to details page
             alert('View details for material: ' + materialId);
         }
 
@@ -704,18 +688,18 @@
 
         async function loadManufactures() {
             const container = document.getElementById('manufacturesList');
-            container.innerHTML = '<div class="loading">Loading manufactures...</div>';
+            container.innerHTML = '<div class="loading" data-i18n="common.loading">Loading...</div>';
             try {
                 const resp = await fetch('/api/registration/manufactures', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { container.innerHTML = '<div class="empty-state">Unable to load manufactures.</div>'; return; }
+                if (!resp.ok) { container.innerHTML = '<div class="empty-state" data-i18n="dashboard.unableLoadManufactures">Unable to load manufactures.</div>'; return; }
                 const data = await resp.json();
                 manufacturesCache = data.manufactures || [];
                 document.getElementById('countRawSuppliers').textContent = manufacturesCache.length;
 
                 if (manufacturesCache.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>No manufactures registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;">Register your manufactures before adding materials.</p></div>';
+                    container.innerHTML = '<div class="empty-state"><p data-i18n="dashboard.noManufactures">No manufactures registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;" data-i18n="dashboard.registerFirst">Register your manufactures before adding materials.</p></div>';
                     return;
                 }
                 const typeLabels = { tier2: 'Tier 2 Supplier', raw_material: 'Raw Material', component_part: 'Component / Part Supplier', printer: 'Printer' };
@@ -729,12 +713,12 @@
                     <td style="font-size:12px;">${escHtml(sales)} / ${escHtml(tech)}</td>
                     <td>${m.material_count || 0}</td>
                     <td style="display:flex;gap:6px;">
-                        <button class="btn-sm-outline" onclick="editManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}', '${m.supply_type}')">Edit</button>
-                        <button class="btn-sm-danger" onclick="deleteManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}')">Delete</button>
+                        <button class="btn-sm-outline" onclick="editManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}', '${m.supply_type}')" data-i18n="dashboard.editMaterial">Edit</button>
+                        <button class="btn-sm-danger" onclick="deleteManufacture(${m.id}, '${escHtml(m.manufacture_name).replace(/'/g, "\\'")}')" data-i18n="common.delete">Delete</button>
                     </td>
                 </tr>`}).join('');
-                container.innerHTML = `<table class="review-table"><thead><tr><th>Manufacture Name</th><th>Supply Type</th><th>Contacts (Sales / Tech)</th><th>Materials</th><th style="width:160px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
-            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading manufactures.</div>'; }
+                container.innerHTML = `<table class="review-table"><thead><tr><th data-i18n="dashboard.manufactureName">Manufacture Name</th><th data-i18n="dashboard.supplyType">Supply Type</th><th data-i18n="dashboard.salesContact">Contacts (Sales / Tech)</th><th data-i18n="dashboard.materials">Materials</th><th style="width:160px;" data-i18n="common.actions">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+            } catch(e) { container.innerHTML = '<div class="empty-state" data-i18n="dashboard.connectionError">Error loading manufactures.</div>'; }
         }
 
         function showAddManufactureForm() {
@@ -780,8 +764,8 @@
             const techName = document.getElementById('mfgTechName').value.trim();
             const techEmail = document.getElementById('mfgTechEmail').value.trim();
             const techPhone = document.getElementById('mfgTechPhone').value.trim();
-            if (!name) { alert('Manufacture name is required.'); return; }
-            if (!type) { alert('Supply type is required.'); return; }
+            if (!name) { alert(I18N.t('dashboard.manufactureName') + ' ' + I18N.t('common.required')); return; }
+            if (!type) { alert(I18N.t('dashboard.supplyType') + ' ' + I18N.t('common.required')); return; }
             const body = {
                 manufacture_name: name,
                 supply_type: type,
@@ -805,21 +789,21 @@
                         body: JSON.stringify(body)
                     });
                 }
-                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save.'); return; }
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || I18N.t('common.error')); return; }
                 cancelManufactureForm();
                 loadManufactures();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function deleteManufacture(id, name) {
-            if (!confirm('Delete manufacture "' + name + '"?')) return;
+            if (!confirm(I18N.t('common.confirmDelete') + ' "' + name + '"?')) return;
             try {
                 const resp = await fetch('/api/registration/manufactures/' + id, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to delete.'); return; }
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || I18N.t('common.error')); return; }
                 loadManufactures();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
 
@@ -829,12 +813,12 @@
 
         async function loadMaterials() {
             const container = document.getElementById('materialsList');
-            container.innerHTML = '<div class="loading">Loading materials...</div>';
+            container.innerHTML = '<div class="loading" data-i18n="common.loading">Loading...</div>';
             try {
                 const resp = await fetch('/api/registration/draft', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { container.innerHTML = '<div class="empty-state">Unable to load materials.</div>'; return; }
+                if (!resp.ok) { container.innerHTML = '<div class="empty-state" data-i18n="dashboard.unableLoadManufactures">Unable to load materials.</div>'; return; }
                 const data = await resp.json();
                 if (!data.exists || !data.registration) {
                     container.innerHTML = '<div class="empty-state"><p>No registration found. Register manufactures first.</p></div>';
@@ -852,13 +836,13 @@
                 document.getElementById('countMaterialsSide').textContent = materialsCache.length;
 
                 if (materialsCache.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>No materials registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;">Register a manufacture first, then add materials.</p></div>';
+                    container.innerHTML = '<div class="empty-state"><p data-i18n="dashboard.noManufactures">No materials registered yet.</p><p style="margin-top:8px;font-size:13px;color:#888;" data-i18n="dashboard.registerFirst">Register a manufacture first, then add materials.</p></div>';
                     return;
                 }
 
                 renderMaterialsTable(materialsCache, manufacturesCacheForMaterials);
-                document.getElementById('materialSearchResultCount').textContent = `Showing ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
-            } catch(e) { container.innerHTML = '<div class="empty-state">Error loading materials.</div>'; }
+                document.getElementById('materialSearchResultCount').textContent = I18N.t('dashboard.showing') ? I18N.t('dashboard.showing') + ' ' + materialsCache.length + ' ' + I18N.t('dashboard.materials') : `Showing ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
+            } catch(e) { container.innerHTML = '<div class="empty-state" data-i18n="dashboard.connectionError">Error loading materials.</div>'; }
         }
 
         function renderMaterialsTable(mats, mfgMap) {
@@ -875,7 +859,7 @@
                 const docKeys = Object.keys(docs);
                 let docInfo = docKeys.map(k => {
                     const hasFile = docs[k] && docs[k].original_filename;
-                    return `<span class="doc-file-name ${hasFile ? '' : 'missing'}">${DOC_TYPE_LABELS[k] || k}: ${hasFile ? '<span style="color:#28a745;">✓</span>' : '<span style="color:#dc3545;">✗</span>'}</span><br>`;
+                    return `<span class="doc-file-name ${hasFile ? '' : 'missing'}">${DOC_TYPE_LABELS[k] || k}: ${hasFile ? '<span style="color:#28a745;">&#10003;</span>' : '<span style="color:#dc3545;">&#10007;</span>'}</span><br>`;
                 }).join('');
 
                 const expectedTypes = (DOC_TYPES_BY_SUPPLY && DOC_TYPES_BY_SUPPLY[mat.supply_type]) || [];
@@ -884,7 +868,7 @@
 
                 const isDeactivated = mat.is_active === false || mat.is_active === 'false';
                 const rowStyle = isDeactivated ? 'opacity:0.4;background:#f8f8f8;' : '';
-                const deactivatedBadge = isDeactivated ? ' <span style="font-size:10px;color:#dc3545;font-weight:600;">(Deactivated)</span>' : '';
+                const deactivatedBadge = isDeactivated ? ` <span style="font-size:10px;color:#dc3545;font-weight:600;">(${I18N.t('dashboard.deactivatedLabel')})</span>` : '';
 
                 return `<tr style="${rowStyle}">
                     <td><strong>${escHtml(mat.commercial_material_name)}</strong>${deactivatedBadge}</td>
@@ -894,14 +878,14 @@
                     <td>${escHtml(mat.internal_factory_material_code)}</td>
                     <td style="font-size:11px;">${docInfo}${missingInfo}</td>
                     <td style="display:flex;gap:4px;flex-wrap:wrap;">
-                        ${isDeactivated ? '' : `<button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')">Edit</button>`}
-                        <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')">Docs</button>
-                        ${isDeactivated ? `<button class="btn-sm-outline" style="color:#28a745;border-color:#28a745;" onclick="reactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Reactivate</button>` : `<button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')">Deactivate</button>`}
+                        ${isDeactivated ? '' : `<button class="btn-sm-outline" onclick="editMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${escHtml(mfgMap[mat.manufacture_id] || '').replace(/'/g, "\\'")}', ${mat.manufacture_id || 0}, '${mat.supply_type}', '${escHtml(mat.supplier_material_code || '').replace(/'/g, "\\'")}', '${escHtml(mat.internal_factory_material_code || '').replace(/'/g, "\\'")}')" data-i18n="dashboard.editMaterial">Edit</button>`}
+                        <button class="btn-sm-outline" onclick="openDocUpload(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}', '${mat.supply_type}')" data-i18n="dashboard.docs">Docs</button>
+                        ${isDeactivated ? `<button class="btn-sm-outline" style="color:#28a745;border-color:#28a745;" onclick="reactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')" data-i18n="dashboard.reactivate">Reactivate</button>` : `<button class="btn-sm-danger" onclick="deactivateMaterial(${mat.id}, '${escHtml(mat.commercial_material_name).replace(/'/g, "\\'")}')" data-i18n="dashboard.deactivate">Deactivate</button>`}
                     </td>
                 </tr>`;
             }).join('');
 
-            container.innerHTML = `<table class="review-table"><thead><tr><th>Material Name</th><th>Manufacture</th><th>Type</th><th>Supplier Code</th><th>Internal Code</th><th>Documents</th><th style="width:220px;">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+            container.innerHTML = `<table class="review-table"><thead><tr><th data-i18n="dashboard.manufactureCommercialName">Material Name</th><th data-i18n="dashboard.manufactureName">Manufacture</th><th data-i18n="dashboard.supplyType">Type</th><th data-i18n="dashboard.manufactureMaterialCode">Supplier Code</th><th data-i18n="dashboard.factoryInternalCode">Internal Code</th><th data-i18n="dashboard.documentsFor">Documents</th><th style="width:220px;" data-i18n="common.actions">Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
         }
 
         function applyMaterialFilters() {
@@ -927,8 +911,8 @@
             renderMaterialsTable(filtered, manufacturesCacheForMaterials);
 
             const countText = filtered.length === materialsCache.length
-                ? `Showing ${filtered.length} material${filtered.length !== 1 ? 's' : ''}`
-                : `Showing ${filtered.length} of ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
+                ? I18N.t('dashboard.showing') + ' ' + filtered.length + ' ' + I18N.t('dashboard.materials')
+                : I18N.t('dashboard.showing') + ' ' + filtered.length + ' ' + I18N.t('dashboard.of') + ' ' + materialsCache.length + ' ' + I18N.t('dashboard.materials');
             document.getElementById('materialSearchResultCount').textContent = countText;
         }
 
@@ -936,7 +920,7 @@
             document.getElementById('matFilterType').value = '';
             document.getElementById('matSearchInput').value = '';
             renderMaterialsTable(materialsCache, manufacturesCacheForMaterials);
-            document.getElementById('materialSearchResultCount').textContent = `Showing ${materialsCache.length} material${materialsCache.length !== 1 ? 's' : ''}`;
+            document.getElementById('materialSearchResultCount').textContent = I18N.t('dashboard.showing') + ' ' + materialsCache.length + ' ' + I18N.t('dashboard.materials');
         }
 
         async function loadManufactureDropdown() {
@@ -946,7 +930,7 @@
                 });
                 const data = await resp.json();
                 const sel = document.getElementById('matManufactureId');
-                sel.innerHTML = '<option value="">-- Select Manufacture --</option>';
+                sel.innerHTML = '<option value="" data-i18n="dashboard.selectManufacture">-- Select Manufacture --</option>';
                 (data.manufactures || []).forEach(m => {
                     const typeLabels = { tier2: 'Tier 2', raw_material: 'Raw Material', component_part: 'Components', printer: 'Printer' };
                     sel.innerHTML += `<option value="${m.id}" data-type="${m.supply_type}">${escHtml(m.manufacture_name)} (${typeLabels[m.supply_type] || m.supply_type})</option>`;
@@ -962,7 +946,7 @@
 
 function showAddMaterialForm() {
             document.getElementById('materialForm').style.display = 'block';
-            document.getElementById('materialFormTitle').textContent = 'Register Material';
+            document.getElementById('materialFormTitle').textContent = I18N.t('dashboard.registerMaterial');
             document.getElementById('materialsList').style.display = 'none';
             document.getElementById('editMatId').value = '';
             document.getElementById('matCommercialName').value = '';
@@ -976,7 +960,7 @@ function showAddMaterialForm() {
 
         function editMaterial(id, name, mfgName, mfgId, supplyType, supplierCode, internalCode) {
             document.getElementById('materialForm').style.display = 'block';
-            document.getElementById('materialFormTitle').textContent = 'Edit: ' + name;
+            document.getElementById('materialFormTitle').textContent = I18N.t('dashboard.editMaterial') + ': ' + name;
             document.getElementById('materialsList').style.display = 'none';
             document.getElementById('editMatId').value = id;
             document.getElementById('matCommercialName').value = name;
@@ -1001,37 +985,37 @@ function showAddMaterialForm() {
             const id = document.getElementById('editMatId').value;
             const name = document.getElementById('matCommercialName').value;
             if (!id) return;
-            if (!confirm('Deactivate material "' + name + '"? This will hide it from active views.')) return;
+            if (!confirm(I18N.t('common.confirmDelete') + ' "' + name + '"? ' + I18N.t('dashboard.deactivateConfirm'))) return;
             try {
                 const resp = await fetch('/api/registration/material/' + id, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to deactivate.'); return; }
+                if (!resp.ok) { alert(I18N.t('dashboard.deactivateFail')); return; }
                 cancelMaterialForm();
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function reactivateMaterial(matId, matName) {
-            if (!confirm('Reactivate material "' + matName + '"?')) return;
+            if (!confirm(I18N.t('dashboard.reactivate') + ' "' + matName + '"?')) return;
             try {
                 const resp = await fetch('/api/registration/material/' + matId + '/reactivate', {
                     method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to reactivate.'); return; }
+                if (!resp.ok) { alert(I18N.t('dashboard.reactivateFail')); return; }
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function deactivateMaterial(matId, matName) {
-            if (!confirm('Deactivate material "' + matName + '"? This will hide it from active views.')) return;
+            if (!confirm(I18N.t('common.confirmDelete') + ' "' + matName + '"? ' + I18N.t('dashboard.deactivateConfirm'))) return;
             try {
                 const resp = await fetch('/api/registration/material/' + matId, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to deactivate.'); return; }
+                if (!resp.ok) { alert(I18N.t('dashboard.deactivateFail')); return; }
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function saveMaterial() {
@@ -1041,10 +1025,10 @@ function showAddMaterialForm() {
             const supplierCode = document.getElementById('matSupplierCode').value.trim();
             const internalCode = document.getElementById('matInternalCode').value.trim();
 
-            if (!mfgId) { alert('Please select a manufacture.'); return; }
-            if (!commercialName) { alert('Commercial material name is required.'); return; }
-            if (!supplierCode) { alert('Supplier material code is required.'); return; }
-            if (!internalCode) { alert('Factory internal material code is required.'); return; }
+            if (!mfgId) { alert(I18N.t('dashboard.selectManufacture') + ' ' + I18N.t('common.required')); return; }
+            if (!commercialName) { alert(I18N.t('dashboard.manufactureCommercialName') + ' ' + I18N.t('common.required')); return; }
+            if (!supplierCode) { alert(I18N.t('dashboard.manufactureMaterialCode') + ' ' + I18N.t('common.required')); return; }
+            if (!internalCode) { alert(I18N.t('dashboard.factoryInternalCode') + ' ' + I18N.t('common.required')); return; }
 
             const supTypeReverse = { 'Tier 2': 'tier2', 'Raw Material': 'raw_material', 'Components': 'component_part', 'Printer': 'printer' };
 
@@ -1061,21 +1045,21 @@ function showAddMaterialForm() {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + token },
                     body: new URLSearchParams({ payload: JSON.stringify([materialPayload]) })
                 });
-                if (!resp.ok) { const err = await resp.json(); alert(err.detail || 'Failed to save material.'); return; }
+                if (!resp.ok) { const err = await resp.json(); alert(err.detail || I18N.t('common.error')); return; }
                 cancelMaterialForm();
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function deleteMaterial(matId, matName) {
-            if (!confirm('Delete material "' + matName + '"? All associated documents will be removed.')) return;
+            if (!confirm(I18N.t('common.confirmDelete') + ' "' + matName + '"?')) return;
             try {
                 const resp = await fetch('/api/registration/material/' + matId, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to delete material.'); return; }
+                if (!resp.ok) { alert(I18N.t('common.error')); return; }
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         let currentDocsCache = {};
@@ -1087,7 +1071,7 @@ function showAddMaterialForm() {
             document.getElementById('docMaterialName').textContent = matName;
 
             const expectedTypes = DOC_TYPES_BY_SUPPLY[supplyType] || [];
-            let fields = '<p style="font-size:12px;color:#888;margin-bottom:10px;">Max 10 MB per file. PDF only. Upload documents via the button below.</p>';
+            let fields = '<p style="font-size:12px;color:#888;margin-bottom:10px;">' + I18N.t('dashboard.max10MB') + '</p>';
             document.getElementById('docUploadFields').innerHTML = fields;
 
             const resp = await fetch('/api/registration/draft', {
@@ -1140,8 +1124,8 @@ function showAddMaterialForm() {
             const docDate = document.getElementById('uploadDocDate').value;
             const fileInput = document.getElementById('uploadFileInput');
 
-            if (!dt) { alert('Please select a document type.'); return; }
-            if (!fileInput.files || fileInput.files.length === 0) { alert('Please select a file.'); return; }
+            if (!dt) { alert(I18N.t('dashboard.docType') + ' ' + I18N.t('common.required')); return; }
+            if (!fileInput.files || fileInput.files.length === 0) { alert(I18N.t('dashboard.selectFile') + ' ' + I18N.t('common.required')); return; }
 
             const formData = new FormData();
             formData.append('material_id', matId);
@@ -1149,10 +1133,10 @@ function showAddMaterialForm() {
             formData.append('file', fileInput.files[0]);
             if (docDate) formData.append('document_issue_date', docDate);
             if (dt === 'sds') {
-                const lang = prompt('SDS Language (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
+                const lang = prompt(I18N.t('dashboard.sdsLanguage') + ' (English/German/French/Traditional Chinese/Simplified Chinese):', 'English');
                 if (!lang) return;
                 formData.append('sds_language', lang);
-                const issue = prompt('SDS Issue Date (YYYY-MM-DD):', docDate || '');
+                const issue = prompt(I18N.t('dashboard.sdsDate') + ' (YYYY-MM-DD):', docDate || '');
                 if (!issue) return;
                 formData.append('sds_issue_date', issue);
             }
@@ -1162,7 +1146,7 @@ function showAddMaterialForm() {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
                 });
                 if (resp.ok) {
-                    alert('Document uploaded successfully.');
+                    alert(I18N.t('dashboard.uploadSuccess'));
                     closeUploadModal();
                     const draftResp = await fetch('/api/registration/draft', {
                         headers: { 'Authorization': 'Bearer ' + token }
@@ -1175,9 +1159,9 @@ function showAddMaterialForm() {
                     loadMaterials();
                 } else {
                     const err = await resp.json();
-                    alert(err.detail || 'Upload failed.');
+                    alert(err.detail || I18N.t('dashboard.uploadFailed'));
                 }
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         async function viewDocument(docId) {
@@ -1185,31 +1169,31 @@ function showAddMaterialForm() {
                 const resp = await fetch(`/api/registration/document/${docId}/download`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to open document.'); return; }
+                if (!resp.ok) { alert(I18N.t('dashboard.openDocFail')); return; }
                 const blob = await resp.blob();
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
-            } catch(e) { alert('Error opening document.'); }
+            } catch(e) { alert(I18N.t('dashboard.openDocError')); }
         }
 
         async function deleteDocument(docId, docType) {
-            if (!confirm('Remove ' + DOC_TYPE_LABELS[docType] + '?')) return;
+            if (!confirm(I18N.t('common.confirmDelete') + ' ' + DOC_TYPE_LABELS[docType] + '?')) return;
             try {
                 const resp = await fetch('/api/registration/document/' + docId, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!resp.ok) { alert('Failed to delete document.'); return; }
+                if (!resp.ok) { alert(I18N.t('dashboard.deleteDocFail')); return; }
                 delete currentDocsCache[docType];
                 renderDocHistory();
                 loadMaterials();
-            } catch(e) { alert('Network error.'); }
+            } catch(e) { alert(I18N.t('common.networkError')); }
         }
 
         function renderDocHistory() {
             const container = document.getElementById('docHistoryTable');
             const entries = Object.entries(currentDocsCache);
             if (entries.length === 0) {
-                container.innerHTML = '<p style="color:#888;margin-top:16px;">No documents uploaded yet.</p>';
+                container.innerHTML = '<p style="color:#888;margin-top:16px;" data-i18n="dashboard.noDocuments">No documents uploaded yet.</p>';
                 return;
             }
             const today = new Date();
@@ -1224,9 +1208,9 @@ function showAddMaterialForm() {
                 let age = '—';
                 if (info.document_issue_date) {
                     const diffDays = Math.floor((today - new Date(info.document_issue_date + 'T00:00:00')) / 86400000);
-                    if (diffDays < 30) age = diffDays + ' days';
-                    else if (diffDays < 365) age = Math.floor(diffDays / 30) + ' mo';
-                    else age = Math.floor(diffDays / 365) + ' yr';
+                    if (diffDays < 30) age = diffDays + ' ' + I18N.t('dashboard.days');
+                    else if (diffDays < 365) age = Math.floor(diffDays / 30) + ' ' + I18N.t('dashboard.months');
+                    else age = Math.floor(diffDays / 365) + ' ' + I18N.t('dashboard.years');
                 }
                 const viewUrl = info.id ? `/api/registration/document/${info.id}/download` : '#';
                 return `<tr>
@@ -1236,13 +1220,13 @@ function showAddMaterialForm() {
                     <td>${age}</td>
                     <td>${uploadDate}</td>
                     <td style="display:flex;gap:4px;">
-                        <button class="btn-sm-outline" onclick="viewDocument(${info.id})">View</button>
-                        <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, '${dt}')">✕</button>
+                        <button class="btn-sm-outline" onclick="viewDocument(${info.id})" data-i18n="common.view">View</button>
+                        <button class="btn-sm-danger" onclick="deleteDocument(${info.id}, '${dt}')">&#10005;</button>
                     </td>
                 </tr>`;
             }).join('');
-            container.innerHTML = `<h4 style="margin-bottom:10px;">Uploaded Documents</h4>
-            <table class="review-table"><thead><tr><th>Document Type</th><th>Filename</th><th>File Date</th><th>Age</th><th>Uploaded</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+            container.innerHTML = `<h4 style="margin-bottom:10px;" data-i18n="dashboard.docHistoryTitle">Uploaded Documents</h4>
+            <table class="review-table"><thead><tr><th data-i18n="dashboard.docTypeHeader">Document Type</th><th data-i18n="dashboard.filenameHeader">Filename</th><th data-i18n="dashboard.fileDateHeader">File Date</th><th data-i18n="dashboard.ageHeader">Age</th><th data-i18n="dashboard.uploadedHeader">Uploaded</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
         }
 
         async function loadRawSuppliers() {
@@ -1298,308 +1282,8 @@ function showAddMaterialForm() {
             console.log('Loading Seal Samples...');
         }
 
-        // =================================================================
-        // Bilingual Support - English & Mandarin
-        // =================================================================
-        const translations = {
-            en: {
-                language: 'English',
-                sidebar: {
-                    navigation: 'Navigation',
-                    overview: 'Overview',
-                    materialsSuppliers: 'Suppliers & Materials',
-                    materialSuppliers: 'Manufactures',
-                    material: 'Registered Materials',
-                    substances: 'Substances & Mixtures',
-                    sourcedComponents: 'Sourced Components',
-                    productsComponents: 'Products & Components',
-                    boughtComponents: 'Bought Components',
-                    products: 'Products',
-                    sealSamples: 'Seal Samples',
-                    process: 'Process',
-                    processFlow: 'Process Flow',
-                    vendorCompliance: 'Vendor Compliance',
-                    upcomingAudits: 'Upcoming Audits',
-                    correctiveAction: 'Corrective Action Plan'
-                },
-                dashboard: {
-                    title: 'Supplier Dashboard',
-                    description: 'Overview of your materials, products, and compliance status.',
-                    activeProducts: 'Active Products',
-                    activeProductsLabel: 'Live on market',
-                    registeredSuppliers: 'Registered Suppliers',
-                    registeredSuppliersLabel: 'Factory partners',
-                    registeredMaterials: 'Registered Materials',
-                    registeredMaterialsLabel: 'Total products',
-                    registeredSubstances: 'Registered Substances',
-                    registeredSubstancesLabel: 'CAS substances',
-                    missingSealSample: 'Missing Seal Sample',
-                    missingSealSampleLabel: 'Products without sample',
-                    allProducts: 'All Products',
-                    productPortfolio: 'Product Portfolio',
-                    refresh: 'Refresh',
-                    emptyProducts: 'No products in this category'
-                },
-                pages: {
-                    comingSoon: 'page coming soon...',
-                    rawSuppliersTitle: 'Manufactures',
-                    rawSuppliersDesc: 'Register your manufactures (Tier 2, Raw Material, Component/Part, Printer).',
-                    materialTitle: 'Registered Materials',
-                    materialDesc: 'Register materials linked to a manufacture and upload compliance documents.',
-                    substancesTitle: 'Substances & Mixtures',
-                    substancesDesc: 'Substances and mixtures database.',
-                    sourcedComponentsTitle: 'Sourced Components',
-                    sourcedComponentsDesc: 'Components sourced from external suppliers.',
-                    boughtComponentsTitle: 'Bought Components',
-                    boughtComponentsDesc: 'Components sourced from suppliers.',
-                    productsTitle: 'Products',
-                    productsDesc: 'Finished products portfolio.',
-                    sealSamplesTitle: 'Seal Samples',
-                    sealSamplesDesc: 'Seal sample images and documentation.',
-                    processFlowTitle: 'Process Flow',
-                    processFlowDesc: 'Manufacturing and quality process flow.',
-                    upcomingAuditsTitle: 'Upcoming Audits',
-                    upcomingAuditsDesc: 'Scheduled vendor audits and assessments.',
-                    correctiveActionTitle: 'Corrective Action Plan',
-                    correctiveActionDesc: 'CAPA (Corrective Action and Preventive Action) tracking.'
-                },
-                buttons: {
-                    uploadNew: 'Upload New',
-                    viewSample: 'View Sample',
-                    download: 'Download',
-                    refresh: 'Refresh',
-                    viewDetails: 'View Details',
-                    documents: 'Documents'
-                },
-                labels: {
-                    currentSealSample: 'Current Seal Sample:',
-                    lastUpload: 'Last Upload:',
-                    notUploaded: 'Not uploaded',
-                    category: 'Category:',
-                    materialType: 'Material Type:',
-                    component: 'Component:',
-                    reach: 'REACh:',
-                    notSpecified: 'Not specified',
-                    toyDirective: 'Toy Directive:',
-                    compliant: 'Compliant',
-                    notCompliant: 'Not Compliant'
-                }
-            },
-            zh: {
-                language: '中文',
-                sidebar: {
-                    navigation: '导航',
-                    overview: '概览',
-                    materialsSuppliers: '供应商与物料',
-                    materialSuppliers: '制造商',
-                    material: '已注册物料',
-                    substances: '物质与混合物',
-                    sourcedComponents: '外购组件',
-                    productsComponents: '产品与组件',
-                    boughtComponents: '采购组件',
-                    products: '产品',
-                    sealSamples: '封样',
-                    process: '流程',
-                    processFlow: '流程',
-                    vendorCompliance: '供应商合规',
-                    upcomingAudits: '即将审核',
-                    correctiveAction: '纠正措施'
-                },
-                dashboard: {
-                    title: '供应商仪表板',
-                    description: '您的物料、产品和合规状况概览。',
-                    activeProducts: '活跃产品',
-                    activeProductsLabel: '在售中',
-                    registeredSuppliers: '注册供应商',
-                    registeredSuppliersLabel: '工厂合作伙伴',
-                    registeredMaterials: '注册物料',
-                    registeredMaterialsLabel: '产品总数',
-                    registeredSubstances: '注册物质',
-                    registeredSubstancesLabel: 'CAS物质',
-                    missingSealSample: '缺少封样',
-                    missingSealSampleLabel: '无样品的产品',
-                    allProducts: '全部产品',
-                    productPortfolio: '产品组合',
-                    refresh: '刷新',
-                    emptyProducts: '此类别中无产品'
-                },
-                pages: {
-                    comingSoon: '功能开发中...',
-                    rawSuppliersTitle: '制造商',
-                    rawSuppliersDesc: '注册您的制造商（Tier 2供应商、原材料、组件/零件、印刷商）。',
-                    materialTitle: '已注册物料',
-                    materialDesc: '注册关联到制造商的物料并上传合规文件。',
-                    substancesTitle: '物质与混合物',
-                    substancesDesc: '物质和混合物数据库。',
-                    sourcedComponentsTitle: '外购组件',
-                    sourcedComponentsDesc: '从外部供应商采购的组件。',
-                    boughtComponentsTitle: '采购组件',
-                    boughtComponentsDesc: '从供应商处采购的组件。',
-                    productsTitle: '产品',
-                    productsDesc: '已完成的产品组合。',
-                    sealSamplesTitle: '封样',
-                    sealSamplesDesc: '封样图片和文档。',
-                    processFlowTitle: '流程',
-                    processFlowDesc: '制造和质量流程。',
-                    upcomingAuditsTitle: '即将审核',
-                    upcomingAuditsDesc: '计划的供应商审核和评估。',
-                    correctiveActionTitle: '纠正措施',
-                    correctiveActionDesc: 'CAPA（纠正和预防措施）跟踪。'
-                },
-                buttons: {
-                    uploadNew: '上传新文件',
-                    viewSample: '查看样本',
-                    download: '下载',
-                    refresh: '刷新',
-                    viewDetails: '查看详情',
-                    documents: '文档'
-                },
-                labels: {
-                    currentSealSample: '当前封样:',
-                    lastUpload: '最后上传:',
-                    notUploaded: '未上传',
-                    category: '类别:',
-                    materialType: '物料类型:',
-                    component: '组件:',
-                    reach: 'REACh:',
-                    notSpecified: '未指定',
-                    toyDirective: '玩具指令:',
-                    compliant: '合规',
-                    notCompliant: '不合规'
-                }
-            }
-        };
-
-        let currentLang = localStorage.getItem('supplier_language') || 'en';
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('supplier_language', lang);
-            updateLanguage();
-        }
-
-        function updateLanguage() {
-            const t = translations[currentLang];
-
-            // Update HTML lang attribute
-            document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh';
-
-            // Update language selector
-            document.getElementById('languageSelect').value = currentLang;
-
-            // Update navigation sidebar
-            document.querySelector('.sidebar-header').textContent = t.sidebar.navigation;
-            document.querySelectorAll('.sidebar .nav-group-title').forEach((el, i) => {
-                const titles = [
-                    t.sidebar.overview,
-                    t.sidebar.materialsSuppliers,
-                    t.sidebar.productsComponents,
-                    t.sidebar.process,
-                    t.sidebar.vendorCompliance
-                ];
-                if (i < titles.length) el.textContent = titles[i];
-            });
-            document.querySelectorAll('.sidebar .nav-item span:first-child').forEach((el, i) => {
-                const navItems = [
-                    t.sidebar.overview,
-                    t.sidebar.materialSuppliers,
-                    t.sidebar.material,
-                    t.sidebar.substances,
-                    t.sidebar.sourcedComponents,
-                    t.sidebar.boughtComponents,
-                    t.sidebar.products,
-                    t.sidebar.sealSamples,
-                    t.sidebar.processFlow,
-                    t.sidebar.upcomingAudits,
-                    t.sidebar.correctiveAction
-                ];
-                if (i < navItems.length) el.textContent = navItems[i];
-            });
-
-            // Update dashboard stats
-            const cards = document.querySelectorAll('.stat-card h3');
-            const cardLabels = [
-                t.dashboard.activeProducts,
-                t.dashboard.registeredSuppliers,
-                t.dashboard.registeredMaterials,
-                t.dashboard.registeredSubstances,
-                t.dashboard.missingSealSample
-            ];
-            cards.forEach((el, i) => {
-                if (i < cardLabels.length) el.textContent = cardLabels[i];
-            });
-
-            const cardLabels2 = document.querySelectorAll('.stat-card .label');
-            const cardLabels2Text = [
-                t.dashboard.activeProductsLabel,
-                t.dashboard.registeredSuppliersLabel,
-                t.dashboard.registeredMaterialsLabel,
-                t.dashboard.registeredSubstancesLabel,
-                t.dashboard.missingSealSampleLabel
-            ];
-            cardLabels2.forEach((el, i) => {
-                if (i < cardLabels2Text.length) el.textContent = cardLabels2Text[i];
-            });
-
-            // Update page title and description
-            document.getElementById('page-title').textContent = t.dashboard.title;
-            document.getElementById('page-description').textContent = t.dashboard.description;
-
-            // Update buttons
-            const refreshBtns = document.querySelectorAll('button[onclick^="refresh"]');
-            refreshBtns.forEach(btn => {
-                if (btn.textContent.includes('Refresh')) btn.textContent = t.buttons.refresh;
-            });
-
-            // Update all products tab
-            const allProductsTab = document.querySelector('.tab');
-            if (allProductsTab) {
-                const tabText = allProductsTab.textContent.split('<')[0].trim();
-                if (tabText === 'All Products' || tabText === '全部产品') {
-                    allProductsTab.innerHTML = `${t.dashboard.allProducts} <span class="tab-count" id="tabCountActive">0</span>`;
-                }
-            }
-
-            // Update section headers
-            const sectionHeaders = document.querySelectorAll('.section-header h3');
-            const sectionHeadersText = [
-                t.dashboard.productPortfolio,
-                t.pages.rawSuppliersTitle,
-                t.pages.materialTitle,
-                t.pages.substancesTitle,
-                t.pages.boughtComponentsTitle,
-                t.pages.productsTitle,
-                t.pages.sealSamplesTitle,
-                t.pages.processFlowTitle,
-                t.pages.upcomingAuditsTitle,
-                t.pages.correctiveActionTitle
-            ];
-            sectionHeaders.forEach((el, i) => {
-                if (i < sectionHeadersText.length) el.textContent = sectionHeadersText[i];
-            });
-
-            // Update empty state messages
-            const emptyStates = document.querySelectorAll('.empty-state');
-            const emptyStateTexts = [
-                t.pages.rawSuppliersTitle,
-                t.pages.materialTitle,
-                t.pages.substancesTitle,
-                t.pages.boughtComponentsTitle,
-                t.pages.productsTitle,
-                t.pages.sealSamplesTitle,
-                t.pages.processFlowTitle,
-                t.pages.upcomingAuditsTitle,
-                t.pages.correctiveActionTitle
-            ];
-            emptyStates.forEach((el, i) => {
-                if (i < emptyStateTexts.length) {
-                    el.innerHTML = `<p>${emptyStateTexts[i]} ${t.pages.comingSoon}</p>`;
-                }
-            });
-        }
-
-        // Initialize language on page load
-        updateLanguage();
+        // Apply translations after all dynamic content is set up
+        I18N.apply();
     </script>
 </body>
 </html>

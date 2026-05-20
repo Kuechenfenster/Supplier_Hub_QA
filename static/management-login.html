@@ -25,39 +25,46 @@
         .links { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
         .links a { color: #1a1a2e; text-decoration: none; }
         .links a:hover { text-decoration: underline; }
+        .lang-bar { text-align: center; margin-bottom: 15px; }
+        .lang-bar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">
             <img src="/assets/logo.png" alt="HTI Logo">
-            <h1>Management Portal</h1>
-            <p>Sign in to your admin account</p>
+            <h1 data-i18n="management_login.title">Management Portal</h1>
+            <p data-i18n="management_login.subtitle">Sign in to your admin account</p>
         </div>
+        <div class="lang-bar" id="langSelector"></div>
         <div class="alert" id="loginAlert"></div>
         <form id="loginForm">
             <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="Enter username" required>
+                <label data-i18n="management_login.username">Username</label>
+                <input type="text" id="username" data-i18n-attr="placeholder" data-i18n="management_login.usernamePlaceholder" placeholder="Enter username" required>
             </div>
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Enter password" required>
+                <label data-i18n="management_login.password">Password</label>
+                <input type="password" id="password" data-i18n-attr="placeholder" data-i18n="management_login.passwordPlaceholder" placeholder="Enter password" required>
             </div>
-            <button type="submit" class="btn" id="loginBtn">Sign In</button>
+            <button type="submit" class="btn" id="loginBtn" data-i18n="management_login.btnSignIn">Sign In</button>
         </form>
         <div class="links">
-            <a href="/">← Back to Supplier Portal</a>
+            <a href="/" data-i18n="management_login.backToSupplier">← Back to Supplier Portal</a>
         </div>
     </div>
+    <script src="/js/i18n.js"></script>
     <script>
+        // Insert language selector
+        document.getElementById('langSelector').innerHTML = I18N.selectorHtml();
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
             const alert = document.getElementById('loginAlert');
             
             btn.disabled = true;
-            btn.textContent = 'Signing in...';
+            btn.textContent = I18N.t('management_login.btnSigningIn');
             
             try {
                 const response = await fetch('/api/auth/login', {
@@ -74,23 +81,23 @@
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    alert.textContent = 'Login successful! Redirecting...';
+                    alert.textContent = I18N.t('management_login.success');
                     alert.className = 'alert success';
                     alert.style.display = 'block';
                     setTimeout(() => window.location.href = '/management', 1000);
                 } else {
-                    alert.textContent = data.detail || 'Login failed!';
+                    alert.textContent = data.detail || I18N.t('management_login.error');
                     alert.className = 'alert error';
                     alert.style.display = 'block';
                     btn.disabled = false;
-                    btn.textContent = 'Sign In';
+                    btn.textContent = I18N.t('management_login.btnSignIn');
                 }
             } catch (error) {
-                alert.textContent = 'Connection error: ' + error.message;
+                alert.textContent = I18N.t('management_login.connectionError') + error.message;
                 alert.className = 'alert error';
                 alert.style.display = 'block';
                 btn.disabled = false;
-                btn.textContent = 'Sign In';
+                btn.textContent = I18N.t('management_login.btnSignIn');
             }
         });
         

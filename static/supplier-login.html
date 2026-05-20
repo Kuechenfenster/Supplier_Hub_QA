@@ -29,39 +29,43 @@
         .divider { display: flex; align-items: center; text-align: center; margin: 20px 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e0e0e0; }
         .divider span { padding: 0 10px; color: #999; font-size: 12px; }
+        .lang-bar { text-align: center; margin-bottom: 15px; }
+        .lang-bar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <img src="assets/logo.png" alt="HTI Logo">
-            <h1>Supplier Portal</h1>
-            <p>Factory login</p>
+            <h1 data-i18n="login.title">Supplier Portal</h1>
+            <p data-i18n="login.subtitle">Factory login</p>
         </div>
         <div class="content">
+            <div class="lang-bar" id="langSelector"></div>
             <div class="alert" id="loginAlert"></div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>Email Address *</label>
-                    <input type="email" id="email" placeholder="supplier@company.com" required>
+                    <label data-i18n="login.email">Email Address *</label>
+                    <input type="email" id="email" data-i18n-attr="placeholder" data-i18n="login.emailPlaceholder" placeholder="supplier@company.com" required>
                 </div>
                 <div class="form-group">
-                    <label>Password *</label>
-                    <input type="password" id="password" placeholder="Enter password" required>
+                    <label data-i18n="login.password">Password *</label>
+                    <input type="password" id="password" data-i18n-attr="placeholder" data-i18n="login.passwordPlaceholder" placeholder="Enter password" required>
                 </div>
-                <button type="submit" class="btn" id="submitBtn">Login</button>
+                <button type="submit" class="btn" id="submitBtn" data-i18n="login.btnLogin">Login</button>
             </form>
             <div class="divider">
-                <span>OR</span>
+                <span data-i18n="common.or">OR</span>
             </div>
             <div class="links">
-                Don't have an account? <a href="/supplier">Register Factory</a>
+                <span data-i18n="login.noAccount">Don't have an account?</span> <a href="/supplier" data-i18n="login.register">Register Factory</a>
             </div>
             <div class="links" style="margin-top: 15px;">
-                <a href="/management-login">Internal Users Login</a>
+                <a href="/management-login" data-i18n="login.internalLogin">Internal Users Login</a>
             </div>
         </div>
     </div>
+    <script src="/js/i18n.js"></script>
     <script>
         const API_URL = '';
         let token = localStorage.getItem('supplier_token') || '';
@@ -72,6 +76,9 @@
             window.location.href = '/supplier-dashboard';
         }
 
+        // Insert language selector
+        document.getElementById('langSelector').innerHTML = I18N.selectorHtml();
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -81,7 +88,7 @@
             const password = document.getElementById('password').value;
 
             btn.disabled = true;
-            btn.textContent = 'Logging in...';
+            btn.textContent = I18N.t('login.btnLoggingIn');
 
             try {
                 const response = await fetch(API_URL + '/api/suppliers/login', {
@@ -99,7 +106,7 @@
                     localStorage.setItem('supplier_email', data.supplier.email);
 
                     alert.className = 'alert success';
-                    alert.textContent = 'Login successful! Redirecting...';
+                    alert.textContent = I18N.t('login.success');
                     alert.style.display = 'block';
 
                     setTimeout(() => {
@@ -107,16 +114,16 @@
                     }, 1000);
                 } else {
                     alert.className = 'alert error';
-                    alert.textContent = data.detail || 'Login failed!';
+                    alert.textContent = data.detail || I18N.t('login.error');
                     alert.style.display = 'block';
                 }
             } catch (error) {
                 alert.className = 'alert error';
-                alert.textContent = 'Connection error: ' + error.message;
+                alert.textContent = I18N.t('login.connectionError') + error.message;
                 alert.style.display = 'block';
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Login';
+                btn.textContent = I18N.t('login.btnLogin');
             }
         });
 

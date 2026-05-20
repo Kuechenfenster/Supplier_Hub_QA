@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supplier Portal - Material Registration</title>
+    <title data-i18n="registration.portalTitle">Supplier Portal - Material Registration</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f5f7fa; min-height: 100vh; }
@@ -158,11 +158,12 @@
 <body>
 
 <nav class="navbar">
-    <h1>Supplier Portal - Material Registration</h1>
+    <h1 data-i18n="registration.portalTitle">Supplier Portal - Material Registration</h1>
     <div class="user-info">
         <span id="supplierName"></span>
-        <a href="/supplier-dashboard" class="btn-nav">Dashboard</a>
-        <button class="btn-nav" onclick="logout()">Logout</button>
+        <div id="langSelector"></div>
+        <a href="/supplier-dashboard" class="btn-nav" data-i18n="common.dashboard">Dashboard</a>
+        <button class="btn-nav" onclick="logout()" data-i18n="common.logout">Logout</button>
     </div>
 </nav>
 
@@ -183,6 +184,7 @@
     <div class="toast" id="toast"></div>
 </div>
 
+<script src="/js/i18n.js"></script>
 <script>
 const TOKEN = localStorage.getItem('supplier_token');
 if (!TOKEN) { window.location.href = '/supplier-login'; }
@@ -197,16 +199,17 @@ let formState = {
     step1: { name_en: '', name_cn: '', material_origin: '', facility_address: '',
         sales_contact_name: '', sales_contact_email: '', sales_contact_phone: '',
         qm_contact_name: '', qm_contact_email: '', qm_contact_phone: '' },
-    step2: [],   // [{ commercial_material_name, internal_factory_material_code, supplier_material_code }]
-    step3: {},   // { [supplierMaterialCode]: { files: { sds:{}, tds:{}, coa:{}, reach_rohs:{} } } }
-    step3docs: {} // Cache for rendered doc states: { [supplierMaterialCode]: { sds: {lang,date}, tds:{state}, coa:{date} } }
+    step2: [],
+    step3: {},
+    step3docs: {}
 };
-let materialIds = {};   // supplier_material_code -> db id
-let sdsWarnings = {};   // supplier_material_code -> bool
+let materialIds = {};
+let sdsWarnings = {};
 let lookupData = { sds_languages: [], physical_states: [], countries: [] };
 
 // ──────────── Init ────────────
 async function init() {
+    document.getElementById('langSelector').innerHTML = I18N.selectorHtml();
     await loadMeta();
     await loadDraft();
     renderStepIndicator();
@@ -279,7 +282,12 @@ function setStep(step) {
 }
 
 function renderStepIndicator() {
-    const steps = ['1. Supplier Profile', '2. Material Codes', '3. Document Uploads', '4. Review & Submit'];
+    const steps = [
+        I18N.t('registration.step1Label'),
+        I18N.t('registration.step2Label'),
+        I18N.t('registration.step3Label'),
+        I18N.t('registration.step4Label')
+    ];
     const container = document.getElementById('stepIndicator');
     let html = '';
     steps.forEach((label, i) => {
@@ -308,31 +316,31 @@ function renderCurrentStep() {
 
 // ──────────── Step 1: Supplier Profile ────────────
 function renderStep1() {
-    let html = `<div class="card-header"><h2>Step 1: Supplier &amp; Commercial Profile</h2><p>Enter your company details and contact information</p></div>`;
+    let html = `<div class="card-header"><h2>${I18N.t('registration.step1Title')}</h2><p>${I18N.t('registration.step1Subtitle')}</p></div>`;
     html += `<div class="form-grid">`;
 
-    html += field('name_en', 'Supplier Entity Name (English)', 'text', true, 2, 255);
-    html += field('name_cn', 'Supplier Entity Name (Chinese)', 'text', false);
-    html += selectField('material_origin', 'Material Origin', lookupData.countries, false);
+    html += field('name_en', I18N.t('registration.nameEn'), 'text', true, 2, 255);
+    html += field('name_cn', I18N.t('registration.nameCn'), 'text', false);
+    html += selectField('material_origin', I18N.t('registration.materialOrigin'), lookupData.countries, false);
     html += `</div>`;
 
     // Sales Contact
-    html += `<fieldset class="contact-group"><legend>Sales Contact Profile <span style="color:#888;font-weight:400;font-size:11px;">— optional</span></legend><div class="form-grid">`;
-    html += field('sales_contact_name', 'Full Name', 'text', false);
-    html += field('sales_contact_email', 'Email Address', 'email', false);
-    html += field('sales_contact_phone', 'Phone Number (intl. format)', 'tel', false);
+    html += `<fieldset class="contact-group"><legend>${I18N.t('registration.salesContactLegend')} <span style="color:#888;font-weight:400;font-size:11px;">${I18N.t('registration.salesContactHint')}</span></legend><div class="form-grid">`;
+    html += field('sales_contact_name', I18N.t('registration.salesFullName'), 'text', false);
+    html += field('sales_contact_email', I18N.t('registration.salesEmail'), 'email', false);
+    html += field('sales_contact_phone', I18N.t('registration.salesPhone'), 'tel', false);
     html += `</div></fieldset>`;
 
     // QM Contact
-    html += `<fieldset class="contact-group" style="margin-top:16px;"><legend>Quality/Escalation Contact (QM Safeguard) <span style="color:#888;font-weight:400;font-size:11px;">— optional, defaults to Sales Contact</span></legend><div class="form-grid">`;
-    html += field('qm_contact_name', 'Full Name', 'text', false);
-    html += field('qm_contact_email', 'Email Address', 'email', false);
-    html += field('qm_contact_phone', 'Phone Number (intl. format)', 'tel', false);
+    html += `<fieldset class="contact-group" style="margin-top:16px;"><legend>${I18N.t('registration.qmContactLegend')} <span style="color:#888;font-weight:400;font-size:11px;">${I18N.t('registration.qmContactHint')}</span></legend><div class="form-grid">`;
+    html += field('qm_contact_name', I18N.t('registration.qmFullName'), 'text', false);
+    html += field('qm_contact_email', I18N.t('registration.qmEmail'), 'email', false);
+    html += field('qm_contact_phone', I18N.t('registration.qmPhone'), 'tel', false);
     html += `</div></fieldset>`;
 
     html += `<div class="form-grid" style="margin-top:18px;">`;
-    html += `<div class="form-group full"><label>Manufacturing Facility Address <span class="required">*</span></label>
-        <textarea name="facility_address" id="facility_address" rows="3" required placeholder="Physical production site address">${esc(formState.step1.facility_address)}</textarea>
+    html += `<div class="form-group full"><label>${I18N.t('registration.facilityAddress')} <span class="required">*</span></label>
+        <textarea name="facility_address" id="facility_address" rows="3" required placeholder="${I18N.t('registration.facilityPlaceholder')}">${esc(formState.step1.facility_address)}</textarea>
         <div class="error-msg" id="err_facility_address"></div></div>`;
     html += `</div>`;
 
@@ -346,7 +354,7 @@ function renderStep1() {
 
     document.getElementById('navButtons').innerHTML = `
         <div></div>
-        <button class="btn-primary" onclick="saveStep1()">Save &amp; Continue</button>
+        <button class="btn-primary" onclick="saveStep1()">${I18N.t('registration.saveContinue')}</button>
     `;
 }
 
@@ -365,15 +373,15 @@ async function saveStep1() {
 
     // Validate
     const nameEn = document.getElementById('name_en')?.value || '';
-    if (nameEn.length < 2 || nameEn.length > 255) { showFieldError('name_en', 'Must be 2-255 characters'); valid = false; }
+    if (nameEn.length < 2 || nameEn.length > 255) { showFieldError('name_en', I18N.t('registration.mustBe255')); valid = false; }
     const origin = document.getElementById('material_origin')?.value || '';
-    if (origin && !lookupData.countries.includes(origin)) { showFieldError('material_origin', 'Select a valid country'); valid = false; }
+    if (origin && !lookupData.countries.includes(origin)) { showFieldError('material_origin', I18N.t('registration.selectValidCountry')); valid = false; }
     const addr = document.getElementById('facility_address')?.value || '';
-    if (!addr.trim()) { showFieldError('facility_address', 'Required'); valid = false; }
+    if (!addr.trim()) { showFieldError('facility_address', I18N.t('registration.required')); valid = false; }
     const scEmail = document.getElementById('sales_contact_email')?.value || '';
-    if (scEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(scEmail)) { showFieldError('sales_contact_email', 'Invalid email'); valid = false; }
+    if (scEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(scEmail)) { showFieldError('sales_contact_email', I18N.t('registration.invalidEmail')); valid = false; }
     const scPhone = document.getElementById('sales_contact_phone')?.value || '';
-    if (scPhone) { const digits = scPhone.replace(/\D/g, ''); if (digits.length < 7) { showFieldError('sales_contact_phone', 'At least 7 digits required'); valid = false; } }
+    if (scPhone) { const digits = scPhone.replace(/\D/g, ''); if (digits.length < 7) { showFieldError('sales_contact_phone', I18N.t('registration.min7Digits')); valid = false; } }
 
     if (!valid) return;
 
@@ -381,52 +389,51 @@ async function saveStep1() {
         const r = await fetch(BASE + '/step1-profile', { method: 'POST', headers: headers(), body: fd });
         if (!r.ok) {
             const err = await r.json();
-            showToast('error', err.detail?.[0]?.msg || err.detail || 'Validation failed');
+            showToast('error', err.detail?.[0]?.msg || err.detail || I18N.t('registration.validationFailed'));
             return;
         }
         const data = await r.json();
-        showToast('success', 'Profile saved');
-        // Update formState from form
+        showToast('success', I18N.t('registration.profileSaved'));
         fields.forEach(f => { formState.step1[f] = document.getElementById(f)?.value || ''; });
         await loadDraft();
         setStep(2);
-    } catch(e) { showToast('error', 'Network error'); }
+    } catch(e) { showToast('error', I18N.t('registration.networkError')); }
 }
 
 // ──────────── Step 2: Material Codes ────────────
 function renderStep2() {
-    let html = `<div class="card-header"><h2>Step 2: Raw Material Identifiers</h2><p>Add the materials you are registering</p></div>`;
+    let html = `<div class="card-header"><h2>${I18N.t('registration.step2Title')}</h2><p>${I18N.t('registration.step2Subtitle')}</p></div>`;
 
     if (formState.step2.length === 0) {
-        html += `<div style="text-align:center;padding:30px;color:#999;">No materials added yet. Click below to add your first material.</div>`;
+        html += `<div style="text-align:center;padding:30px;color:#999;">${I18N.t('registration.noMaterialsYet')}</div>`;
     }
 
     formState.step2.forEach((mat, idx) => {
         html += renderMaterialRow(mat, idx);
     });
 
-    html += `<div style="margin-top:16px;"><button class="btn-add" onclick="addMaterial()">+ Add Material</button></div>`;
+    html += `<div style="margin-top:16px;"><button class="btn-add" onclick="addMaterial()">${I18N.t('registration.addMaterial')}</button></div>`;
 
     document.getElementById('contentArea').innerHTML = html;
     document.getElementById('navButtons').innerHTML = `
-        <button class="btn-outline" onclick="setStep(1)">&larr; Back</button>
-        <button class="btn-primary" onclick="saveStep2()">Save &amp; Continue</button>
+        <button class="btn-outline" onclick="setStep(1)">${I18N.t('common.back')}</button>
+        <button class="btn-primary" onclick="saveStep2()">${I18N.t('registration.saveContinue')}</button>
     `;
 }
 
 function renderMaterialRow(mat, idx) {
     return `<div class="material-row" id="matRow${idx}">
-        <button class="remove-btn" onclick="removeMaterial(${idx})" title="Remove">&times;</button>
-        <h4 style="font-size:14px;color:#666;margin-bottom:14px;">Material #${idx + 1}</h4>
+        <button class="remove-btn" onclick="removeMaterial(${idx})" title="${I18N.t('registration.removeTitle')}">&times;</button>
+        <h4 style="font-size:14px;color:#666;margin-bottom:14px;">${I18N.t('registration.materialNumber')}${idx + 1}</h4>
         <div class="form-grid">
-            <div class="form-group"><label>Manufacture Commercial Name <span class="required">*</span></label>
-                <input type="text" id="mat_comm_${idx}" value="${esc(mat.commercial_material_name)}" placeholder="Brand / trade name on invoices" onchange="updateMatField(${idx}, 'commercial_material_name', this.value)">
+            <div class="form-group"><label>${I18N.t('registration.commercialName')} <span class="required">*</span></label>
+                <input type="text" id="mat_comm_${idx}" value="${esc(mat.commercial_material_name)}" placeholder="${I18N.t('registration.commercialPlaceholder')}" onchange="updateMatField(${idx}, 'commercial_material_name', this.value)">
             </div>
-            <div class="form-group"><label>Internal Factory Material Code <span class="required">*</span></label>
-                <input type="text" id="mat_int_${idx}" value="${esc(mat.internal_factory_material_code)}" placeholder="Your internal SKU / ERP ID" onchange="updateMatField(${idx}, 'internal_factory_material_code', this.value)">
+            <div class="form-group"><label>${I18N.t('registration.internalCode')} <span class="required">*</span></label>
+                <input type="text" id="mat_int_${idx}" value="${esc(mat.internal_factory_material_code)}" placeholder="${I18N.t('registration.internalPlaceholder')}" onchange="updateMatField(${idx}, 'internal_factory_material_code', this.value)">
             </div>
-            <div class="form-group"><label>Manufacture Material Code <span class="required">*</span></label>
-                <input type="text" id="mat_sup_${idx}" value="${esc(mat.supplier_material_code)}" placeholder="Supplier's catalog identifier" onchange="updateMatField(${idx}, 'supplier_material_code', this.value)">
+            <div class="form-group"><label>${I18N.t('registration.supplierCode')} <span class="required">*</span></label>
+                <input type="text" id="mat_sup_${idx}" value="${esc(mat.supplier_material_code)}" placeholder="${I18N.t('registration.supplierPlaceholder')}" onchange="updateMatField(${idx}, 'supplier_material_code', this.value)">
             </div>
         </div>
     </div>`;
@@ -454,19 +461,18 @@ function removeMaterial(idx) {
 }
 
 async function saveStep2() {
-    // Sync form fields back to formState
     formState.step2.forEach((mat, idx) => {
         mat.commercial_material_name = document.getElementById(`mat_comm_${idx}`)?.value || mat.commercial_material_name;
         mat.internal_factory_material_code = document.getElementById(`mat_int_${idx}`)?.value || mat.internal_factory_material_code;
         mat.supplier_material_code = document.getElementById(`mat_sup_${idx}`)?.value || mat.supplier_material_code;
     });
 
-    if (formState.step2.length === 0) { showToast('error', 'Add at least one material'); return; }
+    if (formState.step2.length === 0) { showToast('error', I18N.t('registration.addAtLeastOneMaterial')); return; }
     let valid = true;
     formState.step2.forEach((m, i) => {
-        if (!m.commercial_material_name.trim()) { showToast('error', `Material #${i+1}: Commercial name required`); valid = false; }
-        if (!m.internal_factory_material_code.trim()) { showToast('error', `Material #${i+1}: Internal code required`); valid = false; }
-        if (!m.supplier_material_code.trim()) { showToast('error', `Material #${i+1}: Supplier code required`); valid = false; }
+        if (!m.commercial_material_name.trim()) { showToast('error', `${I18N.t('registration.materialNumber')}${i+1}: ${I18N.t('registration.commercialNameRequired')}`); valid = false; }
+        if (!m.internal_factory_material_code.trim()) { showToast('error', `${I18N.t('registration.materialNumber')}${i+1}: ${I18N.t('registration.internalCodeRequired')}`); valid = false; }
+        if (!m.supplier_material_code.trim()) { showToast('error', `${I18N.t('registration.materialNumber')}${i+1}: ${I18N.t('registration.supplierCodeRequired')}`); valid = false; }
     });
     if (!valid) return;
 
@@ -474,18 +480,18 @@ async function saveStep2() {
     fd.append('payload', JSON.stringify(formState.step2));
     try {
         const r = await fetch(BASE + '/step2-materials', { method: 'POST', headers: headers(), body: fd });
-        if (!r.ok) { const err = await r.json(); showToast('error', err.detail || 'Failed'); return; }
-        showToast('success', 'Materials saved');
+        if (!r.ok) { const err = await r.json(); showToast('error', err.detail || I18N.t('common.error')); return; }
+        showToast('success', I18N.t('registration.materialsSaved'));
         await loadDraft();
         setStep(3);
-    } catch(e) { showToast('error', 'Network error'); }
+    } catch(e) { showToast('error', I18N.t('registration.networkError')); }
 }
 
 // ──────────── Step 3: Document Uploads ────────────
 function renderStep3() {
     if (formState.step2.length === 0) {
-        document.getElementById('contentArea').innerHTML = `<div class="card-header"><h2>Step 3: Document Uploads</h2></div><div style="text-align:center;padding:30px;color:#999;">Add materials in Step 2 first.</div>`;
-        document.getElementById('navButtons').innerHTML = `<button class="btn-outline" onclick="setStep(2)">&larr; Back</button>`;
+        document.getElementById('contentArea').innerHTML = `<div class="card-header"><h2>${I18N.t('registration.step3Label')}</h2></div><div style="text-align:center;padding:30px;color:#999;">${I18N.t('registration.addMaterialsFirst')}</div>`;
+        document.getElementById('navButtons').innerHTML = `<button class="btn-outline" onclick="setStep(2)">${I18N.t('common.back')}</button>`;
         return;
     }
 
@@ -494,25 +500,22 @@ function renderStep3() {
     const docState = formState.step3docs[mat.supplier_material_code] || {};
     const existingFiles = (formState.step3[mat.supplier_material_code] || {}).files || {};
 
-    let html = `<div class="card-header"><h2>Step 3: Document Upload Vault &amp; Technical Metadata</h2><p>Upload compliance documents for each material (all optional)</p></div>`;
+    let html = `<div class="card-header"><h2>${I18N.t('registration.step3Title')}</h2><p>${I18N.t('registration.step3Subtitle')}</p></div>`;
 
     // Material tabs
     html += `<div class="material-tabs">`;
     formState.step2.forEach((m, i) => {
-        const files = (formState.step3[m.supplier_material_code] || {}).files || {};
-        const required = ['sds', 'tds', 'coa', 'reach_rohs'];
-let icon = '';
         html += `<button class="material-tab ${i === activeMaterialIndex ? 'active' : ''}" onclick="switchMaterialTab(${i})">
-            ${esc(m.commercial_material_name || 'Material #' + (i+1))}${icon}
+            ${esc(m.commercial_material_name || I18N.t('registration.materialNumber') + (i+1))}
         </button>`;
     });
     html += `</div>`;
 
     // Document sections
-    html += renderDocSection('sds', '1. Safety Data Sheet (SDS)', mat, docState, existingFiles);
-    html += renderDocSection('tds', '2. Technical Data Sheet (TDS)', mat, docState, existingFiles);
-    html += renderDocSection('coa', '3. Certificate of Analysis (CoA)', mat, docState, existingFiles);
-    html += renderDocSection('reach_rohs', '4. REACH SVHC / RoHS Compliance Statement', mat, docState, existingFiles);
+    html += renderDocSection('sds', I18N.t('registration.sdsTitle'), mat, docState, existingFiles);
+    html += renderDocSection('tds', I18N.t('registration.tdsTitle'), mat, docState, existingFiles);
+    html += renderDocSection('coa', I18N.t('registration.coaTitle'), mat, docState, existingFiles);
+    html += renderDocSection('reach_rohs', I18N.t('registration.reachTitle'), mat, docState, existingFiles);
 
     document.getElementById('contentArea').innerHTML = html;
 
@@ -532,12 +535,12 @@ let icon = '';
     });
 
     if (sdsWarnings[mat.supplier_material_code]) {
-        showGlobalWarning('Warning: This SDS exceeds the 3-year compliance lifecycle guideline.', 'warning');
+        showGlobalWarning(I18N.t('registration.sds3YearWarning'), 'warning');
     }
 
     document.getElementById('navButtons').innerHTML = `
-        <button class="btn-outline" onclick="setStep(2)">&larr; Back</button>
-        <button class="btn-primary" onclick="setStep(4)">Review &amp; Submit</button>
+        <button class="btn-outline" onclick="setStep(2)">${I18N.t('common.back')}</button>
+        <button class="btn-primary" onclick="setStep(4)">${I18N.t('registration.step4Label')}</button>
     `;
 }
 
@@ -545,8 +548,8 @@ function switchMaterialTab(idx) {
     activeMaterialIndex = idx;
     renderStep3();
     document.getElementById('navButtons').innerHTML = `
-        <button class="btn-outline" onclick="setStep(2)">&larr; Back</button>
-        <button class="btn-primary" onclick="setStep(4)">Review &amp; Submit</button>
+        <button class="btn-outline" onclick="setStep(2)">${I18N.t('common.back')}</button>
+        <button class="btn-primary" onclick="setStep(4)">${I18N.t('registration.step4Label')}</button>
     `;
 }
 
@@ -556,21 +559,21 @@ function renderDocSection(docType, title, mat, docState, existingFiles) {
     let metaFields = '';
 
     if (docType === 'sds') {
-        metaFields = `<div class="form-group"><label>SDS Language <span class="required">*</span></label>
+        metaFields = `<div class="form-group"><label>${I18N.t('registration.sdsLanguage')} <span class="required">*</span></label>
             <select id="sds_language" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'sds', 'lang', this.value)">
                 ${lookupData.sds_languages.map(l => `<option value="${l}" ${(docState.sds?.lang || '') === l ? 'selected' : ''}>${l}</option>`).join('')}
             </select></div>
-            <div class="form-group"><label>SDS Issue / Revision Date <span class="required">*</span></label>
+            <div class="form-group"><label>${I18N.t('registration.sdsDate')} <span class="required">*</span></label>
             <input type="date" id="sds_issue_date" value="${docState.sds?.date || ''}" onchange="onSdsDateChange('${esc(mat.supplier_material_code)}', this.value)">
             <div class="error-msg" id="sds_date_warn"></div></div>`;
     } else if (docType === 'tds') {
-        metaFields = `<div class="form-group"><label>Physical State <span class="required">*</span></label>
+        metaFields = `<div class="form-group"><label>${I18N.t('registration.physicalState')} <span class="required">*</span></label>
             <select id="tds_physical_state" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'tds', 'state', this.value)">
-                <option value="">-- Select --</option>
+                <option value="">${I18N.t('registration.selectPlaceholder')}</option>
                 ${lookupData.physical_states.map(s => `<option value="${s}" ${(docState.tds?.state || '') === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select></div>`;
     } else if (docType === 'coa') {
-        metaFields = `<div class="form-group"><label>Test / Execution Date <span class="required">*</span></label>
+        metaFields = `<div class="form-group"><label>${I18N.t('registration.testDate')} <span class="required">*</span></label>
             <input type="date" id="coa_test_date" value="${docState.coa?.date || ''}" onchange="saveDocMeta('${esc(mat.supplier_material_code)}', 'coa', 'date', this.value)"></div>`;
     }
 
@@ -579,8 +582,8 @@ function renderDocSection(docType, title, mat, docState, existingFiles) {
     }
 
     let dzClass = existing ? 'uploaded' : '';
-    let dzText = existing ? `Uploaded: ${existing.name}` : 'Drag &amp; drop PDF here or click to browse';
-    let dzHint = existing ? 'Drop or click to replace' : 'PDF only, max 10 MB';
+    let dzText = existing ? `${I18N.t('registration.dropzoneUploaded')} ${existing.name}` : I18N.t('registration.dropzoneText');
+    let dzHint = existing ? I18N.t('registration.dropzoneReplace') : I18N.t('registration.dropzoneHint');
 
     return `<div class="doc-section">
         <h3>${title}</h3>
@@ -590,7 +593,7 @@ function renderDocSection(docType, title, mat, docState, existingFiles) {
             <div class="dz-hint">${dzHint}</div>
             <input type="file" accept=".pdf" style="display:none" onchange="handleFileSelect('${docType}', this.files[0])">
         </div>
-        ${existing ? `<div class="file-info"><span>&#128206; ${existing.name}</span><span class="remove-file" onclick="removeFile('${esc(mat.supplier_material_code)}', '${docType}')">Remove</span></div>` : ''}
+        ${existing ? `<div class="file-info"><span>&#128206; ${existing.name}</span><span class="remove-file" onclick="removeFile('${esc(mat.supplier_material_code)}', '${docType}')">${I18N.t('registration.fileRemove')}</span></div>` : ''}
         ${metaHtml}
         <div id="uploadStatus_${docType}" style="font-size:12px;margin-top:6px;"></div>
     </div>`;
@@ -604,10 +607,10 @@ function onSdsDateChange(code, val) {
         const threeYearsAgo = new Date();
         threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
         if (issueDate < threeYearsAgo) {
-            warn.textContent = 'Warning: This SDS exceeds the 3-year compliance lifecycle guideline.';
+            warn.textContent = I18N.t('registration.sds3YearWarning');
             warn.style.color = '#b8860b';
             sdsWarnings[code] = true;
-            showGlobalWarning('Warning: This SDS exceeds the 3-year compliance lifecycle guideline.', 'warning');
+            showGlobalWarning(I18N.t('registration.sds3YearWarning'), 'warning');
         } else {
             warn.textContent = '';
             sdsWarnings[code] = false;
@@ -624,17 +627,17 @@ function saveDocMeta(code, docType, key, val) {
 
 async function handleFileSelect(docType, file) {
     if (!file) return;
-    if (file.type !== 'application/pdf') { showToast('error', 'Only PDF files are accepted.'); return; }
-    if (file.size > 10 * 1024 * 1024) { showToast('error', 'File exceeds 10 MB limit.'); return; }
+    if (file.type !== 'application/pdf') { showToast('error', I18N.t('registration.onlyPdf')); return; }
+    if (file.size > 10 * 1024 * 1024) { showToast('error', I18N.t('registration.fileExceeds10MB')); return; }
 
     const mat = formState.step2[activeMaterialIndex];
     const code = mat.supplier_material_code;
     const materialId = materialIds[code];
 
-    if (!materialId) { showToast('error', 'Save materials in Step 2 first.'); return; }
+    if (!materialId) { showToast('error', I18N.t('registration.saveMaterialsFirst')); return; }
 
     const uploadKey = 'uploadStatus_' + docType;
-    document.getElementById(uploadKey).innerHTML = '<span style="color:#667eea;">Uploading...</span>';
+    document.getElementById(uploadKey).innerHTML = `<span style="color:#667eea;">${I18N.t('registration.uploading')}</span>`;
 
     const fd = new FormData();
     fd.append('material_id', materialId);
@@ -657,12 +660,11 @@ async function handleFileSelect(docType, file) {
         const r = await fetch(BASE + '/step3-documents/single', { method: 'POST', headers: headers(), body: fd });
         const result = await r.json();
         if (!r.ok) {
-            document.getElementById(uploadKey).innerHTML = `<span style="color:#dc3545;">${result.detail || 'Upload failed'}</span>`;
+            document.getElementById(uploadKey).innerHTML = `<span style="color:#dc3545;">${result.detail || I18N.t('registration.uploadFailed')}</span>`;
             return;
         }
-        document.getElementById(uploadKey).innerHTML = '<span style="color:#28a745;">Uploaded</span>';
+        document.getElementById(uploadKey).innerHTML = `<span style="color:#28a745;">${I18N.t('registration.uploaded')}</span>`;
 
-        // Update state
         formState.step3[code] = formState.step3[code] || { files: {} };
         formState.step3[code].files[docType] = { name: file.name, id: result.id };
         if (result.warnings && result.warnings.length > 0) {
@@ -672,7 +674,7 @@ async function handleFileSelect(docType, file) {
 
         renderStep3();
     } catch(e) {
-        document.getElementById(uploadKey).innerHTML = '<span style="color:#dc3545;">Network error</span>';
+        document.getElementById(uploadKey).innerHTML = `<span style="color:#dc3545;">${I18N.t('registration.networkError')}</span>`;
     }
 }
 
@@ -692,42 +694,42 @@ async function removeFile(code, docType) {
 
 // ──────────── Step 4: Review & Submit ────────────
 function renderStep4() {
-    let html = `<div class="card-header"><h2>Step 4: Review &amp; Submit</h2><p>Verify all information before final submission</p></div>`;
+    let html = `<div class="card-header"><h2>${I18N.t('registration.step4Title')}</h2><p>${I18N.t('registration.step4Subtitle')}</p></div>`;
 
     // Section A: Supplier Profile
-    html += `<div class="review-section"><h3>A. Supplier &amp; Commercial Profile</h3>`;
+    html += `<div class="review-section"><h3>${I18N.t('registration.reviewSectionA')}</h3>`;
     html += `<table class="review-table">
-        <tr><th>Supplier Name (EN)</th><td>${esc(formState.step1.name_en)}</td></tr>
-        <tr><th>Supplier Name (CN)</th><td>${esc(formState.step1.name_cn || '—')}</td></tr>
-        <tr><th>Material Origin</th><td>${esc(formState.step1.material_origin || '—')}</td></tr>
-        <tr><th>Sales Contact</th><td>${formState.step1.sales_contact_name ? esc(formState.step1.sales_contact_name) + ' / ' + esc(formState.step1.sales_contact_email) + ' / ' + esc(formState.step1.sales_contact_phone) : '<em>Not provided</em>'}</td></tr>
-        <tr><th>QM Contact</th><td>${formState.step1.qm_contact_name ? esc(formState.step1.qm_contact_name) + ' / ' + esc(formState.step1.qm_contact_email) : '<em>Defaults to Sales Contact</em>'}</td></tr>
-        <tr><th>Facility Address</th><td>${esc(formState.step1.facility_address)}</td></tr>
+        <tr><th>${I18N.t('registration.reviewNameEn')}</th><td>${esc(formState.step1.name_en)}</td></tr>
+        <tr><th>${I18N.t('registration.reviewNameCn')}</th><td>${esc(formState.step1.name_cn || '—')}</td></tr>
+        <tr><th>${I18N.t('registration.reviewMaterialOrigin')}</th><td>${esc(formState.step1.material_origin || '—')}</td></tr>
+        <tr><th>${I18N.t('registration.reviewSalesContact')}</th><td>${formState.step1.sales_contact_name ? esc(formState.step1.sales_contact_name) + ' / ' + esc(formState.step1.sales_contact_email) + ' / ' + esc(formState.step1.sales_contact_phone) : '<em>' + I18N.t('common.notProvided') + '</em>'}</td></tr>
+        <tr><th>${I18N.t('registration.reviewQmContact')}</th><td>${formState.step1.qm_contact_name ? esc(formState.step1.qm_contact_name) + ' / ' + esc(formState.step1.qm_contact_email) : '<em>' + I18N.t('common.defaultsTo') + ' ' + I18N.t('registration.reviewSalesContact') + '</em>'}</td></tr>
+        <tr><th>${I18N.t('registration.reviewFacilityAddress')}</th><td>${esc(formState.step1.facility_address)}</td></tr>
     </table></div>`;
 
     // Section B: Materials
-    html += `<div class="review-section"><h3>B. Raw Material Identifiers</h3>`;
+    html += `<div class="review-section"><h3>${I18N.t('registration.reviewSectionB')}</h3>`;
     formState.step2.forEach((mat, i) => {
         html += `<table class="review-table" style="margin-bottom:12px;">
-            <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">Material #${i + 1}</th></tr>
-            <tr><th>Commercial Name</th><td>${esc(mat.commercial_material_name)}</td></tr>
-            <tr><th>Internal Code</th><td>${esc(mat.internal_factory_material_code)}</td></tr>
-            <tr><th>Supplier Code</th><td>${esc(mat.supplier_material_code)}</td></tr>
+            <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">${I18N.t('registration.materialNumber')}${i + 1}</th></tr>
+            <tr><th>${I18N.t('registration.reviewCommercialName')}</th><td>${esc(mat.commercial_material_name)}</td></tr>
+            <tr><th>${I18N.t('registration.reviewInternalCode')}</th><td>${esc(mat.internal_factory_material_code)}</td></tr>
+            <tr><th>${I18N.t('registration.reviewSupplierCode')}</th><td>${esc(mat.supplier_material_code)}</td></tr>
         </table>`;
     });
     html += `</div>`;
 
     // Section C: Documents
-    html += `<div class="review-section"><h3>C. Document Upload Vault</h3>`;
+    html += `<div class="review-section"><h3>${I18N.t('registration.reviewSectionC')}</h3>`;
     formState.step2.forEach(mat => {
         const files = (formState.step3[mat.supplier_material_code] || {}).files || {};
         const docState = formState.step3docs[mat.supplier_material_code] || {};
         html += `<table class="review-table" style="margin-bottom:12px;">
             <tr><th colspan="2" style="background:#f0f2ff;color:#667eea;">${esc(mat.commercial_material_name)}</th></tr>
-            <tr class="${!files.sds ? '' : ''}"><th>SDS</th><td>${files.sds ? esc(files.sds.name) + ' | Lang: ' + (docState.sds?.lang || '—') + ' | Date: ' + (docState.sds?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
-            <tr class="${!files.tds ? '' : ''}"><th>TDS</th><td>${files.tds ? esc(files.tds.name) + ' | State: ' + (docState.tds?.state || '—') : '<span style="color:#888;">—</span>'}</td></tr>
-            <tr class="${!files.coa ? '' : ''}"><th>CoA</th><td>${files.coa ? esc(files.coa.name) + ' | Date: ' + (docState.coa?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
-            <tr class="${!files.reach_rohs ? '' : ''}"><th>REACH/RoHS</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr><th>${I18N.t('registration.reviewSds')}</th><td>${files.sds ? esc(files.sds.name) + ' | ' + I18N.t('registration.sdsLanguage') + ': ' + (docState.sds?.lang || '—') + ' | ' + I18N.t('registration.sdsDate') + ': ' + (docState.sds?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr><th>${I18N.t('registration.reviewTds')}</th><td>${files.tds ? esc(files.tds.name) + ' | ' + I18N.t('registration.physicalState') + ': ' + (docState.tds?.state || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr><th>${I18N.t('registration.reviewCoa')}</th><td>${files.coa ? esc(files.coa.name) + ' | ' + I18N.t('registration.testDate') + ': ' + (docState.coa?.date || '—') : '<span style="color:#888;">—</span>'}</td></tr>
+            <tr><th>${I18N.t('registration.reviewReach')}</th><td>${files.reach_rohs ? esc(files.reach_rohs.name) : '<span style="color:#888;">—</span>'}</td></tr>
         </table>`;
     });
     html += `</div>`;
@@ -735,29 +737,29 @@ function renderStep4() {
     // SDS Warnings Summary
     let sdsWarnMat = formState.step2.filter(m => sdsWarnings[m.supplier_material_code]);
     if (sdsWarnMat.length > 0) {
-        html += `<div class="warning-banner"><div class="icon">&#9888;</div><div class="text"><strong>SDS Compliance Warning</strong>
-            The following materials have SDS documents exceeding the 3-year lifecycle: ${sdsWarnMat.map(m => esc(m.commercial_material_name)).join(', ')}.
-            <br>These will be <strong>blocked</strong> from submission. Please upload updated SDS documents.</div></div>`;
+        html += `<div class="warning-banner"><div class="icon">&#9888;</div><div class="text"><strong>${I18N.t('registration.sdsWarningSummary')}</strong>
+            ${I18N.t('registration.sdsWarningDetail')} ${sdsWarnMat.map(m => esc(m.commercial_material_name)).join(', ')}.
+            <br>${I18N.t('registration.sdsWarningBlocked')}</div></div>`;
     }
 
     document.getElementById('contentArea').innerHTML = html;
     document.getElementById('navButtons').innerHTML = `
-        <button class="btn-outline" onclick="setStep(3)">&larr; Back to Documents</button>
-        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()">Submit Registration</button>
+        <button class="btn-outline" onclick="setStep(3)">${I18N.t('registration.backToDocuments')}</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitRegistration()">${I18N.t('registration.submitRegistration')}</button>
     `;
 }
 
 async function submitRegistration() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Submitting...';
+    btn.innerHTML = `<span class="spinner"></span> ${I18N.t('registration.submitting')}`;
 
     try {
         const r = await fetch(BASE + '/submit', { method: 'POST', headers: headers() });
         const result = await r.json();
         if (!r.ok) {
             btn.disabled = false;
-            btn.innerHTML = 'Submit Registration';
+            btn.innerHTML = I18N.t('registration.submitRegistration');
             if (result.blocked_sds) {
                 showGlobalWarning(result.detail, 'error');
                 result.blocked_sds.forEach(b => showGlobalWarning(b, 'error'));
@@ -765,7 +767,7 @@ async function submitRegistration() {
                 showGlobalWarning(result.detail, 'error');
                 result.checks.forEach(c => showGlobalWarning(c, 'error'));
             } else {
-                showToast('error', result.detail || 'Submission failed');
+                showToast('error', result.detail || I18N.t('registration.submissionFailed'));
             }
             return;
         }
@@ -773,18 +775,18 @@ async function submitRegistration() {
         document.getElementById('contentArea').innerHTML = `
             <div class="confirmation-box">
                 <div class="icon">&#9989;</div>
-                <h2>Registration Submitted</h2>
-                <p>Your supplier and material registration has been submitted for review.</p>
-                <p style="color:#888;font-size:12px;">Reference ID: <strong>${result.id}</strong> | Status: <strong>${result.status}</strong></p>
-                <button class="btn-primary" onclick="window.location.href='/supplier-dashboard'">Return to Dashboard</button>
+                <h2>${I18N.t('registration.confirmationTitle')}</h2>
+                <p>${I18N.t('registration.confirmationMessage')}</p>
+                <p style="color:#888;font-size:12px;">${I18N.t('registration.referenceId')} <strong>${result.id}</strong> | ${I18N.t('registration.status')} <strong>${result.status}</strong></p>
+                <button class="btn-primary" onclick="window.location.href='/supplier-dashboard'">${I18N.t('registration.returnToDashboard')}</button>
             </div>`;
         document.getElementById('navButtons').innerHTML = '';
         document.getElementById('stepIndicator').innerHTML = '';
-        showToast('success', 'Registration submitted for review!');
+        showToast('success', I18N.t('registration.confirmationTitle'));
     } catch(e) {
         btn.disabled = false;
-        btn.innerHTML = 'Submit Registration';
-        showToast('error', 'Network error');
+        btn.innerHTML = I18N.t('registration.submitRegistration');
+        showToast('error', I18N.t('registration.networkError'));
     }
 }
 
@@ -796,7 +798,7 @@ function field(id, label, type, required, min, max) {
 }
 
 function selectField(id, label, options, required) {
-    let opts = `<option value="">-- Select --</option>`;
+    let opts = `<option value="">${I18N.t('registration.selectPlaceholder')}</option>`;
     if (options) options.forEach(o => opts += `<option value="${o}">${o}</option>`);
     return `<div class="form-group ${required ? 'full' : ''}"><label for="${id}">${label} ${required ? '<span class="required">*</span>' : ''}</label>
         <select id="${id}" name="${id}" ${required ? 'required' : ''}>${opts}</select>
